@@ -289,6 +289,41 @@ cat > /usr/local/etc/xray/config.json << END
       "protocol": "blackhole",
       "settings": {},
       "tag": "blocked"
+    },
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "sg.vless.sbs",
+            "port": 443,
+            "users": [
+              {
+                "encryption": "none",
+                "id": "47f5ab29-37cb-4f1a-8638-765c59774836"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "tlsSettings": {
+          "allowInsecure": false,
+          "alpn": [],
+          "fingerprint": "",
+          "serverName": "sg.vless.sbs"
+        },
+        "wsSettings": {
+          "headers": {
+            "Host": "sg.vless.sbs"
+          },
+          "host": "sg.vless.sbs",
+          "path": "/vless"
+        }
+      },
+      "tag": "sg.vless.sbs"
     }
   ],
   "policy": {
@@ -327,6 +362,13 @@ cat > /usr/local/etc/xray/config.json << END
         "protocol": [
           "bittorrent"
         ],
+        "type": "field"
+      },
+      {
+        "domain": [
+          "geosite:google"
+        ],
+        "outboundTag": "sg.vless.sbs",
         "type": "field"
       }
     ]
