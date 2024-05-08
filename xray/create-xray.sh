@@ -72,20 +72,38 @@ vmlink4=`cat<<EOF
 "tls": "none"
 }
 EOF`
+vmlink5=`cat<<EOF
+{
+"v": "2",
+"ps": "${user}",
+"add": "${domain}",
+"port": "443",
+"id": "${uuid}",
+"aid": "0",
+"net": "grpc",
+"path": "vmess-grpc",
+"type": "none",
+"host": "$domain",
+"tls": "tls"
+}
+EOF`
 vmesslink1="vmess://$(echo $vmlink1 | base64 -w 0)"
 vmesslink2="vmess://$(echo $vmlink2 | base64 -w 0)"
 vmesslink3="vmess://$(echo $vmlink3 | base64 -w 0)"
 vmesslink4="vmess://$(echo $vmlink4 | base64 -w 0)"
+vmesslink5="vmess://$(echo $vmlink5 | base64 -w 0)"
 
 vlesslink1="vless://$uuid@$domain:443?path=/vless-ws&security=tls&encryption=none&host=$domain&type=ws&sni=$domain#$user"
 vlesslink2="vless://$uuid@$domain:80?path=/vless-ws&security=none&encryption=none&host=$domain&type=ws#$user"
 vlesslink3="vless://$uuid@$domain:443?path=/vless-hup&security=tls&encryption=none&host=$domain&type=httpupgrade&sni=$domain#$user"
 vlesslink4="vless://$uuid@$domain:80?path=/vless-hup&security=none&encryption=none&host=$domain&type=httpupgrade#$user"
+vlesslink5="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=gun&type=grpc&serviceName=vless-grpc&sni=$domain&flow=none#$user"
 
 trojanlink1="trojan://$pwtr@$domain:443?path=/trojan-ws&security=tls&host=$domain&type=ws&sni=$domain#$user"
 trojanlink2="trojan://$pwtr@$domain:80?path=/trojan-ws&security=none&host=$domain&type=ws#$user"
 trojanlink3="trojan://$pwtr@$domain:443?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade&sni=$domain#$user"
 trojanlink4="trojan://$pwtr@$domain:80?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade#$user"
+trojanlink5="trojan://$pwtr@$domain:443?security=tls&type=grpc&mode=multi&serviceName=trojan-grpc&sni=$domain#$user"
 systemctl restart xray
 
 clear
@@ -97,7 +115,8 @@ echo -e "ISP               : $ISP" | tee -a /user/log-xray-$user.txt
 echo -e "City              : $CITY" | tee -a /user/log-xray-$user.txt
 echo -e "Port Websocket    : 443, 80" | tee -a /user/log-xray-$user.txt
 echo -e "Port HTTPupgrade  : 443, 80" | tee -a /user/log-xray-$user.txt
-echo -e "Network           : Websocket, HTTPupgrade" | tee -a /user/log-xray-$user.txt
+echo -e "Port gRPC         : 443" | tee -a /user/log-xray-$user.txt
+echo -e "Network           : Websocket, HTTPupgrade, gRPC" | tee -a /user/log-xray-$user.txt
 echo -e "Alpn              : h2, http/1.1" | tee -a /user/log-xray-$user.txt
 echo -e "Expired On        : $exp" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
@@ -110,6 +129,8 @@ echo -e "———————————————————————�
 echo -e "Link HUP TLS   : $vmesslink3" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "Link HUP nTLS  : $vmesslink4" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link gRPC      : $vmesslink5" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e " " | tee -a /user/log-xray-$user.txt
 echo -e " " | tee -a /user/log-xray-$user.txt
@@ -124,6 +145,8 @@ echo -e "Link HUP TLS   : $vlesslink3" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "Link HUP nTLS  : $vlesslink4" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link gRPC      : $vlesslink5" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e " " | tee -a /user/log-xray-$user.txt
 echo -e " " | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
@@ -136,6 +159,8 @@ echo -e "———————————————————————�
 echo -e "Link HUP TLS   : $trojanlink3" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "Link HUP nTLS  : $trojanlink4" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link gRPC      : $trojanlink5" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e " " | tee -a /user/log-xray-$user.txt
 echo -e " " | tee -a /user/log-xray-$user.txt
