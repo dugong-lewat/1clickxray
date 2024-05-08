@@ -76,12 +76,12 @@ cat > /usr/local/etc/xray/config.json << END
       {
         "address": "localhost",
         "domains": [
-          "1.1.1.1"
+          "https://1.1.1.1/dns-query"
         ],
         "queryStrategy": "UseIP"
       }
     ],
-    "tag": ""
+    "tag": "dns_inbounds"
   },
   "inbounds": [
 # VLESS HTTPupgrade
@@ -267,6 +267,99 @@ cat > /usr/local/etc/xray/config.json << END
           "path": "/trojan-ws"
         },
         "network": "ws",
+        "security": "none"
+      }
+    },
+# VLESS gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": 3000,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email": "grpc",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "serviceName": "vless-grpc"
+        },
+        "network": "grpc",
+        "security": "none"
+      }
+    },
+# VMESS gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": 3100,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email": "websocket",
+            "id": "$uuid"
+#vmess
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "serviceName": "vmess-grpc"
+        },
+        "network": "grpc",
+        "security": "none"
+      }
+    },
+# TROJAN gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": 3200,
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "email": "grpc",
+            "password": "$pwtr"
+#trojan
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "serviceName": "trojan-grpc"
+        },
+        "network": "grpc",
         "security": "none"
       }
     }
