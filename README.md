@@ -1,7 +1,7 @@
 # 1clickxray
 
 - VLESS, VMESS & TROJAN
-- Websocket & HTTPupgrade
+- Websocket, HTTPupgrade & gRPC
 - Port 443 & 80
 
 ```
