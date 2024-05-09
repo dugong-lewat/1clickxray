@@ -279,7 +279,7 @@ echo -e " " | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "          ----- [ Shadowsocks Link ] -----          " | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
-echo -e "Link WS TLS    : sslink1" | tee -a /user/log-xray-$user.txt
+echo -e "Link WS TLS    : $sslink1" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "Link WS nTLS   : $sslink2" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
@@ -294,7 +294,7 @@ echo -e " " | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "       ----- [ Shadowsocks 2022 Link ] -----        " | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
-echo -e "Link WS TLS    : ss22link1" | tee -a /user/log-xray-$user.txt
+echo -e "Link WS TLS    : $ss22link1" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "Link WS nTLS   : $ss22link2" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
