@@ -54,7 +54,7 @@ domain=$(cat /usr/local/etc/xray/domain)
 curl https://get.acme.sh | sh
 source ~/.bashrc
 bash .acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server zerossl
-bash .acme.sh/acme.sh --issue -d $domain --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --force
+bash .acme.sh/acme.sh --issue -d $domain --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --force --dnssleep
 chmod 745 /usr/local/etc/xray/private.key
 clear
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
