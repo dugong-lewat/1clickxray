@@ -2,6 +2,9 @@ user=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 7 | head -n 1`
 domain=$(cat /usr/local/etc/xray/domain)
 uuid=$(cat /proc/sys/kernel/random/uuid)
 pwtr=$(openssl rand -hex 4)
+pwss=$(echo $RANDOM | md5sum | head -c 6; echo;)
+userpsk=$(openssl rand -base64 16)
+serverpsk=$(cat /usr/local/etc/xray/serverpsk)
 read -p "Expired (days): " masaaktif
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 sed -i '/#vless$/a\#&@ '"$user $exp"'\
@@ -10,6 +13,10 @@ sed -i '/#vmess$/a\#&@ '"$user $exp"'\
 },{"id": "'""$uuid""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
 sed -i '/#trojan$/a\#&@ '"$user $exp"'\
 },{"password": "'""$pwtr""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
+sed -i '/#ss$/a\#&@ '"$user $exp"'\
+},{"password": "'""$pwss""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
+sed -i '/#ss22$/a\#&@ '"$user $exp"'\
+},{"password": "'""$userpsk""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
 ISP=$(cat /usr/local/etc/xray/org)
 CITY=$(cat /usr/local/etc/xray/city)
 vmlink1=`cat<<EOF
@@ -104,8 +111,110 @@ trojanlink2="trojan://$pwtr@$domain:80?path=/trojan-ws&security=none&host=$domai
 trojanlink3="trojan://$pwtr@$domain:443?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade&sni=$domain#$user"
 trojanlink4="trojan://$pwtr@$domain:80?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade#$user"
 trojanlink5="trojan://$pwtr@$domain:443?security=tls&type=grpc&mode=multi&serviceName=trojan-grpc&sni=$domain#$user"
-systemctl restart xray
 
+echo -n "$cipher:$pwss" | base64 -w 0 > /tmp/log
+ss_base64=$(cat /tmp/log)
+sslink1="ss://${ss_base64}@$domain:443?path=/ss-ws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
+sslink2="ss://${ss_base64}@$domain:80?path=/ss-ws&security=none&host=${domain}&type=ws#${user}"
+sslink3="ss://${ss_base64}@$domain:443?path=/ss-hup&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
+sslink4="ss://${ss_base64}@$domain:80?path=/ss-hup&security=none&host=${domain}&type=httpupgrade#${user}"
+sslink5="ss://${ss_base64}@$domain:443?security=tls&encryption=none&type=grpc&serviceName=ss-grpc&sni=$domain#${user}"
+rm -rf /tmp/log
+
+echo -n "$cipher2:$serverpsk:$userpsk" | base64 -w 0 > /tmp/log
+ss2022_base64=$(cat /tmp/log)
+ss22link1="ss://${ss2022_base64}@$domain:443?path=/ss22-ws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
+ss22link2="ss://${ss2022_base64}@$domain:80?path=/ss22-ws&security=none&host=${domain}&type=ws#${user}"
+ss22link3="ss://${ss2022_base64}@$domain:443?path=/ss22-hup&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
+ss22link4="ss://${ss2022_base64}@$domain:80?path=/ss22-hup&security=none&host=${domain}&type=httpupgrade#${user}"
+ss22link5="ss://${ss2022_base64}@$domain:443?security=tls&encryption=none&type=grpc&serviceName=ss22-grpc&sni=$domain#${user}"
+rm -rf /tmp/log
+
+cat > /var/www/html/xray/xray-$user.txt << END
+========================================
+        ----- [ All Xray ] -----
+========================================
+Domain            : $domain
+ISP               : $ISP
+City              : $CITY
+Port HTTPupgrade  : 443, 80
+Port Websocket    : 443, 80
+Port gRPC         : 443
+Network           : HTTPupgrade, Websocket, gRPC
+Alpn              : h2, http/1.1
+Expired On        : $exp
+========================================
+       ----- [ Vmess Link ] -----
+========================================
+Link WS TLS   : $vmesslink1
+========================================
+Link WS nTLS  : $vmesslink2
+========================================
+Link HUP TLS  : $vmesslink3
+========================================
+Link HUP nTLS : $vmesslink4
+========================================
+Link gRPC     : $vmesslink5
+========================================
+
+========================================
+       ----- [ Vless Link ] -----
+========================================
+Link WS TLS   : $vlesslink1
+========================================
+Link WS nTLS  : $vlesslink2
+========================================
+Link HUP TLS  : $vlesslink3
+========================================
+Link HUP nTLS : $vlesslink4
+========================================
+Link gRPC     : $vlesslink5
+========================================
+
+========================================
+       ----- [ Trojan Link ] -----
+========================================
+Link WS TLS   : $trojanlink1
+========================================
+Link WS nTLS  : $trojanlink2
+========================================
+Link HUP TLS  : $trojanlink3
+========================================
+Link HUP nTLS : $trojanlink4
+========================================
+Link gRPC     : $trojanlink5
+========================================
+
+========================================
+    ----- [ Shadowsocks Link ] -----
+========================================
+Link WS TLS   : $sslink1
+========================================
+Link WS nTLS  : $sslink2
+========================================
+Link HUP TLS  : $sslink3
+========================================
+Link HUP nTLS : $sslink4
+========================================
+Link gRPC     : $sslink5
+========================================
+
+========================================
+  ----- [ Shadowsocks 2022 Link ] -----
+========================================
+Link WS TLS   : $ss22link1
+========================================
+Link WS nTLS  : $ss22link2
+========================================
+Link HUP TLS  : $ss22link3
+========================================
+Link HUP nTLS : $ss22link4
+========================================
+Link gRPC     : $ss22link5
+========================================
+END
+
+systemctl restart xray
 clear
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "              ----- [ All Xray ] -----              " | tee -a /user/log-xray-$user.txt
@@ -113,12 +222,13 @@ echo -e "———————————————————————�
 echo -e "Domain            : $domain" | tee -a /user/log-xray-$user.txt
 echo -e "ISP               : $ISP" | tee -a /user/log-xray-$user.txt
 echo -e "City              : $CITY" | tee -a /user/log-xray-$user.txt
-echo -e "Port Websocket    : 443, 80" | tee -a /user/log-xray-$user.txt
 echo -e "Port HTTPupgrade  : 443, 80" | tee -a /user/log-xray-$user.txt
+echo -e "Port Websocket    : 443, 80" | tee -a /user/log-xray-$user.txt
 echo -e "Port gRPC         : 443" | tee -a /user/log-xray-$user.txt
 echo -e "Network           : Websocket, HTTPupgrade, gRPC" | tee -a /user/log-xray-$user.txt
 echo -e "Alpn              : h2, http/1.1" | tee -a /user/log-xray-$user.txt
 echo -e "Expired On        : $exp" | tee -a /user/log-xray-$user.txt
+echo -e "Link / Web        : https://$domain/xray/xray-$user.txt" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "             ----- [ Vmess Link ] -----             " | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
@@ -161,6 +271,36 @@ echo -e "———————————————————————�
 echo -e "Link HUP nTLS  : $trojanlink4" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "Link gRPC      : $trojanlink5" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e " " | tee -a /user/log-xray-$user.txt
+echo -e " " | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "          ----- [ Shadowsocks Link ] -----          " | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link WS TLS    : sslink1" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link WS nTLS   : $sslink2" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link HUP TLS   : $sslink3" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link HUP nTLS  : $sslink4" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link gRPC      : $sslink5" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e " " | tee -a /user/log-xray-$user.txt
+echo -e " " | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "       ----- [ Shadowsocks 2022 Link ] -----        " | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link WS TLS    : ss22link1" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link WS nTLS   : $ss22link2" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link HUP TLS   : $ss22link3" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link HUP nTLS  : $ss22link4" | tee -a /user/log-xray-$user.txt
+echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
+echo -e "Link gRPC      : $ss22link5" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e " " | tee -a /user/log-xray-$user.txt
 echo -e " " | tee -a /user/log-xray-$user.txt
