@@ -1,5 +1,7 @@
 user=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 7 | head -n 1`
 domain=$(cat /usr/local/etc/xray/domain)
+cipher="aes-128-gcm"
+cipher2="2022-blake3-aes-128-gcm"
 uuid=$(cat /proc/sys/kernel/random/uuid)
 pwtr=$(openssl rand -hex 4)
 pwss=$(echo $RANDOM | md5sum | head -c 6; echo;)
@@ -14,7 +16,7 @@ sed -i '/#vmess$/a\#&@ '"$user $exp"'\
 sed -i '/#trojan$/a\#&@ '"$user $exp"'\
 },{"password": "'""$pwtr""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
 sed -i '/#ss$/a\#&@ '"$user $exp"'\
-},{"password": "'""$pwss""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
+},{"password": "'""$pwss""'","method": "'""$cipher""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
 sed -i '/#ss22$/a\#&@ '"$user $exp"'\
 },{"password": "'""$userpsk""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
 ISP=$(cat /usr/local/etc/xray/org)
