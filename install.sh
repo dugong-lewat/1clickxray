@@ -60,6 +60,10 @@ clear
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
 uuid=$(cat /proc/sys/kernel/random/uuid)
 pwtr=$(openssl rand -hex 4)
+pwss=$(echo $RANDOM | md5sum | head -c 6; echo;)
+userpsk=$(openssl rand -base64 16)
+serverpsk=$(openssl rand -base64 16)
+echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 cat > /usr/local/etc/xray/config.json << END
 {
   "api": {
@@ -177,6 +181,67 @@ cat > /usr/local/etc/xray/config.json << END
         "security": "none"
       }
     },
+# Shadowsocks HTTPupgrade
+    {
+      "listen": "127.0.0.1",
+      "port": "1300",
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-128-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "path": "/ss-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      }
+    },
+# Shadowsocks 2022 HTTPupgrade
+    {
+      "listen": "127.0.0.1",
+      "port": "1400",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-128-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "path": "/ss22-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      }
+    },
 # VLESS Websocket
     {
       "listen": "127.0.0.1",
@@ -270,6 +335,67 @@ cat > /usr/local/etc/xray/config.json << END
         "security": "none"
       }
     },
+# Shadowsocks Websocket
+    {
+      "listen": "127.0.0.1",
+      "port": "2300",
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-128-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "path": "/ss-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      }
+    },
+# Shadowsocks 2022 Websocket
+    {
+      "listen": "127.0.0.1",
+      "port": "2400",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-128-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "path": "/ss22-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      }
+    },
 # VLESS gRPC
     {
       "listen": "127.0.0.1",
@@ -358,6 +484,67 @@ cat > /usr/local/etc/xray/config.json << END
       "streamSettings": {
         "grpcSettings": {
           "serviceName": "trojan-grpc"
+        },
+        "network": "grpc",
+        "security": "none"
+      }
+    },
+# Shadowsocks gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": "3300",
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-128-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "serviceName": "ss-grpc"
+        },
+        "network": "grpc",
+        "security": "none"
+      }
+    },
+# Shadowsocks 2022 gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": "3400",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-128-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "serviceName": "ss22-grpc"
         },
         "network": "grpc",
         "security": "none"
