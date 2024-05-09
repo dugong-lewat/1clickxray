@@ -1,6 +1,6 @@
 # 1clickxray
 
-- VLESS, VMESS & TROJAN
+- VLESS, VMESS, TROJAN, Shadowsocks, Shadowsocks 2022
 - Websocket, HTTPupgrade & gRPC
 - Port 443 & 80
 
