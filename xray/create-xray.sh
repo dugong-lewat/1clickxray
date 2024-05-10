@@ -136,15 +136,14 @@ cat > /var/www/html/xray/xray-$user.txt << END
 ========================================
         ----- [ All Xray ] -----
 ========================================
-Domain            : $domain
-ISP               : $ISP
-City              : $CITY
-Port HTTPupgrade  : 443, 80
-Port Websocket    : 443, 80
-Port gRPC         : 443
-Network           : HTTPupgrade, Websocket, gRPC
-Alpn              : h2, http/1.1
-Expired On        : $exp
+Domain         : $domain
+ISP            : $ISP
+City           : $CITY
+Port TLS/HTTPS : 443, 2053, 2083, 2087, 2096, 8443
+Port HTTP      : 80, 8080, 8880, 2052, 2082, 2086, 2095
+Transport      : HTTPupgrade, Websocket, gRPC
+Alpn           : h2, http/1.1
+Expired On     : $exp
 ========================================
        ----- [ Vmess Link ] -----
 ========================================
@@ -158,6 +157,7 @@ Link HUP nTLS : $vmesslink4
 ========================================
 Link gRPC     : $vmesslink5
 ========================================
+
 
 ========================================
        ----- [ Vless Link ] -----
@@ -173,6 +173,7 @@ Link HUP nTLS : $vlesslink4
 Link gRPC     : $vlesslink5
 ========================================
 
+
 ========================================
        ----- [ Trojan Link ] -----
 ========================================
@@ -187,6 +188,7 @@ Link HUP nTLS : $trojanlink4
 Link gRPC     : $trojanlink5
 ========================================
 
+
 ========================================
     ----- [ Shadowsocks Link ] -----
 ========================================
@@ -200,6 +202,7 @@ Link HUP nTLS : $sslink4
 ========================================
 Link gRPC     : $sslink5
 ========================================
+
 
 ========================================
   ----- [ Shadowsocks 2022 Link ] -----
@@ -221,16 +224,15 @@ clear
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "              ----- [ All Xray ] -----              " | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
-echo -e "Domain            : $domain" | tee -a /user/log-xray-$user.txt
-echo -e "ISP               : $ISP" | tee -a /user/log-xray-$user.txt
-echo -e "City              : $CITY" | tee -a /user/log-xray-$user.txt
-echo -e "Port HTTPupgrade  : 443, 80" | tee -a /user/log-xray-$user.txt
-echo -e "Port Websocket    : 443, 80" | tee -a /user/log-xray-$user.txt
-echo -e "Port gRPC         : 443" | tee -a /user/log-xray-$user.txt
-echo -e "Network           : Websocket, HTTPupgrade, gRPC" | tee -a /user/log-xray-$user.txt
-echo -e "Alpn              : h2, http/1.1" | tee -a /user/log-xray-$user.txt
-echo -e "Expired On        : $exp" | tee -a /user/log-xray-$user.txt
-echo -e "Link / Web        : https://$domain/xray/xray-$user.txt" | tee -a /user/log-xray-$user.txt
+echo -e "Domain         : $domain" | tee -a /user/log-xray-$user.txt
+echo -e "ISP            : $ISP" | tee -a /user/log-xray-$user.txt
+echo -e "City           : $CITY" | tee -a /user/log-xray-$user.txt
+echo -e "Port TLS/HTTPS : 443, 2053, 2083, 2087, 2096, 8443" | tee -a /user/log-xray-$user.txt
+echo -e "Port HTTP      : 80, 8080, 8880, 2052, 2082, 2086, 2095" | tee -a /user/log-xray-$user.txt
+echo -e "Transport      : Websocket, HTTPupgrade, gRPC" | tee -a /user/log-xray-$user.txt
+echo -e "Alpn           : h2, http/1.1" | tee -a /user/log-xray-$user.txt
+echo -e "Expired On     : $exp" | tee -a /user/log-xray-$user.txt
+echo -e "Link / Web     : https://$domain/xray/xray-$user.txt" | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
 echo -e "             ----- [ Vmess Link ] -----             " | tee -a /user/log-xray-$user.txt
 echo -e "————————————————————————————————————————————————————" | tee -a /user/log-xray-$user.txt
