@@ -88,6 +88,15 @@ cat > /usr/local/etc/xray/config.json << END
     "tag": "dns_inbounds"
   },
   "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 62789,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      },
+      "tag": "api"
+    },
 # VLESS HTTPupgrade
     {
       "listen": "127.0.0.1",
@@ -113,7 +122,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "httpupgradeSettings": {
-          "path": "/vless-hup"
+          "path": "/vless-hup",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "httpupgrade",
         "security": "none"
@@ -144,7 +157,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "httpupgradeSettings": {
-          "path": "/vmess-hup"
+          "path": "/vmess-hup",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "httpupgrade",
         "security": "none"
@@ -175,7 +192,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "httpupgradeSettings": {
-          "path": "/trojan-hup"
+          "path": "/trojan-hup",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "httpupgrade",
         "security": "none"
@@ -205,7 +226,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "httpupgradeSettings": {
-          "path": "/ss-hup"
+          "path": "/ss-hup",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "httpupgrade",
         "security": "none"
@@ -236,7 +261,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "httpupgradeSettings": {
-          "path": "/ss22-hup"
+          "path": "/ss22-hup",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "httpupgrade",
         "security": "none"
@@ -267,7 +296,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "wsSettings": {
-          "path": "/vless-ws"
+          "path": "/vless-ws",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "ws",
         "security": "none"
@@ -298,7 +331,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "wsSettings": {
-          "path": "/vmess-ws"
+          "path": "/vmess-ws",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "ws",
         "security": "none"
@@ -329,7 +366,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "wsSettings": {
-          "path": "/trojan-ws"
+          "path": "/trojan-ws",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "ws",
         "security": "none"
@@ -359,7 +400,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "wsSettings": {
-          "path": "/ss-ws"
+          "path": "/ss-ws",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "ws",
         "security": "none"
@@ -390,7 +435,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "wsSettings": {
-          "path": "/ss22-ws"
+          "path": "/ss22-ws",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "ws",
         "security": "none"
@@ -421,7 +470,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
-          "serviceName": "vless-grpc"
+          "serviceName": "vless-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "grpc",
         "security": "none"
@@ -452,7 +505,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
-          "serviceName": "vmess-grpc"
+          "serviceName": "vmess-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "grpc",
         "security": "none"
@@ -483,7 +540,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
-          "serviceName": "trojan-grpc"
+          "serviceName": "trojan-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "grpc",
         "security": "none"
@@ -513,7 +574,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
-          "serviceName": "ss-grpc"
+          "serviceName": "ss-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "grpc",
         "security": "none"
@@ -544,7 +609,11 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
-          "serviceName": "ss22-grpc"
+          "serviceName": "ss22-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
         },
         "network": "grpc",
         "security": "none"
@@ -590,7 +659,7 @@ cat > /usr/local/etc/xray/config.json << END
         "network": "ws",
         "security": "tls",
         "tlsSettings": {
-          "allowInsecure": false,
+          "allowInsecure": true,
           "alpn": [],
           "fingerprint": "",
           "serverName": "sg.vless.sbs"
