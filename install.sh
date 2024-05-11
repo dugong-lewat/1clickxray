@@ -61,8 +61,8 @@ echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
 uuid=$(cat /proc/sys/kernel/random/uuid)
 pwtr=$(openssl rand -hex 4)
 pwss=$(echo $RANDOM | md5sum | head -c 6; echo;)
-userpsk=$(openssl rand -base64 16)
-serverpsk=$(openssl rand -base64 16)
+userpsk=$(openssl rand -base64 32)
+serverpsk=$(openssl rand -base64 32)
 echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 cat > /usr/local/etc/xray/config.json << END
 {
@@ -210,7 +210,7 @@ cat > /usr/local/etc/xray/config.json << END
       "settings": {
         "clients": [
             {
-              "method": "aes-128-gcm",
+              "method": "aes-256-gcm",
               "password": "$pwss"
 #ss
             }
@@ -242,7 +242,7 @@ cat > /usr/local/etc/xray/config.json << END
       "port": "1400",
       "protocol": "shadowsocks",
       "settings": {
-        "method": "2022-blake3-aes-128-gcm",
+        "method": "2022-blake3-aes-256-gcm",
         "password": "$(cat /usr/local/etc/xray/serverpsk)",
         "clients": [
           {
@@ -384,7 +384,7 @@ cat > /usr/local/etc/xray/config.json << END
       "settings": {
         "clients": [
             {
-              "method": "aes-128-gcm",
+              "method": "aes-256-gcm",
               "password": "$pwss"
 #ss
             }
@@ -416,7 +416,7 @@ cat > /usr/local/etc/xray/config.json << END
       "port": "2400",
       "protocol": "shadowsocks",
       "settings": {
-        "method": "2022-blake3-aes-128-gcm",
+        "method": "2022-blake3-aes-256-gcm",
         "password": "$(cat /usr/local/etc/xray/serverpsk)",
         "clients": [
           {
@@ -558,7 +558,7 @@ cat > /usr/local/etc/xray/config.json << END
       "settings": {
         "clients": [
             {
-              "method": "aes-128-gcm",
+              "method": "aes-256-gcm",
               "password": "$pwss"
 #ss
             }
@@ -590,7 +590,7 @@ cat > /usr/local/etc/xray/config.json << END
       "port": "3400",
       "protocol": "shadowsocks",
       "settings": {
-        "method": "2022-blake3-aes-128-gcm",
+        "method": "2022-blake3-aes-256-gcm",
         "password": "$(cat /usr/local/etc/xray/serverpsk)",
         "clients": [
           {
