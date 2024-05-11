@@ -1,11 +1,11 @@
 user=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 7 | head -n 1`
 domain=$(cat /usr/local/etc/xray/domain)
-cipher="aes-128-gcm"
-cipher2="2022-blake3-aes-128-gcm"
+cipher="aes-256-gcm"
+cipher2="2022-blake3-aes-256-gcm"
 uuid=$(cat /proc/sys/kernel/random/uuid)
 pwtr=$(openssl rand -hex 4)
 pwss=$(echo $RANDOM | md5sum | head -c 6; echo;)
-userpsk=$(openssl rand -base64 16)
+userpsk=$(openssl rand -base64 32)
 serverpsk=$(cat /usr/local/etc/xray/serverpsk)
 read -p "Expired (days): " masaaktif
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
