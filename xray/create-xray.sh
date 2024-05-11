@@ -7,7 +7,9 @@ pwtr=$(openssl rand -hex 4)
 pwss=$(echo $RANDOM | md5sum | head -c 6; echo;)
 userpsk=$(openssl rand -base64 32)
 serverpsk=$(cat /usr/local/etc/xray/serverpsk)
-read -p "Expired (days): " masaaktif
+echo -e "${BB}————————————————————————————————————————————————————————${NC}"
+read -p "Active Period / Masa Aktif (days): " masaaktif
+echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 sed -i '/#vless$/a\#&@ '"$user $exp"'\
 },{"id": "'""$uuid""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
