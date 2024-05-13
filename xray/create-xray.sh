@@ -210,7 +210,7 @@ Link HUP nTLS    : $trojanlink4
 ========================================
 Link gRPC        : $trojanlink5
 ========================================
-Link TCP TLS     : $trojanlink5
+Link TCP TLS     : $trojanlink6
 ========================================
 
 
