@@ -20,6 +20,7 @@
 | Shadowsocks gRPC | 443 |
 | Shadowsocks 2022 gRPC | 443 |
 
+**Link Instalasi**
 ```
 bash -c "$(wget -qO- https://t.ly/Wmixh)"
 ```
