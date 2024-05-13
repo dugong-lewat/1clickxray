@@ -97,115 +97,388 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "tag": "api"
     },
-# VLESS HTTPupgrade
+# XTLS
     {
-      "listen": "127.0.0.1",
-      "port": 1000,
+      "listen": "::",
+      "port": 443,
       "protocol": "vless",
       "settings": {
         "clients": [
           {
-            "email": "httpupgrade",
+            "flow": "xtls-rprx-vision",
             "id": "$uuid"
-#vless
+#xtls
           }
         ],
         "decryption": "none",
-        "fallbacks": []
-      },
-      "sniffing": {
-        "destOverride": [
-          "http",
-          "tls"
-        ],
-        "enabled": true
+        "fallbacks": [
+          {
+            "alpn": "h2",
+            "dest": 4443,
+            "xver": 2
+          },
+          {
+            "dest": 8080,
+            "xver": 2
+          },
+          // Websocket
+          {
+            "path": "/vless-ws",
+            "dest": "@vless-ws",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-ws",
+            "dest": "@vmess-ws",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-ws",
+            "dest": "@trojan-ws",
+            "xver": 2
+          },
+          {
+            "path": "/ss-ws",
+            "dest": "1000",
+            "xver": 2
+          },
+          {
+            "path": "/ss22-ws",
+            "dest": "1100",
+            "xver": 2
+          },
+          // HTTPupgrade
+          {
+            "path": "/vless-hup",
+            "dest": "@vl-hup",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-hup",
+            "dest": "@vm-hup",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-hup",
+            "dest": "@tr-hup",
+            "xver": 2
+          },
+          {
+            "path": "/ss-hup",
+            "dest": "3000",
+            "xver": 2
+          },
+          {
+            "path": "/ss22-hup",
+            "dest": "3100",
+            "xver": 2
+          }
+        ]
       },
       "streamSettings": {
-        "httpupgradeSettings": {
-          "path": "/vless-hup",
+        "network": "tcp",
+        "security": "tls",
+        "tlsSettings": {
+          "certificates": [
+            {
+              "ocspStapling": 3600,
+              "certificateFile": "/usr/local/etc/xray/fullchain.cer",
+              "keyFile": "/usr/local/etc/xray/private.key"
+            }
+          ],
+          "minVersion": "1.2",
+          "cipherSuites": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
           "alpn": [
             "h2",
             "http/1.1"
           ]
-        },
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# TROJAN TCP TLS
+    {
+      "port": 4443,
+      "listen": "127.0.0.1",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ],
+        "fallbacks": [
+          {
+            "dest": "8443",
+            "xver": 2
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "none",
+        "tcpSettings": {
+          "acceptProxyProtocol": true
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# VLESS WS
+    {
+      "listen": "@vless-ws",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-ws",
+            "id": "$uuid"
+#vless
+
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vless-ws"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# VMESS WS
+    {
+      "listen": "@vmess-ws",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email": "general@vmess-ws", 
+            "id": "$uuid"
+#vmess
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vmess-ws"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# TROJAN WS
+    {
+      "listen": "@trojan-ws",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-ws"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# SS WS
+    {
+      "listen": "127.0.0.1",
+      "port": "1000",
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-ws"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# SS2022 WS
+    {
+      "listen": "127.0.0.1",
+      "port": "1100",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-ws"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# VLESS HTTPupgrade
+    {
+      "listen": "@vl-hup",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-ws",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
         "network": "httpupgrade",
-        "security": "none"
+        "security": "none",
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vless-hup"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
       }
     },
 # VMESS HTTPupgrade
     {
-      "listen": "127.0.0.1",
-      "port": 1100,
+      "listen": "@vm-hup",
       "protocol": "vmess",
       "settings": {
         "clients": [
           {
-            "email": "httpupgrade",
+            "email":"general@vless-ws",
             "id": "$uuid"
 #vmess
           }
         ],
-        "decryption": "none",
-        "fallbacks": []
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "security": "none",
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vmess-hup"
+        }
       },
       "sniffing": {
+        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "httpupgradeSettings": {
-          "path": "/vmess-hup",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
-        "network": "httpupgrade",
-        "security": "none"
+        ]
       }
     },
 # TROJAN HTTPupgrade
     {
-      "listen": "127.0.0.1",
-      "port": 1200,
+      "listen": "@tr-hup",
       "protocol": "trojan",
       "settings": {
         "clients": [
           {
-            "email": "httpupgrade",
             "password": "$pwtr"
 #trojan
           }
-        ],
-        "decryption": "none",
-        "fallbacks": []
+        ]
+      },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "security": "none",
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-hup"
+        }
       },
       "sniffing": {
+        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "httpupgradeSettings": {
-          "path": "/trojan-hup",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
-        "network": "httpupgrade",
-        "security": "none"
+        ]
       }
     },
-# Shadowsocks HTTPupgrade
+# SS HTTPupgrade
     {
       "listen": "127.0.0.1",
-      "port": "1300",
+      "port": "3000",
       "protocol": "shadowsocks",
       "settings": {
         "clients": [
@@ -217,29 +490,26 @@ cat > /usr/local/etc/xray/config.json << END
           ],
         "network": "tcp,udp"
       },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "security": "none",
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-hup"
+        }
+      },
       "sniffing": {
+        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "httpupgradeSettings": {
-          "path": "/ss-hup",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
-        "network": "httpupgrade",
-        "security": "none"
+        ]
       }
     },
-# Shadowsocks 2022 HTTPupgrade
+# SS2022 HTTPupgrade
     {
       "listen": "127.0.0.1",
-      "port": "1400",
+      "port": "3100",
       "protocol": "shadowsocks",
       "settings": {
         "method": "2022-blake3-aes-256-gcm",
@@ -252,203 +522,26 @@ cat > /usr/local/etc/xray/config.json << END
         ],
         "network": "tcp,udp"
       },
-      "sniffing": {
-        "destOverride": [
-          "http",
-          "tls"
-        ],
-        "enabled": true
-      },
       "streamSettings": {
-        "httpupgradeSettings": {
-          "path": "/ss22-hup",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
         "network": "httpupgrade",
-        "security": "none"
-      }
-    },
-# VLESS Websocket
-    {
-      "listen": "127.0.0.1",
-      "port": 2000,
-      "protocol": "vless",
-      "settings": {
-        "clients": [
-          {
-            "email": "websocket",
-            "id": "$uuid"
-#vless
-          }
-        ],
-        "decryption": "none",
-        "fallbacks": []
+        "security": "none",
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-hup"
+        }
       },
       "sniffing": {
+        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "wsSettings": {
-          "path": "/vless-ws",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
-        "network": "ws",
-        "security": "none"
-      }
-    },
-# VMESS Websocket
-    {
-      "listen": "127.0.0.1",
-      "port": 2100,
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "email": "websocket",
-            "id": "$uuid"
-#vmess
-          }
-        ],
-        "decryption": "none",
-        "fallbacks": []
-      },
-      "sniffing": {
-        "destOverride": [
-          "http",
-          "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "wsSettings": {
-          "path": "/vmess-ws",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
-        "network": "ws",
-        "security": "none"
-      }
-    },
-# TROJAN Websocket
-    {
-      "listen": "127.0.0.1",
-      "port": 2200,
-      "protocol": "trojan",
-      "settings": {
-        "clients": [
-          {
-            "email": "websocket",
-            "password": "$pwtr"
-#trojan
-          }
-        ],
-        "decryption": "none",
-        "fallbacks": []
-      },
-      "sniffing": {
-        "destOverride": [
-          "http",
-          "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "wsSettings": {
-          "path": "/trojan-ws",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
-        "network": "ws",
-        "security": "none"
-      }
-    },
-# Shadowsocks Websocket
-    {
-      "listen": "127.0.0.1",
-      "port": "2300",
-      "protocol": "shadowsocks",
-      "settings": {
-        "clients": [
-            {
-              "method": "aes-256-gcm",
-              "password": "$pwss"
-#ss
-            }
-          ],
-        "network": "tcp,udp"
-      },
-      "sniffing": {
-        "destOverride": [
-          "http",
-          "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "wsSettings": {
-          "path": "/ss-ws",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
-        "network": "ws",
-        "security": "none"
-      }
-    },
-# Shadowsocks 2022 Websocket
-    {
-      "listen": "127.0.0.1",
-      "port": "2400",
-      "protocol": "shadowsocks",
-      "settings": {
-        "method": "2022-blake3-aes-256-gcm",
-        "password": "$(cat /usr/local/etc/xray/serverpsk)",
-        "clients": [
-          {
-            "password": "$userpsk"
-#ss22
-          }
-        ],
-        "network": "tcp,udp"
-      },
-      "sniffing": {
-        "destOverride": [
-          "http",
-          "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "wsSettings": {
-          "path": "/ss22-ws",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        },
-        "network": "ws",
-        "security": "none"
+        ]
       }
     },
 # VLESS gRPC
     {
       "listen": "127.0.0.1",
-      "port": 3000,
+      "port": 5000,
       "protocol": "vless",
       "settings": {
         "clients": [
@@ -483,12 +576,12 @@ cat > /usr/local/etc/xray/config.json << END
 # VMESS gRPC
     {
       "listen": "127.0.0.1",
-      "port": 3100,
+      "port": 5100,
       "protocol": "vmess",
       "settings": {
         "clients": [
           {
-            "email": "websocket",
+            "email": "grpc",
             "id": "$uuid"
 #vmess
           }
@@ -518,13 +611,13 @@ cat > /usr/local/etc/xray/config.json << END
 # TROJAN gRPC
     {
       "listen": "127.0.0.1",
-      "port": 3200,
+      "port": 5200,
       "protocol": "trojan",
       "settings": {
         "clients": [
           {
             "email": "grpc",
-            "password": "$pwtr"
+            "password": "$uuid"
 #trojan
           }
         ],
@@ -550,10 +643,10 @@ cat > /usr/local/etc/xray/config.json << END
         "security": "none"
       }
     },
-# Shadowsocks gRPC
+# SS gRPC
     {
       "listen": "127.0.0.1",
-      "port": "3300",
+      "port": "5300",
       "protocol": "shadowsocks",
       "settings": {
         "clients": [
@@ -584,10 +677,10 @@ cat > /usr/local/etc/xray/config.json << END
         "security": "none"
       }
     },
-# Shadowsocks 2022 gRPC
+# SS2022 gRPC
     {
       "listen": "127.0.0.1",
-      "port": "3400",
+      "port": "5400",
       "protocol": "shadowsocks",
       "settings": {
         "method": "2022-blake3-aes-256-gcm",
@@ -617,6 +710,264 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "grpc",
         "security": "none"
+      }
+    }
+    {
+      "port": 80,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "$uuid"
+#universal
+          }
+        ],
+        "fallbacks": [
+          {
+            "dest": 8080,
+            "xver": 2
+          },
+          // Websocket
+          {
+            "path": "/vless-ws",
+            "dest": "@vless-ws",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-ws",
+            "dest": "@vmess-ws",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-ws",
+            "dest": "@trojan",
+            "xver": 2
+          },
+          {
+            "dest": 2000,
+            "xver": 2
+          },
+          {
+            "dest": 2100,
+            "xver": 2
+          },
+          // HTTPupgrade
+          {
+            "path": "/vless-hup",
+            "dest": "@vl-hup",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-hup",
+            "dest": "@vm-hup",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-hup",
+            "dest": "@trojan-hup",
+            "xver": 2
+          },
+          {
+            "path": "/ss-hup",
+            "dest": "4000",
+            "xver": 2
+          },
+          {
+            "path": "/ss22-hup",
+            "dest": "4100",
+            "xver": 2
+          }
+        ],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# TROJAN WS
+    {
+      "listen": "@trojan",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-ws"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# SS WS
+    {
+      "listen": "127.0.0.1",
+      "port": "2000",
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-ws"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# SS2022 WS
+    {
+      "listen": "127.0.0.1",
+      "port": "2100",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-ws"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# TROJAN HTTPupgrade
+    {
+      "listen": "@trojan-hup",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "security": "none",
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-hup"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# SS HTTPupgrade
+    {
+      "listen": "127.0.0.1",
+      "port": "4000",
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "security": "none",
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-hup"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    },
+# SS2022 HTTPupgrade
+    {
+      "listen": "127.0.0.1",
+      "port": "4100",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "network": "httpupgrade",
+        "security": "none",
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-hup"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
       }
     }
   ],
@@ -669,7 +1020,7 @@ cat > /usr/local/etc/xray/config.json << END
             "Host": "sg.vless.sbs"
           },
           "host": "sg.vless.sbs",
-          "path": "/vless"
+          "path": "/vless-ws"
         }
       },
       "tag": "sg.vless.sbs"
@@ -725,7 +1076,92 @@ cat > /usr/local/etc/xray/config.json << END
   "stats": {}
 }
 END
-wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
+cat > /etc/nginx/nginx.conf << END
+# Generated by nginxconfig.io
+user www-data;
+pid /run/nginx.pid;
+worker_processes auto;
+worker_rlimit_nofile 65535;
+
+events {
+   multi_accept on;
+   worker_connections 65535;
+}
+
+http {
+   charset utf-8;
+   sendfile on;
+   tcp_nopush on;
+   tcp_nodelay on;
+   server_tokens off;
+   types_hash_max_size 2048;
+   server_names_hash_bucket_size 128;
+   server_names_hash_max_size 512;
+   client_max_body_size 16M;
+
+   # logging
+   access_log /var/log/nginx/access.log;
+   error_log /var/log/nginx/error.log warn;
+
+   # Compression
+   gzip on;
+   gzip_comp_level 5;
+   gzip_min_length 256;
+   gzip_proxied any;
+   gzip_types application/javascript application/json application/xml text/css text/plain text/xml application/xml+rss application/grpc+proto;
+
+   include /etc/nginx/conf.d/*.conf;
+   include /etc/nginx/sites-enabled/*;
+
+   upstream vless_grpc {
+       server 127.0.0.1:5000;
+   }
+   upstream vmess_grpc {
+       server 127.0.0.1:5100;
+   }
+   upstream trojan_grpc {
+       server 127.0.0.1:5200;
+   }
+   upstream ss_grpc {
+       server 127.0.0.1:5300;
+   }
+   upstream ss22_grpc {
+       server 127.0.0.1:5400;
+   }
+   server {
+       listen 8443 http2 proxy_protocol;
+       set_real_ip_from 127.0.0.1;
+       real_ip_header proxy_protocol;
+       server_name _;
+       return 400;
+   }
+   server {
+       listen 8080 proxy_protocol default_server;
+       listen 8443 http2 proxy_protocol default_server;
+       set_real_ip_from 127.0.0.1;
+       real_ip_header proxy_protocol;
+       root /var/www/html;
+       server_name $domain;
+
+       location /vless-grpc {
+          grpc_pass grpc://vless_grpc;
+       }
+       location /vmess-grpc {
+          grpc_pass grpc://vmess_grpc;
+       }
+       location /trojan-grpc {
+          grpc_pass grpc://trojan_grpc;
+       }
+       location /ss-grpc {
+          grpc_pass grpc://ss_grpc;
+       }
+       location /ss22-grpc {
+          grpc_pass grpc://ss22_grpc;
+       }
+   }
+}
+END
+# wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
 systemctl restart nginx
 systemctl restart xray
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Done${NC}"
