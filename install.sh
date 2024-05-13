@@ -711,7 +711,7 @@ cat > /usr/local/etc/xray/config.json << END
         "network": "grpc",
         "security": "none"
       }
-    }
+    },
     {
       "port": 80,
       "protocol": "vless",
