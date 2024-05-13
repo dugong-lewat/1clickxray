@@ -53,8 +53,8 @@ systemctl stop xray
 domain=$(cat /usr/local/etc/xray/domain)
 curl https://get.acme.sh | sh
 source ~/.bashrc
-bash .acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
-bash .acme.sh/acme.sh --issue -d $domain --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --force
+bash .acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server zerossl
+bash .acme.sh/acme.sh --issue -d $domain --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --debug --force
 chmod 745 /usr/local/etc/xray/private.key
 clear
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
@@ -1216,17 +1216,27 @@ echo -e "                  ${WB}XRAY SCRIPT BY DUGONG${NC}"
 echo -e "${BB}—————————————————————————————————————————————————————————${NC}"
 echo -e "                 ${WB}»»» Protocol Service «««${NC}  "
 echo -e "${BB}—————————————————————————————————————————————————————————${NC}"
-echo -e "  ${YB}- Vmess WS TLS${NC}         : ${YB}443${NC}"
-echo -e "  ${YB}- Vmess WS nTLS${NC}        : ${YB}80${NC}"
-echo -e "  ${YB}- Vmess HTTPupgrade${NC}    : ${YB}443${NC}"
-echo -e "  ${YB}- Vless XTLS Vision${NC}    : ${YB}443${NC}"
-echo -e "  ${YB}- Vless WS TLS${NC}         : ${YB}443${NC}"
-echo -e "  ${YB}- Vless WS nTLS${NC}        : ${YB}80${NC}"
-echo -e "  ${YB}- Vless HTTPupgrade${NC}    : ${YB}443${NC}"
-echo -e "  ${YB}- Trojan TCP TLS${NC}       : ${YB}443${NC}"
-echo -e "  ${YB}- Trojan WS TLS${NC}        : ${YB}443${NC}"
-echo -e "  ${YB}- Trojan WS nTLS${NC}       : ${YB}80${NC}"
-echo -e "  ${YB}- Trojan HTTPupgrade${NC}   : ${YB}443${NC}"
+echo -e "${YB}Vmess Websocket${NC}     : ${YB}443 & 80${NC}"
+echo -e "${YB}Vmess HTTPupgrade${NC}   : ${YB}443 & 80${NC}"
+echo -e "${YB}Vmess gRPC${NC}          : ${YB}443${NC}"
+echo ""
+echo -e "${YB}Vless XTLS-Vision${NC}   : ${YB}443${NC}"
+echo -e "${YB}Vless Websocket${NC}     : ${YB}443 & 80${NC}"
+echo -e "${YB}Vless HTTPupgrade${NC}   : ${YB}443 & 80${NC}"
+echo -e "${YB}Vless gRPC${NC}          : ${YB}443${NC}"
+echo ""
+echo -e "${YB}Trojan TCP TLS${NC}      : ${YB}443${NC}"
+echo -e "${YB}Trojan Websocket${NC}    : ${YB}443 & 80${NC}"
+echo -e "${YB}Trojan HTTPupgrade${NC}  : ${YB}443 & 80${NC}"
+echo -e "${YB}Trojan gRPC${NC}         : ${YB}443${NC}"
+echo ""
+echo -e "${YB}SS Websocket${NC}        : ${YB}443 & 80${NC}"
+echo -e "${YB}SS HTTPupgrade${NC}      : ${YB}443 & 80${NC}"
+echo -e "${YB}SS gRPC${NC}             : ${YB}443${NC}"
+echo ""
+echo -e "${YB}SS 2022 Websocket${NC}   : ${YB}443 & 80${NC}"
+echo -e "${YB}SS 2022 HTTPupgrade${NC} : ${YB}443 & 80${NC}"
+echo -e "${YB}SS 2022 gRPC${NC}        : ${YB}443${NC}"
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 echo ""
 rm -f xray
