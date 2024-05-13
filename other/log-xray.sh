@@ -35,7 +35,7 @@ if [ -z $user ]; then
 menu
 else
 clear
-echo -e "`cat "/user/log-xray-$user.txt"`"
+echo -e "`cat "/user/xray-$user.log"`"
 echo ""
 read -n 1 -s -r -p "Press any key to back on menu"
 menu
