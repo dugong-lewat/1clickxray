@@ -90,8 +90,8 @@ exp2=$(((d1 - d2) / 86400))
 if [[ "$exp2" -le "0" ]]; then
 sed -i "/^#&@ $user $exp/,/^},{/d" /usr/local/etc/xray/config.json
 sed -i "/^#&@ $user $exp/,/^},{/d" /usr/local/etc/xray/config.json
-rm -rf /var/www/html/allxray/allxray-$user.txt
-rm -rf /user/log-allxray-$user.txt
+rm -rf /var/www/html/xray/xray-$user.log
+rm -rf /user/xray-$user.log
 systemctl restart xray
 fi
 done
