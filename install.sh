@@ -17,7 +17,7 @@ apt update -y
 apt install socat netfilter-persistent bsdmainutils -y
 apt install vnstat lsof fail2ban -y
 apt install curl sudo cron -y
-apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https -y
+apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
 mkdir /user >> /dev/null 2>&1
 mkdir /tmp >> /dev/null 2>&1
 rm /usr/local/etc/xray/city >> /dev/null 2>&1
@@ -32,11 +32,19 @@ curl -s ipinfo.io/region >> /usr/local/etc/xray/region
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
 sudo apt-get install speedtest
 clear
-ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+# ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+timedatectl set-timezone Asia/Jakarta
+code=$(grep DISTRIB_CODENAME /etc/lsb-release | cut -d '=' -f 2)
+cat > /etc/apt/sources.list.d/nginx.list << END
+deb http://nginx.org/packages/ubuntu/ $code nginx
+deb-src http://nginx.org/packages/ubuntu/ $code nginx
+END
+wget http://nginx.org/keys/nginx_signing.key
+sudo apt-key add nginx_signing.key
+apt update
 apt install nginx -y
+rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
-rm /etc/nginx/sites-enabled/default >> /dev/null 2>&1
-rm /etc/nginx/sites-available/default >> /dev/null 2>&1
 mkdir -p /var/www/html/xray >> /dev/null 2>&1
 systemctl restart nginx
 clear
@@ -57,7 +65,7 @@ domain=$(cat /usr/local/etc/xray/domain)
 curl https://get.acme.sh | sh
 source ~/.bashrc
 bash .acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server zerossl
-bash .acme.sh/acme.sh --issue -d $domain --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --debug --force
+bash .acme.sh/acme.sh --issue -d $domain --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --force
 chmod 745 /usr/local/etc/xray/private.key
 clear
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
