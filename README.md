@@ -1,5 +1,5 @@
 ## 1 Click Xray
-
+Ubuntu 20 or Newest
 | Protocol & Transport | Network Port |
 |----------|--------|
 | Vmess Websocket | 443 & 80 |
