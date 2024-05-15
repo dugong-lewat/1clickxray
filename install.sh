@@ -132,17 +132,6 @@ cat > /usr/local/etc/xray/config.json << END
             "dest": 8080,
             "xver": 2
           },
-          // TCP + http obfs
-          {
-            "path": "/vless-tcp",
-            "dest": "@vless-tcp",
-            "xver": 2
-          },
-          {
-            "path": "/vmess-tcp",
-            "dest": "@vmess-tcp",
-            "xver": 2
-          },
           // Websocket
           {
             "path": "/vless-ws",
@@ -226,8 +215,8 @@ cat > /usr/local/etc/xray/config.json << END
     },
 # TROJAN TCP TLS
     {
-      "port": 4443,
       "listen": "127.0.0.1",
+      "port": 4443,
       "protocol": "trojan",
       "settings": {
         "clients": [
@@ -257,80 +246,6 @@ cat > /usr/local/etc/xray/config.json << END
         "network": "tcp",
         "security": "none"
       }
-    },
-# VLESS TCP + http obfs
-    {
-      "listen": "@vless-tcp",
-      "protocol": "vless",
-      "settings": {
-        "clients": [
-          {
-            "email":"general@vless-obfs",
-            "id": "$uuid"
-#vless
-          }
-        ],
-        "decryption": "none"
-      },
-      "sniffing": {
-        "destOverride": [
-          "http",
-          "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "tcpSettings": {
-          "acceptProxyProtocol": true,
-          "header": {
-            "type": "http",
-            "request": {
-              "path": [
-                "/vless-tcp"
-              ]
-            }
-          }
-        },
-        "network": "tcp",
-        "security": "none"
-    }
-    },
-# VMESS TCP + http obfs
-    {
-      "listen": "@vmess-tcp",
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "email":"general@vless-obfs",
-            "id": "$uuid"
-#vmess
-          }
-        ],
-        "decryption": "none"
-      },
-      "sniffing": {
-        "destOverride": [
-          "http",
-          "tls"
-        ],
-        "enabled": true
-      },
-      "streamSettings": {
-        "tcpSettings": {
-          "acceptProxyProtocol": true,
-          "header": {
-            "type": "http",
-            "request": {
-              "path": [
-                "/vmess-tcp"
-              ]
-            }
-          }
-        },
-        "network": "tcp",
-        "security": "none"
-    }
     },
 # VLESS WS
     {
