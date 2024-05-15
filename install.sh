@@ -17,6 +17,7 @@ apt update -y
 apt install socat netfilter-persistent bsdmainutils -y
 apt install vnstat lsof fail2ban -y
 apt install curl sudo cron -y
+apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https -y
 mkdir /user >> /dev/null 2>&1
 mkdir /tmp >> /dev/null 2>&1
 rm /usr/local/etc/xray/city >> /dev/null 2>&1
@@ -123,6 +124,17 @@ cat > /usr/local/etc/xray/config.json << END
             "dest": 8080,
             "xver": 2
           },
+          // TCP + http obfs
+          {
+            "path": "/vless-tcp",
+            "dest": "@vless-tcp",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-tcp",
+            "dest": "@vmess-tcp",
+            "xver": 2
+          },
           // Websocket
           {
             "path": "/vless-ws",
@@ -141,12 +153,12 @@ cat > /usr/local/etc/xray/config.json << END
           },
           {
             "path": "/ss-ws",
-            "dest": "1000",
+            "dest": 1000,
             "xver": 2
           },
           {
             "path": "/ss22-ws",
-            "dest": "1100",
+            "dest": 1100,
             "xver": 2
           },
           // HTTPupgrade
@@ -177,9 +189,14 @@ cat > /usr/local/etc/xray/config.json << END
           }
         ]
       },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
       "streamSettings": {
-        "network": "tcp",
-        "security": "tls",
         "tlsSettings": {
           "certificates": [
             {
@@ -194,14 +211,9 @@ cat > /usr/local/etc/xray/config.json << END
             "h2",
             "http/1.1"
           ]
-        }
-      },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": [
-          "http",
-          "tls"
-        ]
+        },
+        "network": "tcp",
+        "security": "tls"
       }
     },
 # TROJAN TCP TLS
@@ -223,20 +235,94 @@ cat > /usr/local/etc/xray/config.json << END
           }
         ]
       },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "none",
-        "tcpSettings": {
-          "acceptProxyProtocol": true
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tcpSettings": {
+          "acceptProxyProtocol": true
+        },
+        "network": "tcp",
+        "security": "none"
       }
+    },
+# VLESS TCP + http obfs
+    {
+      "listen": "@vless-tcp",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-obfs",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tcpSettings": {
+          "acceptProxyProtocol": true,
+          "header": {
+            "type": "http",
+            "request": {
+              "path": [
+                "/vless-tcp"
+              ]
+            }
+          }
+        },
+        "network": "tcp",
+        "security": "none"
+    }
+    },
+# VMESS TCP + http obfs
+    {
+      "listen": "@vmess-tcp",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-obfs",
+            "id": "$uuid"
+#vmess
+          }
+        ],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tcpSettings": {
+          "acceptProxyProtocol": true,
+          "header": {
+            "type": "http",
+            "request": {
+              "path": [
+                "/vmess-tcp"
+              ]
+            }
+          }
+        },
+        "network": "tcp",
+        "security": "none"
+    }
     },
 # VLESS WS
     {
@@ -248,25 +334,24 @@ cat > /usr/local/etc/xray/config.json << END
             "email":"general@vless-ws",
             "id": "$uuid"
 #vless
-
           }
         ],
         "decryption": "none"
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": true,
-          "path": "/vless-ws"
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vless-ws"
+        },
+        "network": "ws",
+        "security": "none"
       }
     },
 # VMESS WS
@@ -282,20 +367,20 @@ cat > /usr/local/etc/xray/config.json << END
           }
         ]
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": true,
-          "path": "/vmess-ws"
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vmess-ws"
+        },
+        "network": "ws",
+        "security": "none"
       }
     },
 # TROJAN WS
@@ -310,26 +395,26 @@ cat > /usr/local/etc/xray/config.json << END
           }
         ]
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": true,
-          "path": "/trojan-ws"
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-ws"
+        },
+        "network": "ws",
+        "security": "none"
       }
     },
 # SS WS
     {
       "listen": "127.0.0.1",
-      "port": "1000",
+      "port": 1000,
       "protocol": "shadowsocks",
       "settings": {
         "clients": [
@@ -341,26 +426,26 @@ cat > /usr/local/etc/xray/config.json << END
           ],
         "network": "tcp,udp"
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": true,
-          "path": "/ss-ws"
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-ws"
+        },
+        "network": "ws",
+        "security": "none"
       }
     },
 # SS2022 WS
     {
       "listen": "127.0.0.1",
-      "port": "1100",
+      "port": 1100,
       "protocol": "shadowsocks",
       "settings": {
         "method": "2022-blake3-aes-256-gcm",
@@ -373,20 +458,20 @@ cat > /usr/local/etc/xray/config.json << END
         ],
         "network": "tcp,udp"
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": true,
-          "path": "/ss22-ws"
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-ws"
+        },
+        "network": "ws",
+        "security": "none"
       }
     },
 # VLESS HTTPupgrade
@@ -404,19 +489,19 @@ cat > /usr/local/etc/xray/config.json << END
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "httpupgrade",
-        "security": "none",
         "httpupgradeSettings": {
           "acceptProxyProtocol": true,
           "path": "/vless-hup"
-        }
+        },
+        "network": "httpupgrade",
+        "security": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     },
 # VMESS HTTPupgrade
@@ -434,19 +519,19 @@ cat > /usr/local/etc/xray/config.json << END
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "httpupgrade",
-        "security": "none",
         "httpupgradeSettings": {
           "acceptProxyProtocol": true,
           "path": "/vmess-hup"
-        }
+        },
+        "network": "httpupgrade",
+        "security": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     },
 # TROJAN HTTPupgrade
@@ -462,19 +547,19 @@ cat > /usr/local/etc/xray/config.json << END
         ]
       },
       "streamSettings": {
-        "network": "httpupgrade",
-        "security": "none",
         "httpupgradeSettings": {
           "acceptProxyProtocol": true,
           "path": "/trojan-hup"
-        }
+        },
+        "network": "httpupgrade",
+        "security": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     },
 # SS HTTPupgrade
@@ -493,19 +578,19 @@ cat > /usr/local/etc/xray/config.json << END
         "network": "tcp,udp"
       },
       "streamSettings": {
-        "network": "httpupgrade",
-        "security": "none",
         "httpupgradeSettings": {
           "acceptProxyProtocol": true,
           "path": "/ss-hup"
-        }
+        },
+        "network": "httpupgrade",
+        "security": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     },
 # SS2022 HTTPupgrade
@@ -525,19 +610,19 @@ cat > /usr/local/etc/xray/config.json << END
         "network": "tcp,udp"
       },
       "streamSettings": {
-        "network": "httpupgrade",
-        "security": "none",
         "httpupgradeSettings": {
           "acceptProxyProtocol": true,
           "path": "/ss22-hup"
-        }
+        },
+        "network": "httpupgrade",
+        "security": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     },
 # VLESS gRPC
@@ -565,6 +650,7 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
+          "multiMode": true,
           "serviceName": "vless-grpc",
           "alpn": [
             "h2",
@@ -600,6 +686,7 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
+          "multiMode": true,
           "serviceName": "vmess-grpc",
           "alpn": [
             "h2",
@@ -619,7 +706,7 @@ cat > /usr/local/etc/xray/config.json << END
         "clients": [
           {
             "email": "grpc",
-            "password": "$uuid"
+            "password": "$pwtr"
 #trojan
           }
         ],
@@ -635,6 +722,7 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
+          "multiMode": true,
           "serviceName": "trojan-grpc",
           "alpn": [
             "h2",
@@ -648,7 +736,7 @@ cat > /usr/local/etc/xray/config.json << END
 # SS gRPC
     {
       "listen": "127.0.0.1",
-      "port": "5300",
+      "port": 5300,
       "protocol": "shadowsocks",
       "settings": {
         "clients": [
@@ -669,6 +757,7 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
+          "multiMode": true,
           "serviceName": "ss-grpc",
           "alpn": [
             "h2",
@@ -682,7 +771,7 @@ cat > /usr/local/etc/xray/config.json << END
 # SS2022 gRPC
     {
       "listen": "127.0.0.1",
-      "port": "5400",
+      "port": 5400,
       "protocol": "shadowsocks",
       "settings": {
         "method": "2022-blake3-aes-256-gcm",
@@ -704,6 +793,7 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "streamSettings": {
         "grpcSettings": {
+          "multiMode": true,
           "serviceName": "ss22-grpc",
           "alpn": [
             "h2",
@@ -783,11 +873,11 @@ cat > /usr/local/etc/xray/config.json << END
         "decryption": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     },
 # TROJAN WS
@@ -802,26 +892,26 @@ cat > /usr/local/etc/xray/config.json << END
           }
         ]
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": true,
-          "path": "/trojan-ws"
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-ws"
+        },
+        "network": "ws",
+        "security": "none"
       }
     },
 # SS WS
     {
       "listen": "127.0.0.1",
-      "port": "2000",
+      "port": 2000,
       "protocol": "shadowsocks",
       "settings": {
         "clients": [
@@ -833,26 +923,26 @@ cat > /usr/local/etc/xray/config.json << END
           ],
         "network": "tcp,udp"
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": true,
-          "path": "/ss-ws"
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-ws"
+        },
+        "network": "ws",
+        "security": "none"
       }
     },
 # SS2022 WS
     {
       "listen": "127.0.0.1",
-      "port": "2100",
+      "port": 2100,
       "protocol": "shadowsocks",
       "settings": {
         "method": "2022-blake3-aes-256-gcm",
@@ -865,20 +955,20 @@ cat > /usr/local/etc/xray/config.json << END
         ],
         "network": "tcp,udp"
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": true,
-          "path": "/ss22-ws"
-        }
-      },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-ws"
+        },
+        "network": "ws",
+        "security": "none"
       }
     },
 # TROJAN HTTPupgrade
@@ -894,25 +984,25 @@ cat > /usr/local/etc/xray/config.json << END
         ]
       },
       "streamSettings": {
-        "network": "httpupgrade",
-        "security": "none",
         "httpupgradeSettings": {
           "acceptProxyProtocol": true,
           "path": "/trojan-hup"
-        }
+        },
+        "network": "httpupgrade",
+        "security": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     },
 # SS HTTPupgrade
     {
       "listen": "127.0.0.1",
-      "port": "4000",
+      "port": 4000,
       "protocol": "shadowsocks",
       "settings": {
         "clients": [
@@ -925,19 +1015,19 @@ cat > /usr/local/etc/xray/config.json << END
         "network": "tcp,udp"
       },
       "streamSettings": {
-        "network": "httpupgrade",
-        "security": "none",
         "httpupgradeSettings": {
           "acceptProxyProtocol": true,
           "path": "/ss-hup"
-        }
+        },
+        "network": "httpupgrade",
+        "security": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     },
 # SS2022 HTTPupgrade
@@ -957,19 +1047,19 @@ cat > /usr/local/etc/xray/config.json << END
         "network": "tcp,udp"
       },
       "streamSettings": {
-        "network": "httpupgrade",
-        "security": "none",
         "httpupgradeSettings": {
           "acceptProxyProtocol": true,
           "path": "/ss22-hup"
-        }
+        },
+        "network": "httpupgrade",
+        "security": "none"
       },
       "sniffing": {
-        "enabled": true,
         "destOverride": [
           "http",
           "tls"
-        ]
+        ],
+        "enabled": true
       }
     }
   ],
