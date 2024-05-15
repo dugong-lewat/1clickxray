@@ -40,7 +40,7 @@ REG=$(cat /usr/local/etc/xray/region)
 vmlink1=`cat<<EOF
 {
 "v": "2",
-"ps": "${user}",
+"ps": "vmess-ws-tls",
 "add": "${domain}",
 "port": "443",
 "id": "${uuid}",
@@ -55,7 +55,7 @@ EOF`
 vmlink2=`cat<<EOF
 {
 "v": "2",
-"ps": "${user}",
+"ps": "vmess-ws-ntls",
 "add": "${domain}",
 "port": "80",
 "id": "${uuid}",
@@ -70,7 +70,7 @@ EOF`
 vmlink3=`cat<<EOF
 {
 "v": "2",
-"ps": "${user}",
+"ps": "vmess-hup-tls",
 "add": "${domain}",
 "port": "443",
 "id": "${uuid}",
@@ -85,7 +85,7 @@ EOF`
 vmlink4=`cat<<EOF
 {
 "v": "2",
-"ps": "${user}",
+"ps": "vmess-hup-ntls",
 "add": "${domain}",
 "port": "80",
 "id": "${uuid}",
@@ -100,7 +100,7 @@ EOF`
 vmlink5=`cat<<EOF
 {
 "v": "2",
-"ps": "${user}",
+"ps": "vmess-grpc",
 "add": "${domain}",
 "port": "443",
 "id": "${uuid}",
@@ -118,50 +118,48 @@ vmesslink3="vmess://$(echo $vmlink3 | base64 -w 0)"
 vmesslink4="vmess://$(echo $vmlink4 | base64 -w 0)"
 vmesslink5="vmess://$(echo $vmlink5 | base64 -w 0)"
 
-vlesslink1="vless://$uuid@$domain:443?path=/vless-ws&security=tls&encryption=none&host=$domain&type=ws&sni=$domain#$user"
-vlesslink2="vless://$uuid@$domain:80?path=/vless-ws&security=none&encryption=none&host=$domain&type=ws#$user"
-vlesslink3="vless://$uuid@$domain:443?path=/vless-hup&security=tls&encryption=none&host=$domain&type=httpupgrade&sni=$domain#$user"
-vlesslink4="vless://$uuid@$domain:80?path=/vless-hup&security=none&encryption=none&host=$domain&type=httpupgrade#$user"
-vlesslink5="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=gun&type=grpc&serviceName=vless-grpc&sni=$domain&flow=none#$user"
-vlesslink6="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=none&type=tcp&sni=$domain&flow=xtls-rprx-vision#$user"
+vlesslink1="vless://$uuid@$domain:443?path=/vless-ws&security=tls&encryption=none&host=$domain&type=ws&sni=$domain#vless-ws-tls"
+vlesslink2="vless://$uuid@$domain:80?path=/vless-ws&security=none&encryption=none&host=$domain&type=ws#vless-ws-ntls"
+vlesslink3="vless://$uuid@$domain:443?path=/vless-hup&security=tls&encryption=none&host=$domain&type=httpupgrade&sni=$domain#vless-hup-tls"
+vlesslink4="vless://$uuid@$domain:80?path=/vless-hup&security=none&encryption=none&host=$domain&type=httpupgrade#vless-hup-ntls"
+vlesslink5="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=gun&type=grpc&serviceName=vless-grpc&sni=$domain&flow=none#vless-grpc"
+vlesslink6="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=none&type=tcp&sni=$domain&flow=xtls-rprx-vision#vless-vision"
 
-trojanlink1="trojan://$pwtr@$domain:443?path=/trojan-ws&security=tls&host=$domain&type=ws&sni=$domain#$user"
-trojanlink2="trojan://$pwtr@$domain:80?path=/trojan-ws&security=none&host=$domain&type=ws#$user"
-trojanlink3="trojan://$pwtr@$domain:443?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade&sni=$domain#$user"
-trojanlink4="trojan://$pwtr@$domain:80?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade#$user"
-trojanlink5="trojan://$pwtr@$domain:443?security=tls&type=grpc&mode=multi&serviceName=trojan-grpc&sni=$domain#$user"
-trojanlink6="trojan://$pwtr@$domain:443?security=tls&type=tcp&sni=$domain#$user"
+trojanlink1="trojan://$pwtr@$domain:443?path=/trojan-ws&security=tls&host=$domain&type=ws&sni=$domain#trojan-ws-tls"
+trojanlink2="trojan://$pwtr@$domain:80?path=/trojan-ws&security=none&host=$domain&type=ws#trojan-ws-ntls"
+trojanlink3="trojan://$pwtr@$domain:443?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade&sni=$domain#trojan-hup-tls"
+trojanlink4="trojan://$pwtr@$domain:80?path=/trojan-hup&security=tls&host=$domain&type=httpupgrade#trojan-hup-ntls"
+trojanlink5="trojan://$pwtr@$domain:443?security=tls&type=grpc&mode=multi&serviceName=trojan-grpc&sni=$domain#trojan-grpc"
+trojanlink6="trojan://$pwtr@$domain:443?security=tls&type=tcp&sni=$domain#trojan-tcp-tls"
 
 echo -n "$cipher:$pwss" | base64 -w 0 > /tmp/log
 ss_base64=$(cat /tmp/log)
-sslink1="ss://${ss_base64}@$domain:443?path=/ss-ws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
-sslink2="ss://${ss_base64}@$domain:80?path=/ss-ws&security=none&host=${domain}&type=ws#${user}"
-sslink3="ss://${ss_base64}@$domain:443?path=/ss-hup&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
-sslink4="ss://${ss_base64}@$domain:80?path=/ss-hup&security=none&host=${domain}&type=httpupgrade#${user}"
-sslink5="ss://${ss_base64}@$domain:443?security=tls&encryption=none&type=grpc&serviceName=ss-grpc&sni=$domain#${user}"
+sslink1="ss://${ss_base64}@$domain:443?path=/ss-ws&security=tls&host=${domain}&type=ws&sni=${domain}#ss-ws-tls"
+sslink2="ss://${ss_base64}@$domain:80?path=/ss-ws&security=none&host=${domain}&type=ws#ss-ws-ntls"
+sslink3="ss://${ss_base64}@$domain:443?path=/ss-hup&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#ss-hup-tls"
+sslink4="ss://${ss_base64}@$domain:80?path=/ss-hup&security=none&host=${domain}&type=httpupgrade#ss-hup-ntls"
+sslink5="ss://${ss_base64}@$domain:443?security=tls&encryption=none&type=grpc&serviceName=ss-grpc&sni=$domain#ss-grpc"
 rm -rf /tmp/log
 
 echo -n "$cipher2:$serverpsk:$userpsk" | base64 -w 0 > /tmp/log
 ss2022_base64=$(cat /tmp/log)
-ss22link1="ss://${ss2022_base64}@$domain:443?path=/ss22-ws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
-ss22link2="ss://${ss2022_base64}@$domain:80?path=/ss22-ws&security=none&host=${domain}&type=ws#${user}"
-ss22link3="ss://${ss2022_base64}@$domain:443?path=/ss22-hup&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
-ss22link4="ss://${ss2022_base64}@$domain:80?path=/ss22-hup&security=none&host=${domain}&type=httpupgrade#${user}"
-ss22link5="ss://${ss2022_base64}@$domain:443?security=tls&encryption=none&type=grpc&serviceName=ss22-grpc&sni=$domain#${user}"
+ss22link1="ss://${ss2022_base64}@$domain:443?path=/ss22-ws&security=tls&host=${domain}&type=ws&sni=${domain}#ss2022-ws-tls"
+ss22link2="ss://${ss2022_base64}@$domain:80?path=/ss22-ws&security=none&host=${domain}&type=ws#ss2022-ws-ntls"
+ss22link3="ss://${ss2022_base64}@$domain:443?path=/ss22-hup&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#ss2022-hup-tls"
+ss22link4="ss://${ss2022_base64}@$domain:80?path=/ss22-hup&security=none&host=${domain}&type=httpupgrade#ss2022-hup-ntls"
+ss22link5="ss://${ss2022_base64}@$domain:443?security=tls&encryption=none&type=grpc&serviceName=ss22-grpc&sni=$domain#ss2022-grpc"
 rm -rf /tmp/log
 
 cat > /var/www/html/xray/xray-$user.log << END
 ========================================
         ----- [ All Xray ] -----
 ========================================
-Domain         : $domain
 ISP            : $ISP
 Region         : $REG
 City           : $CITY
 Port TLS/HTTPS : 443
 Port HTTP      : 80
 Transport      : XTLS-Vision, TCP TLS, HTTPupgrade, Websocket, gRPC
-Alpn           : h2, http/1.1
 Expired On     : $exp
 
 Note !!!
@@ -251,14 +249,12 @@ clear
 echo -e "————————————————————————————————————————————————————" | tee -a /user/xray-$user.log
 echo -e "              ----- [ All Xray ] -----              " | tee -a /user/xray-$user.log
 echo -e "————————————————————————————————————————————————————" | tee -a /user/xray-$user.log
-echo -e "Domain         : $domain" | tee -a /user/xray-$user.log
 echo -e "ISP            : $ISP" | tee -a /user/xray-$user.log
 echo -e "Region         : $REG" | tee -a /user/xray-$user.log
 echo -e "City           : $CITY" | tee -a /user/xray-$user.log
 echo -e "Port TLS/HTTPS : 443" | tee -a /user/xray-$user.log
 echo -e "Port HTTP      : 80" | tee -a /user/xray-$user.log
 echo -e "Transport      : XTLS-Vision, TCP TLS, Websocket, HTTPupgrade, gRPC" | tee -a /user/xray-$user.log
-echo -e "Alpn           : h2, http/1.1" | tee -a /user/xray-$user.log
 echo -e "Expired On     : $exp" | tee -a /user/xray-$user.log
 echo -e "Link / Web     : https://$domain/xray/xray-$user.log" | tee -a /user/xray-$user.log
 echo -e "————————————————————————————————————————————————————" | tee -a /user/xray-$user.log
