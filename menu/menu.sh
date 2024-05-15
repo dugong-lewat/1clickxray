@@ -28,6 +28,7 @@ tmon="$(vnstat -m | grep `date +%G-%m` | awk '{print $8" "substr ($9, 1 ,3)}')"
 domain=$(cat /usr/local/etc/xray/domain)
 ISP=$(cat /usr/local/etc/xray/org)
 CITY=$(cat /usr/local/etc/xray/city)
+REG=$(cat /usr/local/etc/xray/region)
 WKT=$(cat /usr/local/etc/xray/timezone)
 DATE=$(date -R | cut -d " " -f -4)
 MYIP=$(curl -sS ipv4.icanhazip.com)
@@ -35,11 +36,11 @@ clear
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 echo -e "               ${WB}----- [ Xray Script ] -----${NC}              "
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-echo -e " ${YB}ISP${NC}       ${WB}: $ISP"
-echo -e " ${YB}Timezone${NC}  ${WB}: $WKT${NC}"
-echo -e " ${YB}City${NC}      ${WB}: $CITY${NC}"
-echo -e " ${YB}Date${NC}      ${WB}: $DATE${NC}"
-echo -e " ${YB}Domain${NC}    ${WB}: $domain${NC}"
+echo -e " ${YB}ISP${NC}    ${WB}: $ISP"
+echo -e " ${YB}Region${NC} ${WB}: $REG${NC}"
+echo -e " ${YB}City${NC}   ${WB}: $CITY${NC}"
+echo -e " ${YB}Date${NC}   ${WB}: $DATE${NC}"
+echo -e " ${YB}Domain${NC} ${WB}: $domain${NC}"
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 echo -e "     ${WB}NGINX STATUS :${NC} $status_nginx    ${WB}XRAY STATUS :${NC} $status_xray   "
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
