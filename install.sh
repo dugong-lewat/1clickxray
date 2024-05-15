@@ -1128,6 +1128,16 @@ http {
    include /etc/nginx/conf.d/*.conf;
    include /etc/nginx/sites-enabled/*;
 
+server {
+    listen 80;
+    server_name backend_vps;
+
+    location / {
+        root /path/to/your/application;
+        index index.html index.htm;
+    }
+}
+
    upstream vless_grpc {
        server 127.0.0.1:5000;
    }
@@ -1144,19 +1154,36 @@ http {
        server 127.0.0.1:5400;
    }
    server {
-       listen 8443 http2 proxy_protocol;
+       listen 8080 proxy_protocol default_server;
+       listen 8443 http2 proxy_protocol default_server;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
        server_name _;
        return 400;
    }
    server {
-       listen 8080 proxy_protocol default_server;
-       listen 8443 http2 proxy_protocol default_server;
+       listen 8080 proxy_protocol;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
-       root /var/www/html;
        server_name $domain;
+
+       location / {
+          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+          root /var/www/html;
+          index index.html index.htm;
+       }
+   }
+   server {
+       listen 8443 http2 proxy_protocol;
+       set_real_ip_from 127.0.0.1;
+       real_ip_header proxy_protocol;
+       server_name $domain;
+
+       location / {
+          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+          root /var/www/html;
+          index index.html index.htm;
+       }
 
        location /vless-grpc {
           grpc_pass grpc://vless_grpc;
