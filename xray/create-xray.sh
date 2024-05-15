@@ -36,6 +36,7 @@ sed -i '/#ss22$/a\#&@ '"$user $exp"'\
 },{"password": "'""$userpsk""'","email": "'""$user""'"' /usr/local/etc/xray/config.json
 ISP=$(cat /usr/local/etc/xray/org)
 CITY=$(cat /usr/local/etc/xray/city)
+REG=$(cat /usr/local/etc/xray/region)
 vmlink1=`cat<<EOF
 {
 "v": "2",
@@ -155,6 +156,7 @@ cat > /var/www/html/xray/xray-$user.log << END
 ========================================
 Domain         : $domain
 ISP            : $ISP
+Region         : $REG
 City           : $CITY
 Port TLS/HTTPS : 443
 Port HTTP      : 80
@@ -251,6 +253,7 @@ echo -e "              ----- [ All Xray ] -----              " | tee -a /user/xr
 echo -e "————————————————————————————————————————————————————" | tee -a /user/xray-$user.log
 echo -e "Domain         : $domain" | tee -a /user/xray-$user.log
 echo -e "ISP            : $ISP" | tee -a /user/xray-$user.log
+echo -e "Region         : $REG" | tee -a /user/xray-$user.log
 echo -e "City           : $CITY" | tee -a /user/xray-$user.log
 echo -e "Port TLS/HTTPS : 443" | tee -a /user/xray-$user.log
 echo -e "Port HTTP      : 80" | tee -a /user/xray-$user.log
