@@ -48,7 +48,7 @@
     color: #ff2424;
   }
   #country-flag {
-    margin-left: 12px;
+    margin-right: 12px;
     width: 40px; /* Ukuran lebar bendera */
     height: 31px; /* Ukuran tinggi bendera */
   }
@@ -60,7 +60,7 @@
   <div class="info"><span class="info-title">ISP:</span> <span class="loading-text">Memuat...</span></div>
   <div class="info"><span class="info-title">City:</span> <span class="loading-text">Memuat...</span></div>
   <div class="info"><span class="info-title">Region:</span> <span class="loading-text">Memuat...</span></div>
-  <div class="info"><span class="info-title">Country:</span> <span class="loading-text">Memuat...</span> <img id="country-flag" src="" alt="Flag" style="display:none;"/></div>
+  <div class="info" id="country-container"><span class="info-title">Country:</span> <div style="display: flex; align-items: center;"><img id="country-flag" src="" alt="Flag" style="display:none;"/><span class="loading-text">Memuat...</span></div></div>
 </div>
 
 <script>
