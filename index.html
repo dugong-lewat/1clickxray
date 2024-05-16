@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Informasi IP</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #454545; /* Warna latar belakang untuk mode terang */
+    color: #333; /* Warna teks untuk mode terang */
+    margin: 0;
+    padding: 5vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+  }
+  .info-container {
+    background-color: #333333; /* Warna latar belakang container untuk mode terang */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+  }
+  .info {
+    font-size: 16px;
+    color: #ffffff; /* Warna teks untuk mode terang */
+    border-bottom: 1px solid #11fdff;
+    padding: 10px 0;
+  }
+  .info:last-child {
+    border-bottom: none;
+  }
+  .info-title {
+    font-weight: bold;
+  }
+  .loading-text {
+    color: #2fff3b; /* Warna teks memuat untuk mode terang */
+  }
+  .error-text {
+    color: #ff2424; /* Warna teks error untuk mode terang */
+  }
+</style>
+</head>
+<body>
+<div class="info-container">
+  <div class="info"><span class="info-title">IPv4 Address:</span> <span class="loading-text">Memuat...</span></div>
+  <div class="info"><span class="info-title">ISP:</span> <span class="loading-text">Memuat...</span></div>
+  <div class="info"><span class="info-title">City:</span> <span class="loading-text">Memuat...</span></div>
+  <div class="info"><span class="info-title">Region:</span> <span class="loading-text">Memuat...</span></div>
+  <div class="info"><span class="info-title">Country:</span> <span class="loading-text">Memuat...</span> <img id="country-flag" src="" alt="Flag" style="display:none;"/></div>
+</div>
+
+<script>
+  // Token IP yang diberikan
+  const ipToken = 'b9434e9993eb72';
+
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      document.querySelector('.info-container .info:nth-child(1) .loading-text').textContent = data.ip;
+      // Gunakan IP address untuk mendapatkan informasi tambahan dari API lain
+      fetch(`https://ipinfo.io/${data.ip}/json?token=${ipToken}`)
+        .then(response => response.json())
+        .then(ipData => {
+          const ispText = ipData.org.replace(/AS[0-9]+ /, '');
+          document.querySelector('.info-container .info:nth-child(2) .loading-text').textContent = ispText;
+          document.querySelector('.info-container .info:nth-child(3) .loading-text').textContent = ipData.city;
+          document.querySelector('.info-container .info:nth-child(4) .loading-text').textContent = ipData.region;
+          document.querySelector('.info-container .info:nth-child(5) .loading-text').textContent = ipData.country;
+          // Menampilkan bendera negara
+          const countryCode = ipData.country.toLowerCase();
+          const flagImage = document.getElementById('country-flag');
+          flagImage.src = `https://flagcdn.com/16x12/${countryCode}.png`;
+          flagImage.style.display = 'inline';
+          flagImage.alt = `Flag of ${ipData.country}`;
+        })
+        .catch(() => {
+          document.querySelectorAll('.info-container .info .loading-text').forEach((info) => {
+            info.textContent = 'Informasi tidak tersedia';
+            info.classList.add('error-text');
+          });
+        });
+    })
+    .catch(() => {
+      document.querySelectorAll('.info-container .info .loading-text').forEach((info) => {
+        info.textContent = 'Informasi tidak tersedia';
+        info.classList.add('error-text');
+      });
+    });
+</script>
+</body>
+</html>
