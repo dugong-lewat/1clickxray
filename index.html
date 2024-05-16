@@ -31,7 +31,7 @@
     border-bottom: 2px solid #11fdff;
     padding: 30px 0;
     display: flex;
-    justify-content: flex-start; /* Pindahkan ke kiri */
+    justify-content: space-between; /* Pindahkan ke kiri */
     align-items: center;
   }
   .info:last-child {
@@ -52,6 +52,14 @@
     width: 40px; /* Ukuran lebar bendera */
     height: 31px; /* Ukuran tinggi bendera */
   }
+  .copyright {
+    font-size: 30px; /* Ukuran teks hak cipta */
+    margin-top: 70px; /* Jarak atas */
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    color: #ffffff;
+  }
 </style>
 </head>
 <body>
@@ -61,6 +69,7 @@
   <div class="info"><span class="info-title">City:</span> <span class="loading-text">Memuat...</span></div>
   <div class="info"><span class="info-title">Region:</span> <span class="loading-text">Memuat...</span></div>
   <div class="info" id="country-container"><span class="info-title">Country:</span> <div style="display: flex; align-items: center;"><img id="country-flag" src="" alt="Flag" style="display:none;"/><span class="loading-text">Memuat...</span></div></div>
+  <div class="copyright">My Location &copy; 2024 Dugong Lewat</div>
 </div>
 
 <script>
