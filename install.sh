@@ -1144,22 +1144,11 @@ http {
        server 127.0.0.1:5400;
    }
    server {
-       listen 8080 proxy_protocol;
-       set_real_ip_from 127.0.0.1;
-       real_ip_header proxy_protocol;
-
-       location / {
-          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-          root /var/www/html;
-          index index.html index.htm;
-       }
-   }
-   server {
        listen 8443 http2 proxy_protocol;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
-       server_name _;
-       return 400;
+       root /var/www/html;
+       index index.html index.htm;
    }
    server {
        listen 8080 proxy_protocol default_server;
@@ -1171,7 +1160,6 @@ http {
        location / {
           add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
           root /var/www/html;
-          index index.html index.htm;
        }
 
        location /vless-grpc {
@@ -1192,6 +1180,7 @@ http {
    }
 }
 END
+wget -q -O /var/www/html https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/index.html
 # wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
 systemctl restart nginx
 systemctl restart xray
