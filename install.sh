@@ -1180,7 +1180,7 @@ http {
    }
 }
 END
-wget -q -O /var/www/html https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/index.html
+wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/index.html
 # wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
 systemctl restart nginx
 systemctl restart xray
