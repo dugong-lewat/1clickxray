@@ -15,43 +15,78 @@
     min-height: 85vh;
     padding: 35px;
     box-sizing: border-box;
+    overflow: hidden;
   }
+
+  .stars, .twinkling, .clouds {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .stars {
+    background: #000 url('https://www.script-tutorials.com/demos/360/images/stars.png') repeat top center;
+    z-index: 0;
+  }
+
+  .twinkling {
+    background: transparent url('https://www.script-tutorials.com/demos/360/images/twinkling.png') repeat top center;
+    z-index: 1;
+    animation: move-twink-back 200s linear infinite;
+  }
+
+  @keyframes move-twink-back {
+    from { background-position: 0 0; }
+    to { background-position: -10000px 5000px; }
+  }
+
   .info-container {
-    background-color: #333333;
+    background-color: rgba(51, 51, 51, 0.5); /* Warna latar belakang dengan opacity 0.9 */
     border-radius: 18px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 40px;
     width: 100%;
     max-width: 960px;
     box-sizing: border-box;
+    z-index: 2;
   }
+  
   .info {
     font-size: 50px;
-    color: #ffffff;
-    border-bottom: 2px solid #11fdff;
+    color: rgba(255, 255, 255, 1); /* Warna teks tanpa transparansi */
+    border-bottom: 2px solid rgba(17, 253, 255, 1); /* Contoh warna border tanpa transparansi */
     padding: 30px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
+  
   .info:last-child {
     border-bottom: none;
   }
+  
   .info-title {
     font-weight: bold;
     margin-right: 10px;
   }
+  
   .loading-text {
     color: #2fff3b;
   }
+  
   .error-text {
     color: #ff2424;
   }
+  
   #country-flag {
     margin-right: 12px;
     width: 40px;
     height: 31px;
   }
+  
   .spinner {
     border: 4px solid #f3f3f3; /* Light grey */
     border-top: 4px solid #3498db; /* Blue */
@@ -62,10 +97,12 @@
     display: inline-block;
     vertical-align: middle;
   }
+  
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+  
   .copyright {
     font-size: 30px;
     margin-top: 70px;
@@ -74,6 +111,7 @@
     justify-content: center;
     color: #ffffff;
   }
+  
   .copyright2 {
     font-size: 30px;
     margin-top: 1px;
@@ -85,6 +123,9 @@
 </style>
 </head>
 <body>
+<div class="stars"></div>
+<div class="twinkling"></div>
+
 <div class="info-container">
   <div class="info"><span class="info-title">IPv4 Address:</span> <span class="loading-text"><div class="spinner"></div></span></div>
   <div class="info"><span class="info-title">ISP:</span> <span class="loading-text"><div class="spinner"></div></span></div>
