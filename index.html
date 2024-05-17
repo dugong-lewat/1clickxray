@@ -26,12 +26,12 @@
     box-sizing: border-box;
   }
   .info {
-    font-size: 50px; /* Ukuran teks yang lebih besar */
+    font-size: 50px;
     color: #ffffff;
     border-bottom: 2px solid #11fdff;
     padding: 30px 0;
     display: flex;
-    justify-content: space-between; /* Pindahkan ke kiri */
+    justify-content: space-between;
     align-items: center;
   }
   .info:last-child {
@@ -39,7 +39,7 @@
   }
   .info-title {
     font-weight: bold;
-    margin-right: 10px; /* Tambahkan jarak antara judul dan teks */
+    margin-right: 10px;
   }
   .loading-text {
     color: #2fff3b;
@@ -49,12 +49,34 @@
   }
   #country-flag {
     margin-right: 12px;
-    width: 40px; /* Ukuran lebar bendera */
-    height: 31px; /* Ukuran tinggi bendera */
+    width: 40px;
+    height: 31px;
+  }
+  .spinner {
+    border: 4px solid #f3f3f3; /* Light grey */
+    border-top: 4px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
   .copyright {
-    font-size: 30px; /* Ukuran teks hak cipta */
-    margin-top: 70px; /* Jarak atas */
+    font-size: 30px;
+    margin-top: 70px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    color: #ffffff;
+  }
+  .copyright2 {
+    font-size: 30px;
+    margin-top: 1px;
     align-items: center;
     display: flex;
     justify-content: center;
@@ -64,47 +86,60 @@
 </head>
 <body>
 <div class="info-container">
-  <div class="info"><span class="info-title">IPv4 Address:</span> <span class="loading-text">Memuat...</span></div>
-  <div class="info"><span class="info-title">ISP:</span> <span class="loading-text">Memuat...</span></div>
-  <div class="info"><span class="info-title">City:</span> <span class="loading-text">Memuat...</span></div>
-  <div class="info"><span class="info-title">Region:</span> <span class="loading-text">Memuat...</span></div>
-  <div class="info" id="country-container"><span class="info-title">Country:</span> <div style="display: flex; align-items: center;"><img id="country-flag" src="" alt="Flag" style="display:none;"/><span class="loading-text">Memuat...</span></div></div>
-  <div class="copyright">My Location &copy; 2024 Dugong Lewat</div>
+  <div class="info"><span class="info-title">IPv4 Address:</span> <span class="loading-text"><div class="spinner"></div></span></div>
+  <div class="info"><span class="info-title">ISP:</span> <span class="loading-text"><div class="spinner"></div></span></div>
+  <div class="info"><span class="info-title">City:</span> <span class="loading-text"><div class="spinner"></div></span></div>
+  <div class="info"><span class="info-title">Region:</span> <span class="loading-text"><div class="spinner"></div></span></div>
+  <div class="info" id="country-container"><span class="info-title">Country:</span> <div style="display: flex; align-items: center;"><img id="country-flag" src="" alt="Flag" style="display:none;"/><span class="loading-text"><div class="spinner"></div></span></div></div>
+  <div class="copyright">Dibuat Penuh Oleh ChatGPT & Copilot</div>
+  <div class="copyright2">2024 © Dugong Lewat</div>
 </div>
-
+ 
 <script>
   const ipToken = 'b9434e9993eb72';
+
+  function updateInfo(selector, text) {
+    document.querySelector(selector).textContent = text;
+  }
+
+  function displayError(selector) {
+    const element = document.querySelector(selector);
+    element.textContent = 'Informasi tidak tersedia';
+    element.classList.add('error-text');
+    if (element.parentNode.querySelector('.spinner')) {
+      element.parentNode.querySelector('.spinner').style.display = 'none';
+    }
+  }
 
   fetch('https://api.ipify.org?format=json')
     .then(response => response.json())
     .then(data => {
-      document.querySelector('.info-container .info:nth-child(1) .loading-text').textContent = data.ip;
-      fetch(`https://ipinfo.io/${data.ip}/json?token=${ipToken}`)
-        .then(response => response.json())
-        .then(ipData => {
-          const ispText = ipData.org.replace(/AS[0-9]+ /, '');
-          document.querySelector('.info-container .info:nth-child(2) .loading-text').textContent = ispText;
-          document.querySelector('.info-container .info:nth-child(3) .loading-text').textContent = ipData.city;
-          document.querySelector('.info-container .info:nth-child(4) .loading-text').textContent = ipData.region;
-          document.querySelector('.info-container .info:nth-child(5) .loading-text').textContent = ipData.country;
-          const countryCode = ipData.country.toLowerCase();
-          const flagImage = document.getElementById('country-flag');
-          flagImage.src = `https://flagcdn.com/256x192/${countryCode}.png`;
-          flagImage.style.display = 'inline';
-          flagImage.alt = `Flag of ${ipData.country}`;
-        })
-        .catch(() => {
-          document.querySelectorAll('.info-container .info .loading-text').forEach((info) => {
-            info.textContent = 'Informasi tidak tersedia';
-            info.classList.add('error-text');
-          });
-        });
+      updateInfo('.info-container .info:nth-child(1) .loading-text', data.ip);
+      return fetch(`https://ipinfo.io/${data.ip}/json?token=${ipToken}`);
     })
-    .catch(() => {
-      document.querySelectorAll('.info-container .info .loading-text').forEach((info) => {
-        info.textContent = 'Informasi tidak tersedia';
-        info.classList.add('error-text');
+    .then(response => response.json())
+    .then(ipData => {
+      const ispText = ipData.org.replace(/AS[0-9]+ /, '');
+      updateInfo('.info-container .info:nth-child(2) .loading-text', ispText);
+      updateInfo('.info-container .info:nth-child(3) .loading-text', ipData.city);
+      updateInfo('.info-container .info:nth-child(4) .loading-text', ipData.region);
+      updateInfo('.info-container .info:nth-child(5) .loading-text', ipData.country);
+      const countryCode = ipData.country.toLowerCase();
+      const flagImage = document.getElementById('country-flag');
+      flagImage.src = `https://flagcdn.com/256x192/${countryCode}.png`;
+      flagImage.style.display = 'inline';
+      flagImage.alt = `Flag of ${ipData.country}`;
+      document.querySelectorAll('.spinner').forEach((spinner) => {
+        spinner.style.display = 'none';
       });
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      displayError('.info-container .info:nth-child(1) .loading-text');
+      displayError('.info-container .info:nth-child(2) .loading-text');
+      displayError('.info-container .info:nth-child(3) .loading-text');
+      displayError('.info-container .info:nth-child(4) .loading-text');
+      displayError('.info-container .info:nth-child(5) .loading-text');
     });
 </script>
 </body>

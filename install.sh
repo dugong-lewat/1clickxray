@@ -41,6 +41,7 @@ deb-src http://nginx.org/packages/ubuntu/ $code nginx
 END
 wget http://nginx.org/keys/nginx_signing.key
 sudo apt-key add nginx_signing.key
+rm -rf add nginx_signing.*
 apt update
 apt install nginx -y
 rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
@@ -1156,11 +1157,7 @@ http {
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
        server_name $domain;
-
-       location / {
-          add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-          root /var/www/html;
-       }
+       root /var/www/html;
 
        location /vless-grpc {
           grpc_pass grpc://vless_grpc;
