@@ -17,7 +17,6 @@ apt update -y
 apt install socat netfilter-persistent bsdmainutils -y
 apt install vnstat lsof fail2ban -y
 apt install curl sudo cron -y
-apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
 mkdir /user >> /dev/null 2>&1
 mkdir /tmp >> /dev/null 2>&1
 rm /usr/local/etc/xray/city >> /dev/null 2>&1
