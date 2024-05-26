@@ -22,8 +22,8 @@ Ubuntu 20 or Newest
 
 **Link Instalasi**
 ```
-bash -c "$(wget -qO- https://t.ly/Wmixh)"
+bash -c "$(wget -qO- https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install.sh)"
 ```
 ```
-bash -c "$(curl -fsSL https://t.ly/Wmixh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install.sh)"
 ```
