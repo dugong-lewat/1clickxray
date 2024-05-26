@@ -24,3 +24,6 @@ Ubuntu 20 or Newest
 ```
 bash -c "$(wget -qO- https://t.ly/Wmixh)"
 ```
+```
+bash -c "$(curl -fsSL https://t.ly/Wmixh)"
+```
