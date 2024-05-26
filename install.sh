@@ -43,7 +43,7 @@ sudo apt-key add nginx_signing.key
 rm -rf add nginx_signing.*
 apt update
 apt install nginx -y
-rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
+rm -rf /etc/nginx/conf.d/* >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
 mkdir -p /var/www/html/xray >> /dev/null 2>&1
 systemctl restart nginx
