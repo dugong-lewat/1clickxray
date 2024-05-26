@@ -14,7 +14,7 @@ echo -e "${WB}Installation time : $(( ${1} / 3600 )) hours $(( (${1} / 60) % 60 
 }
 start=$(date +%s)
 apt update -y
-apt install socat netfilter-persistent bsdmainutils -y
+apt install socat netfilter-persistent -y
 apt install vnstat lsof fail2ban -y
 apt install curl sudo cron -y
 mkdir /user >> /dev/null 2>&1
@@ -34,14 +34,14 @@ clear
 # ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 timedatectl set-timezone Asia/Jakarta
 code=$(grep DISTRIB_CODENAME /etc/lsb-release | cut -d '=' -f 2)
-cat > /etc/apt/sources.list.d/nginx.list << END
-deb http://nginx.org/packages/ubuntu/ $code nginx
-deb-src http://nginx.org/packages/ubuntu/ $code nginx
-END
-wget http://nginx.org/keys/nginx_signing.key
-sudo apt-key add nginx_signing.key
-rm -rf add nginx_signing.*
-apt update
+#cat > /etc/apt/sources.list.d/nginx.list << END
+#deb http://nginx.org/packages/ubuntu/ $code nginx
+#deb-src http://nginx.org/packages/ubuntu/ $code nginx
+#END
+#wget http://nginx.org/keys/nginx_signing.key
+#sudo apt-key add nginx_signing.key
+#rm -rf add nginx_signing.*
+#apt update
 apt install nginx -y
 rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
