@@ -218,7 +218,7 @@ sleep 3
 clear
 
 # Menampilkan pesan interaktif
-print_msg $GB "Selamat datang! Skrip ini akan menginstal Speedtest CLI dan mengatur zona waktu Anda."
+print_msg $YB "Selamat datang! Skrip ini akan menginstal Speedtest CLI dan mengatur zona waktu Anda."
 sleep 3
 
 # Mengunduh dan menginstal Speedtest CLI
