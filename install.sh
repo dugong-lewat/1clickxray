@@ -55,6 +55,8 @@ rm -rf /var/www/html/* >> /dev/null 2>&1
 mkdir -p /var/www/html/xray >> /dev/null 2>&1
 systemctl restart nginx
 clear
+systemctl stop nginx
+systemctl stop xray
 
 
 # Warna untuk output (sesuaikan dengan kebutuhan)
@@ -75,35 +77,37 @@ validate_domain() {
 # Fungsi untuk meminta input domain
 input_domain() {
     while true; do
-        echo -e "${YB}Masukan Domain${NC}"
+        echo -e "${YB}Input Domain${NC}"
         echo " "
-        read -rp "Masukan domain kamu: " -e dns
+        read -rp "Input domain kamu: " -e dns
 
         if [ -z "$dns" ]; then
-            echo -e "${YB}Tidak ada masukan untuk domain!${NC}"
+            echo -e "${YB}Nothing input for domain!${NC}"
         elif ! validate_domain "$dns"; then
-            echo -e "${YB}Format domain tidak valid! Masukkan domain yang valid.${NC}"
+            echo -e "${YB}Invalid domain format! Please input a valid domain.${NC}"
         else
             echo "$dns" > /usr/local/etc/xray/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
-            echo -e "${YB}Domain berhasil disimpan!${NC}"
+            echo -e "${YB}Domain saved successfully!${NC}"
             break
         fi
     done
 }
 
+# Fungsi untuk menginstal acme.sh dan mendapatkan sertifikat
+install_acme_sh() {
+    curl https://get.acme.sh | sh
+    source ~/.bashrc
+    ~/.acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server zerossl
+    ~/.acme.sh/acme.sh --issue -d "$dns" --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --reloadcmd "systemctl reload nginx"
+    echo -e "${YB}Sertifikat SSL berhasil dipasang!${NC}"
+}
+
 # Panggil fungsi input_domain untuk memulai proses
 input_domain
-sleep 2.5
 
-clear
-systemctl stop nginx
-systemctl stop xray
-domain=$(cat /usr/local/etc/xray/domain)
-curl https://get.acme.sh | sh
-source ~/.bashrc
-bash .acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server zerossl
-bash .acme.sh/acme.sh --issue -d $domain --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --force
+# Panggil fungsi install_acme_sh untuk menginstal acme.sh dan mendapatkan sertifikat
+install_acme_sh
 chmod 745 /usr/local/etc/xray/private.key
 clear
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
