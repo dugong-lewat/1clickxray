@@ -1451,9 +1451,10 @@ wget -q -O certxray "https://${GITHUB}/other/certxray.sh"
 wget -q -O about "https://${GITHUB}/other/about.sh"
 wget -q -O clear-log "https://${GITHUB}/other/clear-log.sh"
 wget -q -O log-xray "https://${GITHUB}/other/log-xray.sh"
+wget -q -O update-xray "https://${GITHUB}/other/update-xray.sh"
 
 echo -e "${GB}[ INFO ]${NC} ${YB}Memberikan izin eksekusi pada skrip...${NC}"
-chmod +x del-xray extend-xray create-xray cek-xray log-xray menu allxray xp dns certxray about clear-log
+chmod +x del-xray extend-xray create-xray cek-xray log-xray menu allxray xp dns certxray about clear-log update-xray
 echo -e "${GB}[ INFO ]${NC} ${YB}Persiapan Selesai.${NC}"
 sleep 3
 cd
