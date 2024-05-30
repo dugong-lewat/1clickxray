@@ -80,6 +80,12 @@ print_msg $YB "Membuat direktori yang diperlukan..."
 sudo mkdir -p /user /tmp /usr/local/etc/xray
 check_success "Gagal membuat direktori."
 
+# Membuat file log Xray yang diperlukan
+print_msg $YB "Membuat file log Xray yang diperlukan..."
+sudo touch /var/log/xray/access.log
+sudo touch /var/log/xray/error.log
+check_success "Gagal membuat file log Xray yang diperlukan."
+
 # Menghapus file konfigurasi lama jika ada
 print_msg $YB "Menghapus file konfigurasi lama..."
 sudo rm -f /usr/local/etc/xray/city /usr/local/etc/xray/org /usr/local/etc/xray/timezone /usr/local/etc/xray/region
