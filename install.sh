@@ -34,21 +34,6 @@ check_success() {
     fi
 }
 
-# Fungsi untuk animasi progres
-spinner() {
-    local pid=$!
-    local delay=0.1
-    local spinstr='|/-\'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
-    done
-    printf "    \b\b\b\b"
-}
-
 # Selamat datang
 print_msg $YB "Selamat datang! Skrip ini akan memasang beberapa paket penting pada sistem Anda."
 
@@ -1434,7 +1419,7 @@ sudo iptables -A INPUT -p tcp --dport 6881:6889 -m string --algo bm --string "Bi
 sudo iptables -A INPUT -p udp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 cd /usr/bin
 # Menyiapkan unduhan menu utama
-print_msg $GB "[ INFO ]" $YB "Mengunduh Menu Utama..."
+print_msg $GB "[ INFO ]" $NC $YB "Mengunduh Menu Utama..."
 GITHUB="raw.githubusercontent.com/dugong-lewat/1clickxray/main"
 wget -q -O menu "https://${GITHUB}/menu/menu.sh"
 wget -q -O allxray "https://${GITHUB}/menu/allxray.sh"
@@ -1445,19 +1430,19 @@ wget -q -O cek-xray "https://${GITHUB}/xray/cek-xray.sh"
 sleep 0.5
 
 # Menyiapkan unduhan menu lainnya
-print_msg $GB "[ INFO ]" $YB "Mengunduh Menu Lainnya..."
+print_msg $GB "[ INFO ]" $NC $YB "Mengunduh Menu Lainnya..."
 wget -q -O xp "https://${GITHUB}/other/xp.sh"
 wget -q -O dns "https://${GITHUB}/other/dns.sh"
 wget -q -O certxray "https://${GITHUB}/other/certxray.sh"
 wget -q -O about "https://${GITHUB}/other/about.sh"
 wget -q -O clear-log "https://${GITHUB}/other/clear-log.sh"
 wget -q -O log-xray "https://${GITHUB}/other/log-xray.sh"
-print_msg $GB "[ INFO ]" $YB "Semua Menu Berhasil Diunduh."
+print_msg $GB "[ INFO ]" $NC $YB "Semua Menu Berhasil Diunduh."
 
 # Memberikan izin eksekusi pada skrip
-print_msg $GB "[ INFO ]" $YB "Memberikan izin eksekusi pada skrip..."
+print_msg $GB "[ INFO ]" $NC $YB "Memberikan izin eksekusi pada skrip..."
 chmod +x del-xray extend-xray create-xray cek-xray log-xray menu allxray xp dns certxray about clear-log
-print_msg $GB "[ INFO ]" $YB "Persiapan Selesai."
+print_msg $GB "[ INFO ]" $NC $YB "Persiapan Selesai."
 sleep 2
 cd
 echo "0 0 * * * root xp" >> /etc/crontab
