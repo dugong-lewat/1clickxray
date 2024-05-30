@@ -80,6 +80,7 @@ show_menu() {
     echo -e " ${MB}[4]${NC} ${YB}Change Domain${NC}"
     echo -e " ${MB}[5]${NC} ${YB}Cert Acme.sh${NC}"
     echo -e " ${MB}[6]${NC} ${YB}About Script${NC}"
+    echo -e " ${MB}[x]${NC} ${YB}Exit${NC}"
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
 }
@@ -96,10 +97,12 @@ handle_menu() {
         5) clear ; certxray ;;
         6) clear ; about ;;
         x) exit ;;
-        *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; clear ; show_menu ; handle_menu ;;
+        *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_menu ;;
     esac
 }
 
 # Tampilkan menu dan tangani input pengguna
-show_menu
-handle_menu
+while true; do
+    show_menu
+    handle_menu
+done
