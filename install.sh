@@ -1150,7 +1150,7 @@ http {
        listen 8443 http2 proxy_protocol default_server;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
-       server_name $domain;
+       server_name $dns;
        root /var/www/html;
 
        location /vless-grpc {
