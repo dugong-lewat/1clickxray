@@ -14,9 +14,12 @@ echo -e "${WB}Installation time : $(( ${1} / 3600 )) hours $(( (${1} / 60) % 60 
 }
 start=$(date +%s)
 apt update -y
-apt install socat netfilter-persistent -y
+apt install socat netfilter-persistent bsdmainutils -y
 apt install vnstat lsof fail2ban -y
 apt install curl sudo cron -y
+apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
+
+
 mkdir /user >> /dev/null 2>&1
 mkdir /tmp >> /dev/null 2>&1
 rm /usr/local/etc/xray/city >> /dev/null 2>&1
@@ -31,8 +34,12 @@ curl -s ipinfo.io/region >> /usr/local/etc/xray/region
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
 sudo apt-get install speedtest
 clear
+
+
 # ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 timedatectl set-timezone Asia/Jakarta
+
+
 code=$(grep DISTRIB_CODENAME /etc/lsb-release | cut -d '=' -f 2)
 cat > /etc/apt/sources.list.d/nginx.list << END
 deb http://nginx.org/packages/ubuntu/ $code nginx
@@ -43,29 +50,51 @@ sudo apt-key add nginx_signing.key
 rm -rf add nginx_signing.*
 apt update
 apt install nginx -y
-rm -rf /etc/nginx/conf.d/* >> /dev/null 2>&1
+rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
 mkdir -p /var/www/html/xray >> /dev/null 2>&1
 systemctl restart nginx
 clear
+
+
+# Warna untuk output (sesuaikan dengan kebutuhan)
+YB='\033[1;33m'  # Yellow Bold
+NC='\033[0m'     # No Color
 touch /usr/local/etc/xray/domain
-echo -e "${YB}Input Domain${NC} "
+
+# Fungsi untuk memvalidasi domain
+validate_domain() {
+    local domain=$1
+    if [[ $domain =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+echo -e "${YB}Input Domain${NC}"
 echo " "
-read -rp "Input domain kamu : " -e dns
-if [ -z $dns ]; then
-echo -e "Nothing input for domain!"
+read -rp "Input domain kamu: " -e dns
+
+if [ -z "$dns" ]; then
+    echo -e "${YB}Nothing input for domain!${NC}"
+elif ! validate_domain "$dns"; then
+    echo -e "${YB}Invalid domain format! Please input a valid domain.${NC}"
 else
-echo "$dns" > /usr/local/etc/xray/domain
-echo "DNS=$dns" > /var/lib/dnsvps.conf
+    echo "$dns" > /usr/local/etc/xray/domain
+    echo "DNS=$dns" > /var/lib/dnsvps.conf
+    echo -e "${YB}Domain saved successfully!${NC}"
 fi
+sleep 2.5
+
 clear
 systemctl stop nginx
 systemctl stop xray
 domain=$(cat /usr/local/etc/xray/domain)
 curl https://get.acme.sh | sh
 source ~/.bashrc
-#bash .acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server zerossl
-bash .acme.sh/acme.sh --issue -d $domain --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --force
+bash .acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server zerossl
+bash .acme.sh/acme.sh --issue -d $domain --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --force
 chmod 745 /usr/local/etc/xray/private.key
 clear
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
@@ -1227,6 +1256,8 @@ echo "*/3 * * * * root clear-log" >> /etc/crontab
 systemctl restart cron
 clear
 echo ""
+echo -e "${BB}—————————————————————————————————————————————————————————${NC}"
+echo -e "                  ${WB}XRAY SCRIPT BY DUGONG${NC}"
 echo -e "${BB}—————————————————————————————————————————————————————————${NC}"
 echo -e "                 ${WB}»»» Protocol Service «««${NC}  "
 echo -e "${BB}—————————————————————————————————————————————————————————${NC}"
