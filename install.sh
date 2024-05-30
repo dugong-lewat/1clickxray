@@ -53,8 +53,8 @@ apt install nginx -y
 rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
 mkdir -p /var/www/html/xray >> /dev/null 2>&1
-systemctl restart nginx
 clear
+systemctl restart nginx
 systemctl stop nginx
 systemctl stop xray
 
@@ -100,6 +100,7 @@ install_acme_sh() {
     source ~/.bashrc
     ~/.acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server zerossl
     ~/.acme.sh/acme.sh --issue -d "$dns" --server zerossl --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --reloadcmd "systemctl reload nginx"
+    chmod 745 /usr/local/etc/xray/private.key
     echo -e "${YB}Sertifikat SSL berhasil dipasang!${NC}"
 }
 
@@ -108,7 +109,6 @@ input_domain
 
 # Panggil fungsi install_acme_sh untuk menginstal acme.sh dan mendapatkan sertifikat
 install_acme_sh
-chmod 745 /usr/local/etc/xray/private.key
 clear
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
 uuid=$(cat /proc/sys/kernel/random/uuid)
@@ -165,67 +165,20 @@ cat > /usr/local/etc/xray/config.json << END
         ],
         "decryption": "none",
         "fallbacks": [
-          {
-            "alpn": "h2",
-            "dest": 4443,
-            "xver": 2
-          },
-          {
-            "dest": 8080,
-            "xver": 2
-          },
+          {"alpn": "h2", "dest": 4443, "xver": 2},
+          {"dest": 8080, "xver": 2},
           // Websocket
-          {
-            "path": "/vless-ws",
-            "dest": "@vless-ws",
-            "xver": 2
-          },
-          {
-            "path": "/vmess-ws",
-            "dest": "@vmess-ws",
-            "xver": 2
-          },
-          {
-            "path": "/trojan-ws",
-            "dest": "@trojan-ws",
-            "xver": 2
-          },
-          {
-            "path": "/ss-ws",
-            "dest": 1000,
-            "xver": 2
-          },
-          {
-            "path": "/ss22-ws",
-            "dest": 1100,
-            "xver": 2
-          },
+          {"path": "/vless-ws", "dest": "@vless-ws", "xver": 2},
+          {"path": "/vmess-ws", "dest": "@vmess-ws", "xver": 2},
+          {"path": "/trojan-ws", "dest": "@trojan-ws", "xver": 2},
+          {"path": "/ss-ws", "dest": 1000, "xver": 2},
+          {"path": "/ss22-ws", "dest": 1100, "xver": 2},
           // HTTPupgrade
-          {
-            "path": "/vless-hup",
-            "dest": "@vl-hup",
-            "xver": 2
-          },
-          {
-            "path": "/vmess-hup",
-            "dest": "@vm-hup",
-            "xver": 2
-          },
-          {
-            "path": "/trojan-hup",
-            "dest": "@tr-hup",
-            "xver": 2
-          },
-          {
-            "path": "/ss-hup",
-            "dest": "3000",
-            "xver": 2
-          },
-          {
-            "path": "/ss22-hup",
-            "dest": "3100",
-            "xver": 2
-          }
+          {"path": "/vless-hup", "dest": "@vl-hup", "xver": 2},
+          {"path": "/vmess-hup", "dest": "@vm-hup", "xver": 2},
+          {"path": "/trojan-hup", "dest": "@tr-hup", "xver": 2},
+          {"path": "/ss-hup", "dest": 3000, "xver": 2},
+          {"path": "/ss22-hup", "dest": 3100, "xver": 2}
         ]
       },
       "sniffing": {
