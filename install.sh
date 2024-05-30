@@ -323,8 +323,14 @@ input_domain() {
 
         if [ -z "$dns" ]; then
             echo -e "${RB}Nothing input for domain!${NC}"
+            sleep 3
+            clear
+            input_domain
         elif ! validate_domain "$dns"; then
             echo -e "${RB}Invalid domain format! Please input a valid domain.${NC}"
+            sleep 3
+            clear
+            input_domain
         else
             echo "$dns" > /usr/local/etc/xray/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
