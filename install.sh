@@ -75,18 +75,18 @@ validate_domain() {
 # Fungsi untuk meminta input domain
 input_domain() {
     while true; do
-        echo -e "${YB}Input Domain${NC}"
+        echo -e "${YB}Masukan Domain${NC}"
         echo " "
-        read -rp "Input domain kamu: " -e dns
+        read -rp "Masukan domain kamu: " -e dns
 
         if [ -z "$dns" ]; then
-            echo -e "${YB}Nothing input for domain!${NC}"
+            echo -e "${YB}Tidak ada masukan untuk domain!${NC}"
         elif ! validate_domain "$dns"; then
-            echo -e "${YB}Invalid domain format! Please input a valid domain.${NC}"
+            echo -e "${YB}Format domain tidak valid! Masukkan domain yang valid.${NC}"
         else
             echo "$dns" > /usr/local/etc/xray/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
-            echo -e "${YB}Domain saved successfully!${NC}"
+            echo -e "${YB}Domain berhasil disimpan!${NC}"
             break
         fi
     done
