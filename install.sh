@@ -1,67 +1,271 @@
-rm -rf xray
-clear
-NC='\e[0m'
-DEFBOLD='\e[39;1m'
-RB='\e[31;1m'
-GB='\e[32;1m'
-YB='\e[33;1m'
-BB='\e[34;1m'
-MB='\e[35;1m'
-CB='\e[35;1m'
-WB='\e[37;1m'
+#!/bin/bash
+
+rm -rf install.sh
+# Warna untuk output (sesuaikan dengan kebutuhan)
+NC='\e[0m'       # No Color (mengatur ulang warna teks ke default)
+DEFBOLD='\e[39;1m' # Default Bold
+RB='\e[31;1m'    # Red Bold
+GB='\e[32;1m'    # Green Bold
+YB='\e[33;1m'    # Yellow Bold
+BB='\e[34;1m'    # Blue Bold
+MB='\e[35;1m'    # Magenta Bold
+CB='\e[36;1m'    # Cyan Bold
+WB='\e[37;1m'    # White Bold
+
 secs_to_human() {
 echo -e "${WB}Installation time : $(( ${1} / 3600 )) hours $(( (${1} / 60) % 60 )) minute's $(( ${1} % 60 )) seconds${NC}"
 }
 start=$(date +%s)
+
+# Fungsi untuk mencetak pesan dengan warna
+print_msg() {
+    COLOR=$1
+    MSG=$2
+    echo -e "${COLOR}${MSG}${NC}"
+}
+
+# Fungsi untuk memeriksa keberhasilan perintah
+check_success() {
+    if [ $? -eq 0 ]; then
+        print_msg $GB "Berhasil"
+    else
+        print_msg $RB "Gagal: $1"
+        exit 1
+    fi
+}
+
+# Selamat datang
+print_msg $YB "Selamat datang! Skrip ini akan memasang beberapa paket penting pada sistem Anda."
+
+# Update package list
+print_msg $YB "Memperbarui daftar paket..."
 apt update -y
+check_success
+
+# Install paket pertama
+print_msg $YB "Memasang socat, netfilter-persistent, dan bsdmainutils..."
 apt install socat netfilter-persistent bsdmainutils -y
+check_success
+
+# Install paket kedua
+print_msg $YB "Memasang vnstat, lsof, dan fail2ban..."
 apt install vnstat lsof fail2ban -y
+check_success
+
+# Install paket ketiga
+print_msg $YB "Memasang curl, sudo, dan cron..."
 apt install curl sudo cron -y
+check_success
+
+# Install paket keempat
+print_msg $YB "Memasang build-essential dan dependensi lainnya..."
 apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
+check_success
 
+# Pesan selesai
+print_msg $GB "Semua paket telah berhasil dipasang!"
+sleep 2
+clear
 
+# Selamat datang
+print_msg $YB "Selamat datang! Skrip ini akan memasang Xray-core dan melakukan beberapa konfigurasi pada sistem Anda."
+
+# Membuat direktori yang diperlukan
+print_msg $YB "Membuat direktori yang diperlukan..."
 mkdir /user >> /dev/null 2>&1
 mkdir /tmp >> /dev/null 2>&1
+check_success "Gagal membuat direktori."
+
+# Menghapus file konfigurasi lama jika ada
+print_msg $YB "Menghapus file konfigurasi lama..."
 rm /usr/local/etc/xray/city >> /dev/null 2>&1
 rm /usr/local/etc/xray/org >> /dev/null 2>&1
 rm /usr/local/etc/xray/timezone >> /dev/null 2>&1
 rm /usr/local/etc/xray/region >> /dev/null 2>&1
-bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" - install --beta
-curl -s ipinfo.io/city >> /usr/local/etc/xray/city
-curl -s ipinfo.io/org | cut -d " " -f 2-10 >> /usr/local/etc/xray/org
-curl -s ipinfo.io/timezone >> /usr/local/etc/xray/timezone
-curl -s ipinfo.io/region >> /usr/local/etc/xray/region
-curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
-sudo apt-get install speedtest
+check_success "Gagal menghapus file konfigurasi lama."
+
+# Fungsi untuk mendeteksi OS dan distribusi
+detect_os() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS=$NAME
+        VERSION=$VERSION_ID
+    else
+        print_msg $RB "Tidak dapat mendeteksi OS. Skrip ini hanya mendukung distribusi berbasis Debian dan Red Hat."
+        exit 1
+    fi
+}
+
+# Fungsi untuk memeriksa versi terbaru Xray-core
+get_latest_xray_version() {
+    LATEST_VERSION=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    if [ -z "$LATEST_VERSION" ]; then
+        print_msg $RB "Tidak dapat menemukan versi terbaru Xray-core."
+        exit 1
+    fi
+}
+
+# Fungsi untuk memasang Xray-core
+install_xray_core() {
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64)
+            ARCH="64"
+            ;;
+        aarch64)
+            ARCH="arm64-v8a"
+            ;;
+        *)
+            print_msg $RB "Arsitektur $ARCH tidak didukung."
+            exit 1
+            ;;
+    esac
+
+    DOWNLOAD_URL="https://github.com/XTLS/Xray-core/releases/download/$LATEST_VERSION/Xray-linux-$ARCH.zip"
+
+    # Unduh dan ekstrak Xray-core
+    print_msg $YB "Mengunduh dan memasang Xray-core..."
+    curl -L -o xray.zip $DOWNLOAD_URL
+    unzip xray.zip -d /usr/local/bin
+    rm xray.zip
+    chmod +x /usr/local/bin/xray
+    check_success "Gagal mengunduh atau memasang Xray-core."
+
+    # Membuat layanan systemd
+    print_msg $YB "Mengkonfigurasi layanan systemd untuk Xray-core..."
+    cat <<EOF > /etc/systemd/system/xray.service
+[Unit]
+Description=Xray Service
+Documentation=https://github.com/xtls
+After=network.target nss-lookup.target
+
+[Service]
+User=nobody
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+ExecStart=/usr/local/bin/xray run -config /usr/local/etc/xray/config.json
+Restart=on-failure
+RestartPreventExitStatus=23
+LimitNPROC=10000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl daemon-reload
+    systemctl enable xray
+    systemctl start xray
+    check_success "Gagal mengkonfigurasi layanan systemd untuk Xray-core."
+}
+
+# Deteksi OS
+print_msg $YB "Mendeteksi sistem operasi..."
+detect_os
+
+# Cek apakah OS didukung
+if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" || "$OS" == "CentOS" || "$OS" == "Fedora" || "$OS" == "Red Hat Enterprise Linux" ]]; then
+    print_msg $GB "Mendeteksi OS: $OS $VERSION"
+else
+    print_msg $RB "Distribusi $OS tidak didukung oleh skrip ini. Proses instalasi dibatalkan."
+    exit 1
+fi
+
+# Memeriksa versi terbaru Xray-core
+print_msg $YB "Memeriksa versi terbaru Xray-core..."
+get_latest_xray_version
+print_msg $GB "Versi terbaru Xray-core: $LATEST_VERSION"
+
+# Memasang dependensi yang diperlukan
+print_msg $YB "Memasang dependensi yang diperlukan..."
+if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then
+    apt update
+    apt install -y curl unzip
+elif [[ "$OS" == "CentOS" || "$OS" == "Fedora" || "$OS" == "Red Hat Enterprise Linux" ]]; then
+    yum install -y curl unzip
+fi
+check_success "Gagal memasang dependensi yang diperlukan."
+
+# Memasang Xray-core
+install_xray_core
+
+print_msg $GB "Pemasangan Xray-core versi $LATEST_VERSION selesai."
+
+# Mengumpulkan informasi dari ipinfo.io
+print_msg $YB "Mengumpulkan informasi lokasi dari ipinfo.io..."
+curl -s ipinfo.io/city >> /usr/local/etc/xray/city >> /dev/null 2>&1
+curl -s ipinfo.io/org | cut -d " " -f 2-10 >> /usr/local/etc/xray/org >> /dev/null 2>&1
+curl -s ipinfo.io/timezone >> /usr/local/etc/xray/timezone >> /dev/null 2>&1
+curl -s ipinfo.io/region >> /usr/local/etc/xray/region >> /dev/null 2>&1
+check_success "Gagal mengumpulkan informasi lokasi."
+
+print_msg $GB "Semua tugas selesai. Xray-core telah dipasang dan dikonfigurasi dengan informasi lokasi."
+sleep 2
 clear
 
-
+curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
+sudo apt-get install speedtest
 # ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 timedatectl set-timezone Asia/Jakarta
 
+# Selamat datang
+print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi Nginx pada sistem Anda."
 
+# Mendapatkan codename distribusi Ubuntu
+print_msg $YB "Mendeteksi codename distribusi Ubuntu..."
 code=$(grep DISTRIB_CODENAME /etc/lsb-release | cut -d '=' -f 2)
+check_success "Gagal mendeteksi codename distribusi Ubuntu."
+
+# Menambahkan repository Nginx
+print_msg $YB "Menambahkan repository Nginx ke sources.list.d..."
 cat > /etc/apt/sources.list.d/nginx.list << END
 deb http://nginx.org/packages/ubuntu/ $code nginx
 deb-src http://nginx.org/packages/ubuntu/ $code nginx
 END
-wget http://nginx.org/keys/nginx_signing.key
+check_success "Gagal menambahkan repository Nginx."
+
+# Mendownload kunci signing Nginx
+print_msg $YB "Mendownload kunci signing Nginx..."
+wget -q http://nginx.org/keys/nginx_signing.key
+check_success "Gagal mendownload kunci signing Nginx."
+
+# Menambahkan kunci signing Nginx ke apt
+print_msg $YB "Menambahkan kunci signing Nginx ke apt..."
 sudo apt-key add nginx_signing.key
-rm -rf add nginx_signing.*
+check_success "Gagal menambahkan kunci signing Nginx ke apt."
+
+# Membersihkan file kunci yang didownload
+rm -rf nginx_signing.*
+check_success "Gagal membersihkan file kunci yang didownload."
+
+# Memperbarui daftar paket
+print_msg $YB "Memperbarui daftar paket..."
 apt update
+check_success "Gagal memperbarui daftar paket."
+
+# Menginstall Nginx
+print_msg $YB "Menginstall Nginx..."
 apt install nginx -y
+check_success "Gagal menginstall Nginx."
+
+# Menghapus konfigurasi default Nginx dan konten default web
+print_msg $YB "Menghapus konfigurasi default Nginx dan konten default web..."
 rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
+check_success "Gagal menghapus konfigurasi default Nginx dan konten default web."
+
+# Membuat direktori untuk Xray
+print_msg $YB "Membuat direktori untuk Xray di /var/www/html..."
 mkdir -p /var/www/html/xray >> /dev/null 2>&1
+check_success "Gagal membuat direktori untuk Xray."
+
+# Pesan selesai
+print_msg $GB "Pemasangan dan konfigurasi Nginx telah selesai."
+sleep 2
 clear
 systemctl restart nginx
 systemctl stop nginx
 systemctl stop xray
-
-
-# Warna untuk output (sesuaikan dengan kebutuhan)
-YB='\033[1;33m'  # Yellow Bold
-NC='\033[0m'     # No Color
 touch /usr/local/etc/xray/domain
 
 # Fungsi untuk memvalidasi domain
@@ -1172,7 +1376,7 @@ http {
 }
 END
 wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/index.html
-# wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
+
 systemctl restart nginx
 systemctl restart xray
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Done${NC}"
