@@ -1418,9 +1418,8 @@ sudo iptables -A INPUT -p tcp --dport 6881:6889 -j DROP
 sudo iptables -A INPUT -p tcp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 sudo iptables -A INPUT -p udp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 cd /usr/bin
-# Menyiapkan unduhan menu utama
-print_msg $GB "[ INFO ]" $NC $YB "Mengunduh Menu Utama..."
-GITHUB="raw.githubusercontent.com/dugong-lewat/1clickxray/main"
+GITHUB=raw.githubusercontent.com/dugong-lewat/1clickxray/main
+echo -e "${GB}[ INFO ]${NC} ${YB}Mengunduh menu utama...${NC}"
 wget -q -O menu "https://${GITHUB}/menu/menu.sh"
 wget -q -O allxray "https://${GITHUB}/menu/allxray.sh"
 wget -q -O del-xray "https://${GITHUB}/xray/del-xray.sh"
@@ -1429,21 +1428,18 @@ wget -q -O create-xray "https://${GITHUB}/xray/create-xray.sh"
 wget -q -O cek-xray "https://${GITHUB}/xray/cek-xray.sh"
 sleep 0.5
 
-# Menyiapkan unduhan menu lainnya
-print_msg $GB "[ INFO ]" $NC $YB "Mengunduh Menu Lainnya..."
+echo -e "${GB}[ INFO ]${NC} ${YB}Mengunduh menu lainnya...${NC}"
 wget -q -O xp "https://${GITHUB}/other/xp.sh"
 wget -q -O dns "https://${GITHUB}/other/dns.sh"
 wget -q -O certxray "https://${GITHUB}/other/certxray.sh"
 wget -q -O about "https://${GITHUB}/other/about.sh"
 wget -q -O clear-log "https://${GITHUB}/other/clear-log.sh"
 wget -q -O log-xray "https://${GITHUB}/other/log-xray.sh"
-print_msg $GB "[ INFO ]" $NC $YB "Semua Menu Berhasil Diunduh."
 
-# Memberikan izin eksekusi pada skrip
-print_msg $GB "[ INFO ]" $NC $YB "Memberikan izin eksekusi pada skrip..."
+echo -e "${GB}[ INFO ]${NC} ${YB}Memberikan izin eksekusi pada skrip...${NC}"
 chmod +x del-xray extend-xray create-xray cek-xray log-xray menu allxray xp dns certxray about clear-log
-print_msg $GB "[ INFO ]" $NC $YB "Persiapan Selesai."
-sleep 2
+echo -e "${GB}[ INFO ]${NC} ${YB}Persiapan Selesai.${NC}"
+sleep 3
 cd
 echo "0 0 * * * root xp" >> /etc/crontab
 echo "*/3 * * * * root clear-log" >> /etc/crontab
@@ -1478,7 +1474,7 @@ echo -e "${YB}SS 2022 HTTPupgrade${NC} : ${YB}443 & 80${NC}"
 echo -e "${YB}SS 2022 gRPC${NC}        : ${YB}443${NC}"
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 echo ""
-rm -f xray
+rm -f install.sh
 secs_to_human "$(($(date +%s) - ${start}))"
 echo -e "${YB}[ WARNING ] reboot now ? (Y/N)${NC} "
 read answer
