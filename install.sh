@@ -72,17 +72,13 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang Xray-core dan melakukan b
 
 # Membuat direktori yang diperlukan
 print_msg $YB "Membuat direktori yang diperlukan..."
-mkdir /user >> /dev/null 2>&1
-mkdir /tmp >> /dev/null 2>&1
-check_success
+sudo mkdir -p /user /tmp /usr/local/etc/xray
+check_success "Gagal membuat direktori."
 
 # Menghapus file konfigurasi lama jika ada
 print_msg $YB "Menghapus file konfigurasi lama..."
-rm /usr/local/etc/xray/city >> /dev/null 2>&1
-rm /usr/local/etc/xray/org >> /dev/null 2>&1
-rm /usr/local/etc/xray/timezone >> /dev/null 2>&1
-rm /usr/local/etc/xray/region >> /dev/null 2>&1
-check_success
+sudo rm -f /usr/local/etc/xray/city /usr/local/etc/xray/org /usr/local/etc/xray/timezone /usr/local/etc/xray/region
+check_success "Gagal menghapus file konfigurasi lama."
 
 # Fungsi untuk mendeteksi OS dan distribusi
 detect_os() {
@@ -126,14 +122,18 @@ install_xray_core() {
     # Unduh dan ekstrak Xray-core
     print_msg $YB "Mengunduh dan memasang Xray-core..."
     curl -L -o xray.zip $DOWNLOAD_URL
-    unzip xray.zip -d /usr/local/bin
+    check_success "Gagal mengunduh Xray-core."
+
+    sudo unzip -o xray.zip -d /usr/local/bin
+    check_success "Gagal mengekstrak Xray-core."
     rm xray.zip
-    chmod +x /usr/local/bin/xray
-    check_success
+
+    sudo chmod +x /usr/local/bin/xray
+    check_success "Gagal mengatur izin eksekusi untuk Xray-core."
 
     # Membuat layanan systemd
     print_msg $YB "Mengkonfigurasi layanan systemd untuk Xray-core..."
-    cat <<EOF > /etc/systemd/system/xray.service
+    sudo bash -c 'cat <<EOF > /etc/systemd/system/xray.service
 [Unit]
 Description=Xray Service
 Documentation=https://github.com/xtls
@@ -152,11 +152,13 @@ LimitNOFILE=1000000
 
 [Install]
 WantedBy=multi-user.target
-EOF
-    systemctl daemon-reload
-    systemctl enable xray
-    systemctl start xray
-    check_success
+EOF'
+    check_success "Gagal mengkonfigurasi layanan systemd untuk Xray-core."
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable xray
+    sudo systemctl start xray
+    check_success "Gagal memulai layanan Xray-core."
 }
 
 # Deteksi OS
@@ -179,12 +181,12 @@ print_msg $GB "Versi terbaru Xray-core: $LATEST_VERSION"
 # Memasang dependensi yang diperlukan
 print_msg $YB "Memasang dependensi yang diperlukan..."
 if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then
-    apt update
-    apt install -y curl unzip
+    sudo apt update
+    sudo apt install -y curl unzip
 elif [[ "$OS" == "CentOS" || "$OS" == "Fedora" || "$OS" == "Red Hat Enterprise Linux" ]]; then
-    yum install -y curl unzip
+    sudo yum install -y curl unzip
 fi
-check_success
+check_success "Gagal memasang dependensi yang diperlukan."
 
 # Memasang Xray-core
 install_xray_core
@@ -193,10 +195,10 @@ print_msg $GB "Pemasangan Xray-core versi $LATEST_VERSION selesai."
 
 # Mengumpulkan informasi dari ipinfo.io
 print_msg $YB "Mengumpulkan informasi lokasi dari ipinfo.io..."
-curl -s ipinfo.io/city >> /usr/local/etc/xray/city >> /dev/null 2>&1
-curl -s ipinfo.io/org | cut -d " " -f 2-10 >> /usr/local/etc/xray/org >> /dev/null 2>&1
-curl -s ipinfo.io/timezone >> /usr/local/etc/xray/timezone >> /dev/null 2>&1
-curl -s ipinfo.io/region >> /usr/local/etc/xray/region >> /dev/null 2>&1
+curl -s ipinfo.io/city | sudo tee /usr/local/etc/xray/city
+curl -s ipinfo.io/org | cut -d " " -f 2-10 | sudo tee /usr/local/etc/xray/org
+curl -s ipinfo.io/timezone | sudo tee /usr/local/etc/xray/timezone
+curl -s ipinfo.io/region | sudo tee /usr/local/etc/xray/region
 check_success "Gagal mengumpulkan informasi lokasi."
 
 print_msg $GB "Semua tugas selesai. Xray-core telah dipasang dan dikonfigurasi dengan informasi lokasi."
@@ -214,7 +216,7 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi Nginx
 # Mendapatkan codename distribusi Ubuntu
 print_msg $YB "Mendeteksi codename distribusi Ubuntu..."
 code=$(grep DISTRIB_CODENAME /etc/lsb-release | cut -d '=' -f 2)
-check_success
+check_success "Gagal mendeteksi codename distribusi Ubuntu."
 
 # Menambahkan repository Nginx
 print_msg $YB "Menambahkan repository Nginx ke sources.list.d..."
@@ -222,46 +224,45 @@ cat > /etc/apt/sources.list.d/nginx.list << END
 deb http://nginx.org/packages/ubuntu/ $code nginx
 deb-src http://nginx.org/packages/ubuntu/ $code nginx
 END
-check_success
+check_success "Gagal menambahkan repository Nginx."
 
 # Mendownload kunci signing Nginx
 print_msg $YB "Mendownload kunci signing Nginx..."
 wget -q http://nginx.org/keys/nginx_signing.key
-check_success
+check_success "Gagal mendownload kunci signing Nginx."
 
 # Menambahkan kunci signing Nginx ke apt
 print_msg $YB "Menambahkan kunci signing Nginx ke apt..."
 sudo apt-key add nginx_signing.key
-check_success
+check_success "Gagal menambahkan kunci signing Nginx ke apt."
 
 # Membersihkan file kunci yang didownload
 rm -rf nginx_signing.*
-check_success
+check_success "Gagal membersihkan file kunci yang didownload."
 
 # Memperbarui daftar paket
 print_msg $YB "Memperbarui daftar paket..."
 apt update
-check_success
+check_success "Gagal memperbarui daftar paket."
 
 # Menginstall Nginx
 print_msg $YB "Menginstall Nginx..."
 apt install nginx -y
-check_success
+check_success "Gagal menginstall Nginx."
 
 # Menghapus konfigurasi default Nginx dan konten default web
 print_msg $YB "Menghapus konfigurasi default Nginx dan konten default web..."
 rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
-check_success
+check_success "Gagal menghapus konfigurasi default Nginx dan konten default web."
 
 # Membuat direktori untuk Xray
 print_msg $YB "Membuat direktori untuk Xray di /var/www/html..."
 mkdir -p /var/www/html/xray >> /dev/null 2>&1
-check_success
+check_success "Gagal membuat direktori untuk Xray."
 
 # Pesan selesai
 print_msg $GB "Pemasangan dan konfigurasi Nginx telah selesai."
-sleep 2
 clear
 systemctl restart nginx
 systemctl stop nginx
