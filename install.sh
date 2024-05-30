@@ -87,8 +87,9 @@ check_success "Gagal menghapus file konfigurasi lama."
 
 # Membuat file log Xray yang diperlukan
 print_msg $YB "Membuat file log Xray yang diperlukan..."
-sudo touch /var/log/xray/access.log
-sudo touch /var/log/xray/error.log
+sudo touch /var/log/xray/access.log /var/log/xray/error.log
+sudo chown nobody:nogroup /var/log/xray/access.log /var/log/xray/error.log
+sudo chmod 644 /var/log/xray/access.log /var/log/xray/error.log
 check_success "Gagal membuat file log Xray yang diperlukan."
 
 # Fungsi untuk mendeteksi OS dan distribusi
