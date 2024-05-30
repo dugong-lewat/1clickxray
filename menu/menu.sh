@@ -51,7 +51,7 @@ DATE=$(date -R | cut -d " " -f -4)
 MYIP=$(curl -sS ipv4.icanhazip.com)
 
 # Fungsi untuk menampilkan menu
-menu() {
+show_menu() {
     clear
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e "               ${WB}----- [ Xray Script ] -----${NC}              "
@@ -91,15 +91,15 @@ handle_menu() {
     case $opt in
         1) clear ; allxray ;;
         2) clear ; log-xray ;;
-        3) clear ; speedtest ; echo " " ; read -n 1 -s -r -p "Press any key to back on menu" ; menu ;;
+        3) clear ; speedtest ; echo " " ; read -n 1 -s -r -p "Press any key to back on menu" ; show_menu ;;
         4) clear ; dns ;;
         5) clear ; certxray ;;
         6) clear ; about ;;
         x) exit ;;
-        *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; menu ;;
+        *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; clear ; show_menu ; handle_menu ;;
     esac
 }
 
 # Tampilkan menu dan tangani input pengguna
-menu
+show_menu
 handle_menu
