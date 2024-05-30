@@ -217,10 +217,25 @@ print_msg $GB "Semua tugas selesai. Xray-core telah dipasang dan dikonfigurasi d
 sleep 3
 clear
 
-curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
-sudo apt-get install speedtest
-# ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-timedatectl set-timezone Asia/Jakarta
+# Menampilkan pesan interaktif
+print_msg $GB "Selamat datang! Skrip ini akan menginstal Speedtest CLI dan mengatur zona waktu Anda."
+sleep 3
+
+# Mengunduh dan menginstal Speedtest CLI
+print_msg $YB "Mengunduh dan menginstal Speedtest CLI..."
+curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash &>/dev/null
+sudo apt-get install -y speedtest &>/dev/null
+print_msg $YB "Speedtest CLI berhasil diinstal."
+
+# Mengatur zona waktu ke Asia/Jakarta
+print_msg $YB "Mengatur zona waktu ke Asia/Jakarta..."
+sudo timedatectl set-timezone Asia/Jakarta &>/dev/null
+print_msg $YB "Zona waktu berhasil diatur."
+
+# Memberikan pesan penyelesaian
+print_msg $YB "Instalasi selesai."
+sleep 3
+clear
 
 # Selamat datang
 print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi Nginx pada sistem Anda."
