@@ -77,7 +77,7 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang Xray-core dan melakukan b
 
 # Membuat direktori yang diperlukan
 print_msg $YB "Membuat direktori yang diperlukan..."
-sudo mkdir -p /user /tmp /usr/local/etc/xray
+sudo mkdir -p /user /tmp /usr/local/etc/xray /var/log/xray
 check_success "Gagal membuat direktori."
 
 # Menghapus file konfigurasi lama jika ada
