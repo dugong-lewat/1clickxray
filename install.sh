@@ -428,9 +428,6 @@ install_acme_sh() {
     echo -e "${YB}Sertifikat SSL berhasil dipasang!${NC}"
 }
 
-# Panggil fungsi input_domain untuk memulai proses
-input_domain
-
 # Panggil fungsi install_acme_sh untuk menginstal acme.sh dan mendapatkan sertifikat
 install_acme_sh
 clear
