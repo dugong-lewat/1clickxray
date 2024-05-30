@@ -41,30 +41,35 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang beberapa paket penting pa
 print_msg $YB "Memperbarui daftar paket..."
 apt update -y
 check_success
+sleep 1
 
 # Install paket pertama
 print_msg $YB "Memasang socat, netfilter-persistent, dan bsdmainutils..."
 apt install socat netfilter-persistent bsdmainutils -y
 check_success
+sleep 1
 
 # Install paket kedua
 print_msg $YB "Memasang vnstat, lsof, dan fail2ban..."
 apt install vnstat lsof fail2ban -y
 check_success
+sleep 1
 
 # Install paket ketiga
 print_msg $YB "Memasang curl, sudo, dan cron..."
 apt install curl sudo cron -y
 check_success
+sleep 1
 
 # Install paket keempat
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
 apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
 check_success
+sleep 1
 
 # Pesan selesai
 print_msg $GB "Semua paket telah berhasil dipasang!"
-sleep 2
+sleep 3
 clear
 
 # Selamat datang
@@ -202,7 +207,7 @@ curl -s ipinfo.io/region | sudo tee /usr/local/etc/xray/region
 check_success "Gagal mengumpulkan informasi lokasi."
 
 print_msg $GB "Semua tugas selesai. Xray-core telah dipasang dan dikonfigurasi dengan informasi lokasi."
-sleep 2
+sleep 3
 clear
 
 curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
@@ -263,6 +268,7 @@ check_success "Gagal membuat direktori untuk Xray."
 
 # Pesan selesai
 print_msg $GB "Pemasangan dan konfigurasi Nginx telah selesai."
+sleep 3
 clear
 systemctl restart nginx
 systemctl stop nginx
