@@ -328,7 +328,7 @@ input_domain
 # Panggil fungsi install_acme_sh untuk menginstal acme.sh dan mendapatkan sertifikat
 install_acme_sh
 clear
-echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Conf${NC}"
+echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Config${NC}"
 # Menghasilkan UUID
 uuid=$(cat /proc/sys/kernel/random/uuid)
 
@@ -1409,7 +1409,7 @@ sleep 3
 systemctl restart nginx
 systemctl restart xray
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Done${NC}"
-sleep 1
+sleep 3
 clear
 # Blokir lalu lintas torrent (BitTorrent)
 sudo iptables -A INPUT -p udp --dport 6881:6889 -j DROP
