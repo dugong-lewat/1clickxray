@@ -1,6 +1,7 @@
 #!/bin/bash
 
 rm -rf install.sh
+clear
 # Warna untuk output (sesuaikan dengan kebutuhan)
 NC='\e[0m'       # No Color (mengatur ulang warna teks ke default)
 DEFBOLD='\e[39;1m' # Default Bold
