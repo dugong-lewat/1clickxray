@@ -395,6 +395,8 @@ create_A_record() {
       "ttl": 0,
       "proxied": false
     }')
+  echo "$dns" > /usr/local/etc/xray/domain
+  echo "DNS=$dns" > /var/lib/dnsvps.conf
   handle_response "$response" "${YB}Adding domain $GB$NAME_A$NC"
 }
 
