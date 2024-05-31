@@ -1,5 +1,6 @@
 ## 1 Click Xray
 Ubuntu 20 or Newest
+
 Skrip ini aman untuk di install ulang tanpa harus rebuild VPS
 | Protocol & Transport | Network Port |
 |----------|--------|
