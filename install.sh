@@ -341,7 +341,8 @@ input_domain() {
         else
             echo "$dns" > /usr/local/etc/xray/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
-            echo -e "${YB}Domain${NC} ${GB}${dns}${NC} ${YB}saved successfully${NC}"
+            echo -e "Domain ${GB}${dns}${NC} saved successfully"
+            echo -e "${YB}Don't forget to renew the certificate.${NC}"
             break
         fi
     done
@@ -381,8 +382,36 @@ handle_response() {
   fi
 }
 
+# Function to delete existing DNS record
+delete_record() {
+  local record_name=$1
+  local record_type=$2
+
+  echo -e "${YB}Checking for existing $record_type record: ${CB}$record_name${NC} ${YB}.....${NC}"
+  RECORD_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?type=$record_type&name=$record_name" \
+    -H "X-Auth-Email: $API_EMAIL" \
+    -H "X-Auth-Key: $API_KEY" \
+    -H "Content-Type: application/json" | jq -r '.result[0].id')
+
+  if [ "$RECORD_ID" != "null" ]; then
+    echo -e "${YB}Deleting existing $record_type record: ${CB}$record_name${NC} ${YB}.....${NC}"
+    response=$(curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$RECORD_ID" \
+      -H "X-Auth-Email: $API_EMAIL" \
+      -H "X-Auth-Key: $API_KEY" \
+      -H "Content-Type: application/json")
+    handle_response "$response" "${YB}Deleting $record_type record:${NC} ${CB}$record_name${NC}"
+  else
+    echo -e "${GB}No existing $record_type record found for $record_name.${NC}"
+  fi
+}
+
 # Function to add A record
 create_A_record() {
+  local record_name=$(cat /usr/local/etc/xray/a_record 2>/dev/null)
+  if [ -n "$record_name" ]; then
+    delete_record "$record_name" "$TYPE_A"
+  fi
+
   echo -e "${YB}Adding A record $GB$NAME_A$NC $YB.....${NC}"
   response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
@@ -396,12 +425,18 @@ create_A_record() {
       "proxied": false
     }')
   echo "$NAME_A" > /usr/local/etc/xray/domain
+  echo "$NAME_A" > /usr/local/etc/xray/a_record
   echo "DNS=$NAME_A" > /var/lib/dnsvps.conf
   handle_response "$response" "${YB}Adding A record $GB$NAME_A$NC"
 }
 
 # Function to add CNAME record
 create_CNAME_record() {
+  local record_name=$(cat /usr/local/etc/xray/cname_record 2>/dev/null)
+  if [ -n "$record_name" ]; then
+    delete_record "$record_name" "$TYPE_CNAME"
+  fi
+
   echo -e "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC $YB.....${NC}"
   response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
@@ -414,6 +449,7 @@ create_CNAME_record() {
       "ttl": 0,
       "proxied": false
     }')
+  echo "$NAME_CNAME" > /usr/local/etc/xray/cname_record
   handle_response "$response" "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC"
 }
 
@@ -458,7 +494,7 @@ setup_domain() {
     done
 
     # Memberi waktu singkat sebelum membersihkan layar
-    sleep 4
+    sleep 2
 }
 
 # Menjalankan menu utama
