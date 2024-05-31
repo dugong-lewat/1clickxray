@@ -114,7 +114,7 @@ handle_response() {
 
 # Function to add A record
 create_A_record() {
-  echo -e "${YB}Adding domain $GB$NAME_A$NC $YB.....${NC}"
+  echo -e "${YB}Adding A record $GB$NAME_A$NC $YB.....${NC}"
   response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
@@ -128,12 +128,12 @@ create_A_record() {
     }')
   echo "$NAME_A" > /usr/local/etc/xray/domain
   echo "DNS=$NAME_A" > /var/lib/dnsvps.conf
-  handle_response "$response" "${YB}Adding domain $GB$NAME_A$NC"
+  handle_response "$response" "${YB}Adding A record $GB$NAME_A$NC"
 }
 
 # Function to add CNAME record
 create_CNAME_record() {
-  echo -e "${YB}Adding wildcard domain $GB$NAME_CNAME$NC $YB.....${NC}"
+  echo -e "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC $YB.....${NC}"
   response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
@@ -145,7 +145,7 @@ create_CNAME_record() {
       "ttl": 0,
       "proxied": false
     }')
-  handle_response "$response" "${YB}Adding wildcard domain $GB$NAME_CNAME$NC"
+  handle_response "$response" "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC"
 }
 
 # Fungsi untuk menampilkan menu utama
@@ -189,7 +189,7 @@ setup_domain() {
     done
 
     # Memberi waktu singkat sebelum membersihkan layar
-    sleep 4
+    sleep 2
 }
 
 # Menjalankan menu utama
@@ -198,7 +198,7 @@ setup_domain
 input_menu() {
     # Isi dengan fungsi atau perintah untuk menampilkan menu Anda
     echo -e "${YB}Dont forget to renew certificate.${NC}"
-    sleep 2
+    sleep 4
     echo -e "${YB}Returning to menu...${NC}"
     sleep 4
     clear
