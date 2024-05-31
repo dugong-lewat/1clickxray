@@ -9,6 +9,19 @@ BB='\e[34;1m'      # Blue Bold
 MB='\e[35;1m'      # Magenta Bold
 CB='\e[36;1m'      # Cyan Bold
 WB='\e[37;1m'      # White Bold
+
+# Set your Cloudflare API credentials and zone ID
+API_EMAIL="1562apricot@awgarstone.com"
+API_KEY="e9c80c4d538c819701ea0129a2fd75ea599ba"
+
+# Set the DNS record details
+DOMAIN="vless.sbs"
+TYPE_A="A"
+TYPE_CNAME="CNAME"
+NAME_A="xray-$(</dev/urandom tr -dc a-z0-9 | head -c4).$DOMAIN"
+IP_ADDRESS=$(wget -qO- ifconfig.me)
+NAME_CNAME="*.$NAME_A"
+TARGET_CNAME="$NAME_A"
 clear
 
 # Fungsi untuk mencetak pesan dengan warna
@@ -65,44 +78,72 @@ input_domain() {
     done
 }
 
-# Fungsi untuk membuat subdomain acak di Cloudflare
-create_random_subdomain() {
-    DOMAIN=vless.sbs
-    SUB_DOMAIN="xray-$(</dev/urandom tr -dc a-z0-9 | head -c4).$DOMAIN"
-    CF_ID=1562apricot@awgarstone.com
-    CF_KEY=e9c80c4d538c819701ea0129a2fd75ea599ba
+# Function to get Zone ID
+get_zone_id() {
+  echo -e "${YB}Getting Zone ID...${NC}"
+  ZONE_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$DOMAIN" \
+    -H "X-Auth-Email: $API_EMAIL" \
+    -H "X-Auth-Key: $API_KEY" \
+    -H "Content-Type: application/json" | jq -r '.result[0].id')
 
-    IP=$(wget -qO- ifconfig.me)
-    echo -e "Updating DNS for ${GB}${SUB_DOMAIN}${NC}..."
+  if [ "$ZONE_ID" == "null" ]; then
+    echo -e "${RB}Failed to get Zone ID${NC}"
+    exit 1
+  fi
 
-    ZONE=$(curl -sLX GET "https://api.cloudflare.com/client/v4/zones?name=${DOMAIN}&status=active" \
-         -H "X-Auth-Email: ${CF_ID}" \
-         -H "X-Auth-Key: ${CF_KEY}" \
-         -H "Content-Type: application/json" | jq -r .result[0].id)
+  # Sensoing Zone ID (Only showing first and last 3 characters)
+  ZONE_ID_SENSORED="${GB}${ZONE_ID:0:3}*****${ZONE_ID: -3}"
 
-    RECORD=$(curl -sLX GET "https://api.cloudflare.com/client/v4/zones/${ZONE}/dns_records?name=${SUB_DOMAIN}" \
-         -H "X-Auth-Email: ${CF_ID}" \
-         -H "X-Auth-Key: ${CF_KEY}" \
-         -H "Content-Type: application/json" | jq -r .result[0].id)
+  echo -e "${YB}Zone ID: $ZONE_ID_SENSORED${NC}"
+}
 
-    if [[ "${#RECORD}" -le 10 ]]; then
-         RECORD=$(curl -sLX POST "https://api.cloudflare.com/client/v4/zones/${ZONE}/dns_records" \
-         -H "X-Auth-Email: ${CF_ID}" \
-         -H "X-Auth-Key: ${CF_KEY}" \
-         -H "Content-Type: application/json" \
-         --data '{"type":"A","name":"'${SUB_DOMAIN}'","content":"'${IP}'","ttl":0,"proxied":false}' | jq -r .result.id)
-    fi
+# Function to handle API response
+handle_response() {
+  local response=$1
+  local action=$2
 
-    RESULT=$(curl -sLX PUT "https://api.cloudflare.com/client/v4/zones/${ZONE}/dns_records/${RECORD}" \
-         -H "X-Auth-Email: ${CF_ID}" \
-         -H "X-Auth-Key: ${CF_KEY}" \
-         -H "Content-Type: application/json" \
-         --data '{"type":"A","name":"'${SUB_DOMAIN}'","content":"'${IP}'","ttl":0,"proxied":false}')
+  success=$(echo $response | jq -r '.success')
+  if [ "$success" == "true" ]; then
+    echo -e "$action ${YB}was successful.${NC}"
+  else
+    echo -e "$action ${RB}failed.${NC}"
+    errors=$(echo $response | jq -r '.errors[] | .message')
+    echo -e "${RB}Errors: $errors${NC}"
+  fi
+}
 
-    echo "$SUB_DOMAIN" > /usr/local/etc/xray/domain
-    echo "DNS=$SUB_DOMAIN" > /var/lib/dnsvps.conf
-    echo -e "Domain ${GB}${SUB_DOMAIN}${NC} saved successfully"
-    echo -e "${YB}Don't forget to renew the certificate.${NC}"
+# Function to add A record
+create_A_record() {
+  echo -e "${YB}Adding domain $GB$NAME_A$NC $YB.....${NC}"
+  response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+    -H "X-Auth-Email: $API_EMAIL" \
+    -H "X-Auth-Key: $API_KEY" \
+    -H "Content-Type: application/json" \
+    --data '{
+      "type": "'$TYPE_A'",
+      "name": "'$NAME_A'",
+      "content": "'$IP_ADDRESS'",
+      "ttl": 0,
+      "proxied": false
+    }')
+  handle_response "$response" "${YB}Adding domain $GB$NAME_A$NC"
+}
+
+# Function to add CNAME record
+create_CNAME_record() {
+  echo -e "${YB}Adding wildcard domain $GB$NAME_CNAME$NC $YB.....${NC}"
+  response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+    -H "X-Auth-Email: $API_EMAIL" \
+    -H "X-Auth-Key: $API_KEY" \
+    -H "Content-Type: application/json" \
+    --data '{
+      "type": "'$TYPE_CNAME'",
+      "name": "'$NAME_CNAME'",
+      "content": "'$TARGET_CNAME'",
+      "ttl": 0,
+      "proxied": false
+    }')
+  handle_response "$response" "${YB}Adding wildcard domain $GB$NAME_CNAME$NC"
 }
 
 # Fungsi untuk menampilkan menu utama
@@ -127,7 +168,9 @@ setup_domain() {
         case $choice in
             1)
                 # Menggunakan domain acak
-                create_random_subdomain
+                get_zone_id
+                create_A_record
+                create_CNAME_record
                 break
                 ;;
             2)
@@ -152,6 +195,8 @@ setup_domain
 
 input_menu() {
     # Isi dengan fungsi atau perintah untuk menampilkan menu Anda
+    echo -e "${YB}Dont forget to renew certificate.${NC}"
+    sleep 2
     echo -e "${YB}Returning to menu...${NC}"
     sleep 4
     clear
