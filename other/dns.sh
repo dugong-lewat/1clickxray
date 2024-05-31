@@ -19,7 +19,7 @@ DOMAIN="vless.sbs"
 TYPE_A="A"
 TYPE_CNAME="CNAME"
 NAME_A="$(openssl rand -hex 2).$DOMAIN"
-IP_ADDRESS=$(wget -qO- ifconfig.me)
+IP_ADDRESS=$(curl -sS ipv4.icanhazip.com)
 NAME_CNAME="*.$NAME_A"
 TARGET_CNAME="$NAME_A"
 clear
