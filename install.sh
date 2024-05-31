@@ -525,7 +525,7 @@ pwss=$(echo $RANDOM | md5sum | head -c 6; echo;)
 # Menghasilkan PSK (Pre-Shared Key) untuk pengguna dan server
 userpsk=$(openssl rand -base64 32)
 serverpsk=$(openssl rand -base64 32)
-echo "$serverpsk" > /usr/local/etc/xray/$serverpsk
+echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 
 # Konfigurasi Xray-core
 print_msg $YB "Mengonfigurasi Xray-core..."
