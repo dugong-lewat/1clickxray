@@ -248,33 +248,6 @@ clear
 # Selamat datang
 print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi Nginx pada sistem Anda."
 
-# Mendapatkan codename distribusi Ubuntu
-print_msg $YB "Mendeteksi codename distribusi Ubuntu..."
-code=$(grep DISTRIB_CODENAME /etc/lsb-release | cut -d '=' -f 2)
-check_success "Gagal mendeteksi codename distribusi Ubuntu."
-
-# Menambahkan repository Nginx
-print_msg $YB "Menambahkan repository Nginx ke sources.list.d..."
-cat > /etc/apt/sources.list.d/nginx.list << END
-deb http://nginx.org/packages/ubuntu/ $code nginx
-deb-src http://nginx.org/packages/ubuntu/ $code nginx
-END
-check_success "Gagal menambahkan repository Nginx."
-
-# Mendownload kunci signing Nginx
-print_msg $YB "Mendownload kunci signing Nginx..."
-wget -q http://nginx.org/keys/nginx_signing.key
-check_success "Gagal mendownload kunci signing Nginx."
-
-# Menambahkan kunci signing Nginx ke apt
-print_msg $YB "Menambahkan kunci signing Nginx ke apt..."
-sudo apt-key add nginx_signing.key
-check_success "Gagal menambahkan kunci signing Nginx ke apt."
-
-# Membersihkan file kunci yang didownload
-rm -rf nginx_signing.*
-check_success "Gagal membersihkan file kunci yang didownload."
-
 # Memperbarui daftar paket
 print_msg $YB "Memperbarui daftar paket..."
 apt update
