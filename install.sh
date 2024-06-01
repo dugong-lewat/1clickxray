@@ -70,7 +70,7 @@ sleep 1
 
 # Install paket keempat
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
-# apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
+#apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
 apt install systemd -y
 check_success
 sleep 1
@@ -186,7 +186,7 @@ print_msg $YB "Mendeteksi sistem operasi..."
 detect_os
 
 # Cek apakah OS didukung
-if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" || "$OS" == "CentOS" || "$OS" == "Fedora" || "$OS" == "Red Hat Enterprise Linux" ]]; then
+if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" || "$OS" == "Debian GNU/Linux" || "$OS" == "CentOS" || "$OS" == "Fedora" || "$OS" == "Red Hat Enterprise Linux" ]]; then
     print_msg $GB "Mendeteksi OS: $OS $VERSION"
 else
     print_msg $RB "Distribusi $OS tidak didukung oleh skrip ini. Proses instalasi dibatalkan."
@@ -507,7 +507,7 @@ install_acme_sh() {
     curl https://get.acme.sh | sh
     source ~/.bashrc
     ~/.acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
-    ~/.acme.sh/acme.sh --issue -d "$domain" --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --reloadcmd "systemctl reload nginx"
+    ~/.acme.sh/acme.sh --issue -d "$domain" --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --reloadcmd "systemctl reload nginx"
     chmod 745 /usr/local/etc/xray/private.key
     echo -e "${YB}Sertifikat SSL berhasil dipasang!${NC}"
 }
