@@ -70,8 +70,7 @@ sleep 1
 
 # Install paket keempat
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
-#apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
-apt install systemd -y
+apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
 check_success
 sleep 1
 
@@ -248,15 +247,67 @@ clear
 # Selamat datang
 print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi Nginx pada sistem Anda."
 
+# Mendapatkan informasi distribusi dan codename
+print_msg $YB "Mendeteksi distribusi dan codename Linux..."
+if [ -f /etc/lsb-release ]; then
+    . /etc/lsb-release
+    os=$DISTRIB_ID
+    codename=$DISTRIB_CODENAME
+elif [ -f /etc/os-release ]; then
+    . /etc/os-release
+    os=$ID
+    codename=$VERSION_CODENAME
+else
+    print_msg $RB "Gagal mendeteksi distribusi Linux."
+    exit 1
+fi
+check_success "Gagal mendeteksi distribusi Linux."
+
+# Menentukan URL repository berdasarkan distribusi dan codename
+case "$os" in
+    ubuntu)
+        repo_url="http://nginx.org/packages/ubuntu/"
+        ;;
+    debian)
+        repo_url="http://nginx.org/packages/debian/"
+        ;;
+    *)
+        print_msg $RB "Distribusi Linux tidak didukung."
+        exit 1
+        ;;
+esac
+
+# Menambahkan repository Nginx
+print_msg $YB "Menambahkan repository Nginx ke sources.list.d..."
+cat > /etc/apt/sources.list.d/nginx.list << END
+deb $repo_url $codename nginx
+deb-src $repo_url $codename nginx
+END
+check_success "Gagal menambahkan repository Nginx."
+
+# Mendownload kunci signing Nginx
+print_msg $YB "Mendownload kunci signing Nginx..."
+wget -q http://nginx.org/keys/nginx_signing.key
+check_success "Gagal mendownload kunci signing Nginx."
+
+# Menambahkan kunci signing Nginx ke apt
+print_msg $YB "Menambahkan kunci signing Nginx ke apt..."
+apt-key add nginx_signing.key
+check_success "Gagal menambahkan kunci signing Nginx ke apt."
+
+# Membersihkan file kunci yang didownload
+rm -rf nginx_signing.*
+check_success "Gagal membersihkan file kunci yang didownload."
+
 # Memperbarui daftar paket
 print_msg $YB "Memperbarui daftar paket..."
 apt update
 check_success "Gagal memperbarui daftar paket."
 
-# Menginstall Nginx
-print_msg $YB "Menginstall Nginx..."
-apt install nginx -y
-check_success "Gagal menginstall Nginx."
+# Menginstal Nginx versi terbaru
+print_msg $YB "Menginstal Nginx versi terbaru..."
+apt install -y nginx
+check_success "Gagal menginstal Nginx."
 
 # Menghapus konfigurasi default Nginx dan konten default web
 print_msg $YB "Menghapus konfigurasi default Nginx dan konten default web..."
