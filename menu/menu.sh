@@ -29,17 +29,21 @@ status_nginx=$(check_service_status nginx)
 # Mengambil data bandwidth menggunakan vnstat
 get_bandwidth_data() {
     local period=$1
-    local field=$2
-    vnstat | grep "$period" | awk "{print \$$field\" \"substr (\$$(($field+1)), 1, 3)}"
+    vnstat --json | jq -r ".interfaces[0].traffic.$period[] | .rx, .tx"
 }
 
-dtoday=$(get_bandwidth_data today 2)
-utoday=$(get_bandwidth_data today 5)
-ttoday=$(get_bandwidth_data today 8)
+# Mendapatkan data bandwidth hari ini
+today_data=($(get_bandwidth_data "day"))
+dtoday=$(echo "${today_data[0]}" | awk '{printf "%.2f MiB", $1/1048576}')
+utoday=$(echo "${today_data[1]}" | awk '{printf "%.2f MiB", $1/1048576}')
+ttoday=$(echo "${today_data[0]} ${today_data[1]}" | awk '{printf "%.2f MiB", ($1 + $2)/1048576}')
 
-dmon=$(get_bandwidth_data "$(date +%G-%m)" 2)
-umon=$(get_bandwidth_data "$(date +%G-%m)" 5)
-tmon=$(get_bandwidth_data "$(date +%G-%m)" 8)
+# Mendapatkan data bandwidth bulanan
+month=$(date +%Y-%m)
+monthly_data=($(vnstat --json | jq -r ".interfaces[0].traffic.month[] | select(.date.year == $(date +%Y) and .date.month == $(date +%-m)) | .rx, .tx"))
+dmon=$(echo "${monthly_data[0]}" | awk '{printf "%.2f MiB", $1/1048576}')
+umon=$(echo "${monthly_data[1]}" | awk '{printf "%.2f MiB", $1/1048576}')
+tmon=$(echo "${monthly_data[0]} ${monthly_data[1]}" | awk '{printf "%.2f MiB", ($1 + $2)/1048576}')
 
 # Mengambil informasi konfigurasi dan sistem
 domain=$(cat /usr/local/etc/xray/domain)
@@ -47,8 +51,9 @@ ISP=$(cat /usr/local/etc/xray/org)
 CITY=$(cat /usr/local/etc/xray/city)
 REG=$(cat /usr/local/etc/xray/region)
 WKT=$(cat /usr/local/etc/xray/timezone)
-DATE=$(date -R | cut -d " " -f -4)
+DATE=$(date +"%a, %d %b %Y")
 MYIP=$(curl -sS ipv4.icanhazip.com)
+XRAY_VERSION=$(xray -version | head -n 1 | awk '{print "v"$2}')
 
 # Fungsi untuk menampilkan menu
 show_menu() {
@@ -56,21 +61,21 @@ show_menu() {
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e "               ${WB}----- [ Xray Script ] -----${NC}              "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e " ${YB}ISP${NC}    ${WB}: $ISP"
-    echo -e " ${YB}Region${NC} ${WB}: $REG${NC}"
-    echo -e " ${YB}City${NC}   ${WB}: $CITY${NC}"
-    echo -e " ${YB}Date${NC}   ${WB}: $DATE${NC}"
-    echo -e " ${YB}Domain${NC} ${WB}: $domain${NC}"
+    echo -e " ${YB}ISP${NC}          ${WB}: $ISP"
+    echo -e " ${YB}Region${NC}       ${WB}: $REG${NC}"
+    echo -e " ${YB}City${NC}         ${WB}: $CITY${NC}"
+    echo -e " ${YB}Date${NC}         ${WB}: $DATE${NC}"
+    echo -e " ${YB}Domain${NC}       ${WB}: $domain${NC}"
+    echo -e " ${YB}Xray Version${NC} ${WB}: $XRAY_VERSION${NC}"
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e "     ${WB}NGINX STATUS :${NC} $status_nginx    ${WB}XRAY STATUS :${NC} $status_xray   "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e "          ${WB}----- [ Bandwidth Monitoring ] -----${NC}"
-    echo -e ""
-    echo -e "  ${GB}Today ($DATE)     Monthly ($(date +%B/%Y))${NC}      "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "    ${GB}↓↓ Down: $dtoday          ↓↓ Down: $dmon${NC}   "
-    echo -e "    ${GB}↑↑ Up  : $utoday          ↑↑ Up  : $umon${NC}   "
-    echo -e "    ${GB}≈ Total: $ttoday          ≈ Total: $tmon${NC}   "
+    echo -e "  ${GB}Today (${DATE})${NC}      ${GB}Monthly ($(date +%B/%Y))${NC}      "
+    echo -e "  ${GB}↓↓ Down : $dtoday${NC}         ${GB}↓↓ Down : $dmon${NC}   "
+    echo -e "  ${GB}↑↑ Up   : $utoday${NC}         ${GB}↑↑ Up   : $umon${NC}   "
+    echo -e "  ${GB}≈ Total : $ttoday${NC}         ${GB}≈ Total : $tmon${NC}   "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e "                   ${WB}----- [ Menu ] -----${NC}               "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
@@ -81,9 +86,10 @@ show_menu() {
     echo -e " ${MB}[5]${NC} ${YB}Change Domain${NC}"
     echo -e " ${MB}[6]${NC} ${YB}Cert Acme.sh${NC}"
     echo -e " ${MB}[7]${NC} ${YB}About Script${NC}"
-    echo -e " ${MB}[x]${NC} ${YB}Exit${NC}"
+    echo -e " ${MB}[8]${NC} ${YB}Exit${NC}"
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
+    # echo -e "${RB}Jika kalian mengubah domain maka Akun yang yang sudah dibuat akan hilang, Jadi tolong hati-hati.${NC}"
 }
 
 # Fungsi untuk menangani input menu
@@ -98,7 +104,7 @@ handle_menu() {
         5) clear ; dns ;;
         6) clear ; certxray ;;
         7) clear ; about ;;
-        x) exit ;;
+        8) exit ;;
         *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_menu ;;
     esac
 }
