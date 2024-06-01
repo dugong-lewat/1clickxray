@@ -368,7 +368,6 @@ input_domain() {
             echo "$dns" > /usr/local/etc/xray/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
             echo -e "Domain ${GB}${dns}${NC} saved successfully"
-            echo -e "${YB}Don't forget to renew the certificate.${NC}"
             break
         fi
     done
