@@ -272,6 +272,12 @@ case "$os" in
     debian)
         repo_url="http://nginx.org/packages/debian/"
         ;;
+    Ubuntu)
+        repo_url="http://nginx.org/packages/ubuntu/"
+        ;;
+    Debian)
+        repo_url="http://nginx.org/packages/debian/"
+        ;;
     *)
         print_msg $RB "Distribusi Linux tidak didukung."
         exit 1
