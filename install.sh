@@ -70,7 +70,7 @@ sleep 1
 
 # Install paket keempat
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
-# apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
+apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
 apt install unzip systemd -y
 check_success
 sleep 1
