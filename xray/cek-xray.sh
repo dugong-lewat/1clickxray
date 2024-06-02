@@ -53,31 +53,31 @@ function display_users() {
         local data2=($(tail -n 500 "$log_file" | awk '{print $3}' | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq))
 
         if [ ${#data2[@]} -eq 0 ]; then
-            echo -e "${YB}Tidak ada alamat IP yang ditemukan untuk pengguna $akun.${NC}"
+            echo -e "${YB}Tidak ada alamat IP yang ditemukan untuk pengguna $YB$akun$NC.${NC}"
             continue
         fi
 
-        echo -n > /tmp/ipvmess.txt
-        echo -n > /tmp/other.txt
+        echo -n > /tmp/ipxray
+        echo -n > /tmp/other
 
         for ip in "${data2[@]}"; do
             local jum=$(grep -w "$akun" "$log_file" | tail -n 500 | awk '{print $3}' | sed 's/tcp://g' | cut -d ":" -f 1 | grep -w "$ip" | sort | uniq)
             if [[ "$jum" == "$ip" ]]; then
-                echo "$jum" >> /tmp/ipvmess.txt
+                echo "$jum" >> /tmp/ipxray
             else
-                echo "$ip" >> /tmp/other.txt
+                echo "$ip" >> /tmp/other
             fi
         done
 
-        local jum=$(cat /tmp/ipvmess.txt)
+        local jum=$(cat /tmp/ipxray)
         if [ -n "$jum" ]; then
-            local jum2=$(nl < /tmp/ipvmess.txt)
+            local jum2=$(nl < /tmp/ipxray)
             echo -e "${MB}User: ${WB}$akun${NC}"
             echo -e "${GB}$jum2${NC}"
             echo -e "${BB}————————————————————————————————————————————————————${NC}"
         fi
 
-        rm -f /tmp/ipvmess.txt /tmp/other.txt
+        rm -f /tmp/ipxray /tmp/other
     done
 }
 
