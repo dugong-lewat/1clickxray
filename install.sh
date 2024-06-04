@@ -70,7 +70,7 @@ sleep 1
 
 # Install paket keempat
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
-# apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
+apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
 apt install unzip systemd -y
 check_success
 sleep 1
@@ -532,12 +532,12 @@ setup_domain() {
 setup_domain
 
 # Fungsi untuk menginstal acme.sh dan mendapatkan sertifikat
-domain=$(cat /usr/local/etc/xray/domain)
 install_acme_sh() {
+    domain=$(cat /usr/local/etc/xray/domain)
     curl https://get.acme.sh | sh
     source ~/.bashrc
     ~/.acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
-    ~/.acme.sh/acme.sh --issue -d "$domain" --listen-v4 --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --reloadcmd "systemctl reload nginx"
+    ~/.acme.sh/acme.sh --issue -d "$domain" --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --reloadcmd "systemctl reload nginx"
     chmod 745 /usr/local/etc/xray/private.key
     echo -e "${YB}Sertifikat SSL berhasil dipasang!${NC}"
 }
@@ -586,7 +586,7 @@ cat > /usr/local/etc/xray/config.json << END
   "inbounds": [
     {
       "listen": "127.0.0.1",
-      "port": 62789,
+      "port": 10000,
       "protocol": "dokodemo-door",
       "settings": {
         "address": "127.0.0.1"
@@ -608,20 +608,67 @@ cat > /usr/local/etc/xray/config.json << END
         ],
         "decryption": "none",
         "fallbacks": [
-          {"alpn": "h2", "dest": 4443, "xver": 2},
-          {"dest": 8080, "xver": 2},
+          {
+            "alpn": "h2",
+            "dest": 4443,
+            "xver": 2
+          },
+          {
+            "dest": 8080,
+            "xver": 2
+          },
           // Websocket
-          {"path": "/vless-ws", "dest": "@vless-ws", "xver": 2},
-          {"path": "/vmess-ws", "dest": "@vmess-ws", "xver": 2},
-          {"path": "/trojan-ws", "dest": "@trojan-ws", "xver": 2},
-          {"path": "/ss-ws", "dest": 1000, "xver": 2},
-          {"path": "/ss22-ws", "dest": 1100, "xver": 2},
+          {
+            "path": "/vless-ws",
+            "dest": "@vless-ws",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-ws",
+            "dest": "@vmess-ws",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-ws",
+            "dest": "@trojan-ws",
+            "xver": 2
+          },
+          {
+            "path": "/ss-ws",
+            "dest": 1000,
+            "xver": 2
+          },
+          {
+            "path": "/ss22-ws",
+            "dest": 1100,
+            "xver": 2
+          },
           // HTTPupgrade
-          {"path": "/vless-hup", "dest": "@vl-hup", "xver": 2},
-          {"path": "/vmess-hup", "dest": "@vm-hup", "xver": 2},
-          {"path": "/trojan-hup", "dest": "@tr-hup", "xver": 2},
-          {"path": "/ss-hup", "dest": 3000, "xver": 2},
-          {"path": "/ss22-hup", "dest": 3100, "xver": 2}
+          {
+            "path": "/vless-hup",
+            "dest": "@vl-hup",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-hup",
+            "dest": "@vm-hup",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-hup",
+            "dest": "@tr-hup",
+            "xver": 2
+          },
+          {
+            "path": "/ss-hup",
+            "dest": "3000",
+            "xver": 2
+          },
+          {
+            "path": "/ss22-hup",
+            "dest": "3100",
+            "xver": 2
+          }
         ]
       },
       "sniffing": {
@@ -649,7 +696,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "tcp",
         "security": "tls"
-      }
+      },
+      "tag": "in-01"
     },
 # TROJAN TCP TLS
     {
@@ -683,7 +731,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "tcp",
         "security": "none"
-      }
+      },
+      "tag": "in-02"
     },
 # VLESS WS
     {
@@ -713,7 +762,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      }
+      },
+      "tag": "in-03"
     },
 # VMESS WS
     {
@@ -742,7 +792,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      }
+      },
+      "tag": "in-04",
     },
 # TROJAN WS
     {
@@ -770,7 +821,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      }
+      },
+      "tag": "in-05"
     },
 # SS WS
     {
@@ -801,7 +853,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      }
+      },
+      "tag": "in-06"
     },
 # SS2022 WS
     {
@@ -833,7 +886,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      }
+      },
+      "tag": "in-07"
     },
 # VLESS HTTPupgrade
     {
@@ -863,7 +917,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-08"
     },
 # VMESS HTTPupgrade
     {
@@ -893,7 +948,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-09"
     },
 # TROJAN HTTPupgrade
     {
@@ -921,7 +977,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-10"
     },
 # SS HTTPupgrade
     {
@@ -952,7 +1009,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-11"
     },
 # SS2022 HTTPupgrade
     {
@@ -984,7 +1042,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-12"
     },
 # VLESS gRPC
     {
@@ -1020,7 +1079,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "grpc",
         "security": "none"
-      }
+      },
+      "tag": "in-13"
     },
 # VMESS gRPC
     {
@@ -1056,7 +1116,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "grpc",
         "security": "none"
-      }
+      },
+      "tag": "in-14"
     },
 # TROJAN gRPC
     {
@@ -1092,7 +1153,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "grpc",
         "security": "none"
-      }
+      },
+      "tag": "in-15"
     },
 # SS gRPC
     {
@@ -1127,7 +1189,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "grpc",
         "security": "none"
-      }
+      },
+      "tag": "in-16"
     },
 # SS2022 gRPC
     {
@@ -1163,7 +1226,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "grpc",
         "security": "none"
-      }
+      },
+      "tag": "in-17"
     },
     {
       "port": 80,
@@ -1239,7 +1303,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-18"
     },
 # TROJAN WS
     {
@@ -1267,7 +1332,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      }
+      },1
+      "tag": "in-19"
     },
 # SS WS
     {
@@ -1298,7 +1364,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      }
+      },
+      "tag": "in-20"
     },
 # SS2022 WS
     {
@@ -1330,7 +1397,8 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      }
+      },
+      "tag": "in-21"
     },
 # TROJAN HTTPupgrade
     {
@@ -1358,7 +1426,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-22"
     },
 # SS HTTPupgrade
     {
@@ -1389,7 +1458,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-23"
     },
 # SS2022 HTTPupgrade
     {
@@ -1421,7 +1491,8 @@ cat > /usr/local/etc/xray/config.json << END
           "tls"
         ],
         "enabled": true
-      }
+      },
+      "tag": "in-24"
     }
   ],
   "log": {
@@ -1444,39 +1515,30 @@ cat > /usr/local/etc/xray/config.json << END
       "tag": "blocked"
     },
     {
-      "protocol": "vless",
+      "protocol": "wireguard",
       "settings": {
-        "vnext": [
+        "address": [
+          "172.16.0.2/32",
+          "2606:4700::/128"
+        ],
+        "domainStrategy": "ForceIP",
+        "kernelMode": false,
+        "mtu": 1420,
+        "peers": [
           {
-            "address": "sg.vless.sbs",
-            "port": 443,
-            "users": [
-              {
-                "encryption": "none",
-                "id": "47f5ab29-37cb-4f1a-8638-765c59774836"
-              }
-            ]
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "endpoint": "engage.cloudflareclient.com:2408",
+            "keepAlive": 0,
+            "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
           }
-        ]
+        ],
+        "secretKey": "MCQZVrCmmKJqhPT0jKF86EM5ar+/muwmCgsK8eVUC0k=",
+        "workers": 0
       },
-      "streamSettings": {
-        "network": "ws",
-        "security": "tls",
-        "tlsSettings": {
-          "allowInsecure": true,
-          "alpn": [],
-          "fingerprint": "",
-          "serverName": "sg.vless.sbs"
-        },
-        "wsSettings": {
-          "headers": {
-            "Host": "sg.vless.sbs"
-          },
-          "host": "sg.vless.sbs",
-          "path": "/vless-ws"
-        }
-      },
-      "tag": "sg.vless.sbs"
+      "tag": "warp"
     }
   ],
   "policy": {
@@ -1519,9 +1581,45 @@ cat > /usr/local/etc/xray/config.json << END
       },
       {
         "domain": [
-          "geosite:google"
+          "geosite:google",
+          "geosite:openai",
+          "geosite:netflix",
+          "geosite:reddit",
+          "geosite:apple",
+          "geosite:spotify",
+          "geosite:meta"
         ],
-        "outboundTag": "sg.vless.sbs",
+        "outboundTag": "direct",
+        "type": "field"
+      },
+      {
+        "inboundTag": [
+          "in-01",
+          "in-02",
+          "in-03",
+          "in-04",
+          "in-05",
+          "in-06",
+          "in-07",
+          "in-08",
+          "in-09",
+          "in-10",
+          "in-11",
+          "in-12",
+          "in-13",
+          "in-14",
+          "in-15",
+          "in-16",
+          "in-17",
+          "in-18",
+          "in-19",
+          "in-20",
+          "in-21",
+          "in-22",
+          "in-23",
+          "in-24"
+        ],
+        "outboundTag": "direct",
         "type": "field"
       }
     ]
