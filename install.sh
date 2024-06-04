@@ -1332,7 +1332,7 @@ cat > /usr/local/etc/xray/config.json << END
         },
         "network": "ws",
         "security": "none"
-      },1
+      },
       "tag": "in-19"
     },
 # SS WS
