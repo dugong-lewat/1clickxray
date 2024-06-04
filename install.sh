@@ -793,7 +793,7 @@ cat > /usr/local/etc/xray/config.json << END
         "network": "ws",
         "security": "none"
       },
-      "tag": "in-04",
+      "tag": "in-04"
     },
 # TROJAN WS
     {
