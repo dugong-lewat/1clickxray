@@ -1513,6 +1513,32 @@ cat > /usr/local/etc/xray/config.json << END
       "protocol": "blackhole",
       "settings": {},
       "tag": "blocked"
+    },
+    {
+      "protocol": "wireguard",
+      "settings": {
+        "address": [
+          "172.16.0.2/32",
+          "2606:4700::/128"
+        ],
+        "domainStrategy": "ForceIP",
+        "kernelMode": false,
+        "mtu": 1420,
+        "peers": [
+          {
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "endpoint": "engage.cloudflareclient.com:2408",
+            "keepAlive": 0,
+            "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
+          }
+        ],
+        "secretKey": "MCQZVrCmmKJqhPT0jKF86EM5ar+/muwmCgsK8eVUC0k=",
+        "workers": 0
+      },
+      "tag": "warp"
     }
   ],
   "policy": {
@@ -1551,6 +1577,49 @@ cat > /usr/local/etc/xray/config.json << END
         "protocol": [
           "bittorrent"
         ],
+        "type": "field"
+      },
+      {
+        "domain": [
+          "geosite:google",
+          "geosite:openai",
+          "geosite:netflix",
+          "geosite:reddit",
+          "geosite:apple",
+          "geosite:spotify",
+          "geosite:meta"
+        ],
+        "outboundTag": "direct",
+        "type": "field"
+      },
+      {
+        "inboundTag": [
+          "in-01",
+          "in-02",
+          "in-03",
+          "in-04",
+          "in-05",
+          "in-06",
+          "in-07",
+          "in-08",
+          "in-09",
+          "in-10",
+          "in-11",
+          "in-12",
+          "in-13",
+          "in-14",
+          "in-15",
+          "in-16",
+          "in-17",
+          "in-18",
+          "in-19",
+          "in-20",
+          "in-21",
+          "in-22",
+          "in-23",
+          "in-24"
+        ],
+        "outboundTag": "direct",
         "type": "field"
       }
     ]
