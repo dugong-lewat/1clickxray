@@ -153,13 +153,17 @@ Documentation=https://github.com/xtls
 After=network.target nss-lookup.target
 
 [Service]
-User=root
+User=nobody
+Group=nogroup
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ExecStart=/usr/local/bin/xray run -confdir /usr/local/etc/xray/config/
 RestartSec=3
 Restart=always
+StandardOutput=file:/var/log/xray/access.log
+StandardError=file:/var/log/xray/error.log
+SyslogIdentifier=xray
 LimitNOFILE=infinity
 OOMScoreAdjust=100
 
@@ -1485,7 +1489,7 @@ sleep 1.5
 print_msg $YB "Membuat file log Xray yang diperlukan..."
 sudo touch /var/log/xray/access.log /var/log/xray/error.log
 sudo chown nobody:nogroup /var/log/xray/access.log /var/log/xray/error.log
-sudo chmod 644 /var/log/xray/access.log /var/log/xray/error.log
+sudo chmod 664 /var/log/xray/access.log /var/log/xray/error.log
 check_success "Gagal membuat file log Xray yang diperlukan."
 sleep 1.5
 
