@@ -30,7 +30,7 @@ add_xray_config() {
 
 # Inisialisasi Variabel
 user=$(generate_random_string 7)
-domain=$(cat /usr/local/etc/xray/domain)
+domain=$(cat /usr/local/etc/xray/dns/domain)
 cipher="aes-256-gcm"
 cipher2="2022-blake3-aes-256-gcm"
 uuid=$(generate_uuid)
