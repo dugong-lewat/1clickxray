@@ -16,8 +16,8 @@
       "protocol": "wireguard",
       "settings": {
         "address": [
-          "172.16.0.2/32",
-          "2606:4700::/128"
+          "172.16.0.2",
+          "2606:4700:110:8b11:3447:b482:6337:7d9a"
         ],
         "domainStrategy": "ForceIP",
         "kernelMode": false,
@@ -33,7 +33,7 @@
             "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
           }
         ],
-        "secretKey": "MCQZVrCmmKJqhPT0jKF86EM5ar+/muwmCgsK8eVUC0k=",
+        "secretKey": "cDdJ0KRWkVW0axW+v1c3+KjY25q3hybuVAEXemyKtno=",
         "workers": 0
       },
       "tag": "warp"
