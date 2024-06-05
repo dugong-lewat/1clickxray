@@ -562,6 +562,12 @@ echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 print_msg $YB "Mengonfigurasi Xray-core..."
 cat > /usr/local/etc/xray/config.json << END
 {
+  "log": {
+    "access": "/var/log/xray/access.log",
+    "dnsLog": false,
+    "error": "/var/log/xray/error.log",
+    "loglevel": "info"
+  },
   "api": {
     "services": [
       "HandlerService",
@@ -582,6 +588,20 @@ cat > /usr/local/etc/xray/config.json << END
       }
     ],
     "tag": "dns_inbounds"
+  },
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true
+      }
+    },
+    "system": {
+      "statsInboundDownlink": true,
+      "statsInboundUplink": true,
+      "statsOutboundDownlink": true,
+      "statsOutboundUplink": true
+    }
   },
   "inbounds": [
     {
@@ -1495,12 +1515,6 @@ cat > /usr/local/etc/xray/config.json << END
       "tag": "in-24"
     }
   ],
-  "log": {
-    "access": "/var/log/xray/access.log",
-    "dnsLog": false,
-    "error": "/var/log/xray/error.log",
-    "loglevel": "info"
-  },
   "outbounds": [
     {
       "protocol": "freedom",
@@ -1541,20 +1555,6 @@ cat > /usr/local/etc/xray/config.json << END
       "tag": "warp"
     }
   ],
-  "policy": {
-    "levels": {
-      "0": {
-        "statsUserDownlink": true,
-        "statsUserUplink": true
-      }
-    },
-    "system": {
-      "statsInboundDownlink": true,
-      "statsInboundUplink": true,
-      "statsOutboundDownlink": true,
-      "statsOutboundUplink": true
-    }
-  },
   "routing": {
     "domainStrategy": "AsIs",
     "rules": [
@@ -1589,37 +1589,7 @@ cat > /usr/local/etc/xray/config.json << END
           "geosite:spotify",
           "geosite:meta"
         ],
-        "outboundTag": "direct",
-        "type": "field"
-      },
-      {
-        "inboundTag": [
-          "in-01",
-          "in-02",
-          "in-03",
-          "in-04",
-          "in-05",
-          "in-06",
-          "in-07",
-          "in-08",
-          "in-09",
-          "in-10",
-          "in-11",
-          "in-12",
-          "in-13",
-          "in-14",
-          "in-15",
-          "in-16",
-          "in-17",
-          "in-18",
-          "in-19",
-          "in-20",
-          "in-21",
-          "in-22",
-          "in-23",
-          "in-24"
-        ],
-        "outboundTag": "direct",
+        "outboundTag": "warp",
         "type": "field"
       }
     ]
