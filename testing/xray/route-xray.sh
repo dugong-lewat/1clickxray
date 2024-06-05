@@ -61,7 +61,7 @@ disable_route() {
 show_wg_menu() {
     clear
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "             ${WB}----- [ Route Xray Menu ] -----${NC}            "
+    echo -e "             ${WB}----- [ Xray Route Menu ] -----${NC}            "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
     echo -e " ${MB}[1]${NC} ${YB}Route all traffic via WARP${NC}"
