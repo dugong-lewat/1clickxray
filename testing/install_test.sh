@@ -93,13 +93,6 @@ print_msg $YB "Menghapus file konfigurasi lama..."
 sudo rm -f /usr/local/etc/xray/city /usr/local/etc/xray/org /usr/local/etc/xray/timezone /usr/local/etc/xray/region
 check_success "Gagal menghapus file konfigurasi lama."
 
-# Membuat file log Xray yang diperlukan
-print_msg $YB "Membuat file log Xray yang diperlukan..."
-sudo mkdir -p /var/log/xray
-sudo chown -R nobody:nogroup /var/log/xray
-sudo chmod -R 755 /var/log/xray
-check_success "Gagal membuat file log Xray yang diperlukan."
-
 # Fungsi untuk mendeteksi OS dan distribusi
 detect_os() {
     if [ -f /etc/os-release ]; then
@@ -1488,6 +1481,14 @@ wget -q -O /usr/local/etc/xray/config/06_routing.json "https://${XRAY_CONFIG}/06
 wget -q -O /usr/local/etc/xray/config/07_stats.json "https://${XRAY_CONFIG}/07_stats.json"
 sleep 1.5
 
+# Membuat file log Xray yang diperlukan
+print_msg $YB "Membuat file log Xray yang diperlukan..."
+sudo touch /var/log/xray/access.log /var/log/xray/error.log
+sudo chown nobody:nogroup /var/log/xray/access.log /var/log/xray/error.log
+sudo chmod 644 /var/log/xray/access.log /var/log/xray/error.log
+check_success "Gagal membuat file log Xray yang diperlukan."
+sleep 1.5
+
 # Konfigurasi Nginx
 print_msg $YB "Mengonfigurasi Nginx..."
 cat > /etc/nginx/nginx.conf << END
@@ -1580,7 +1581,6 @@ wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/dugong-lew
 print_msg $GB "Konfigurasi Xray-core dan Nginx berhasil."
 sleep 3
 
-systemctl daemon-reload
 systemctl restart nginx
 systemctl restart xray
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Done${NC}"
