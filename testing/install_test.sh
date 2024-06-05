@@ -95,9 +95,9 @@ check_success "Gagal menghapus file konfigurasi lama."
 
 # Membuat file log Xray yang diperlukan
 print_msg $YB "Membuat file log Xray yang diperlukan..."
-sudo touch /var/log/xray/access.log /var/log/xray/error.log
-sudo chown nobody:nogroup /var/log/xray/access.log /var/log/xray/error.log
-sudo chmod 644 /var/log/xray/access.log /var/log/xray/error.log
+sudo mkdir -p /var/log/xray
+sudo chown -R nobody:nogroup /var/log/xray
+sudo chmod -R 755 /var/log/xray
 check_success "Gagal membuat file log Xray yang diperlukan."
 
 # Fungsi untuk mendeteksi OS dan distribusi
@@ -1580,6 +1580,7 @@ wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/dugong-lew
 print_msg $GB "Konfigurasi Xray-core dan Nginx berhasil."
 sleep 3
 
+systemctl daemon-reload
 systemctl restart nginx
 systemctl restart xray
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Done${NC}"
