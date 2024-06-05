@@ -69,7 +69,7 @@ input_domain() {
         elif ! validate_domain "$dns"; then
             echo -e "${RB}Invalid domain format! Please input a valid domain.${NC}"
         else
-            echo "$dns" > /usr/local/etc/xray/domain
+            echo "$dns" > /usr/local/etc/xray/dns/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
             echo -e "Domain ${GB}${dns}${NC} saved successfully"
             echo -e "${YB}Don't forget to renew the certificate.${NC}"
@@ -137,7 +137,7 @@ delete_record() {
 
 # Function to add A record
 create_A_record() {
-  local record_name=$(cat /usr/local/etc/xray/a_record 2>/dev/null)
+  local record_name=$(cat /usr/local/etc/xray/dns/a_record 2>/dev/null)
   if [ -n "$record_name" ]; then
     delete_record "$record_name" "$TYPE_A"
   fi
@@ -154,15 +154,15 @@ create_A_record() {
       "ttl": 0,
       "proxied": false
     }')
-  echo "$NAME_A" > /usr/local/etc/xray/domain
-  echo "$NAME_A" > /usr/local/etc/xray/a_record
+  echo "$NAME_A" > /usr/local/etc/xray/dns/domain
+  echo "$NAME_A" > /usr/local/etc/xray/dns/a_record
   echo "DNS=$NAME_A" > /var/lib/dnsvps.conf
   handle_response "$response" "${YB}Adding A record $GB$NAME_A$NC"
 }
 
 # Function to add CNAME record
 create_CNAME_record() {
-  local record_name=$(cat /usr/local/etc/xray/cname_record 2>/dev/null)
+  local record_name=$(cat /usr/local/etc/xray/dns/cname_record 2>/dev/null)
   if [ -n "$record_name" ]; then
     delete_record "$record_name" "$TYPE_CNAME"
   fi
@@ -179,14 +179,14 @@ create_CNAME_record() {
       "ttl": 0,
       "proxied": false
     }')
-  echo "$NAME_CNAME" > /usr/local/etc/xray/cname_record
+  echo "$NAME_CNAME" > /usr/local/etc/xray/dns/cname_record
   handle_response "$response" "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC"
 }
 
 # Update Nginx configuration
 update_nginx_config() {
     # Get new domain from file
-    NEW_DOMAIN=$(cat /usr/local/etc/xray/domain)
+    NEW_DOMAIN=$(cat /usr/local/etc/xray/dns/domain)
     # Update server_name in Nginx configuration
     sed -i "s/server_name .*;/server_name $NEW_DOMAIN;/g" /etc/nginx/nginx.conf
 
