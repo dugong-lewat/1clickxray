@@ -33,8 +33,13 @@
           "geosite:spotify",
           "geosite:meta"
         ],
-        "outboundTag": "warp",
+        "outboundTag": "direct",
         "type": "field"
+      },
+      {
+        "type": "field",
+        "port": "0-65535",
+        "outboundTag": "direct"
       }
     ]
   }
