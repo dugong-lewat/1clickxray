@@ -71,7 +71,7 @@ sleep 1
 # Install paket keempat
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
 apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
-apt install unzip systemd -y
+apt install unzip -y
 check_success
 sleep 1
 
@@ -533,6 +533,7 @@ setup_domain
 # Fungsi untuk menginstal acme.sh dan mendapatkan sertifikat
 install_acme_sh() {
     domain=$(cat /usr/local/etc/xray/dns/domain)
+    rm -rf ~/.acme.sh/*_ecc >> /dev/null 2>&1
     curl https://get.acme.sh | sh
     source ~/.bashrc
     ~/.acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
