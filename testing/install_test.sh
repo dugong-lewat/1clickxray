@@ -164,7 +164,7 @@ User=root
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
-ExecStart=/usr/local/bin/xray run -confdir /usr/local/etc/xray/
+ExecStart=/usr/local/bin/xray run -confdir /usr/local/etc/xray/config/
 RestartSec=3
 Restart=always
 LimitNOFILE=infinity
@@ -334,7 +334,9 @@ clear
 systemctl restart nginx
 systemctl stop nginx
 systemctl stop xray
-touch /usr/local/etc/xray/domain
+mkdir -p /usr/local/etc/xray/config >> /dev/null 2>&1
+mkdir -p /usr/local/etc/xray/dns >> /dev/null 2>&1
+touch /usr/local/etc/xray/dns/domain
 
 # Set your Cloudflare API credentials and zone ID
 API_EMAIL="1562apricot@awgarstone.com"
@@ -371,7 +373,7 @@ input_domain() {
         elif ! validate_domain "$dns"; then
             echo -e "${RB}Invalid domain format! Please input a valid domain.${NC}"
         else
-            echo "$dns" > /usr/local/etc/xray/domain
+            echo "$dns" > /usr/local/etc/xray/dns/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
             echo -e "Domain ${GB}${dns}${NC} saved successfully"
             break
@@ -438,7 +440,7 @@ delete_record() {
 
 # Function to add A record
 create_A_record() {
-  local record_name=$(cat /usr/local/etc/xray/a_record 2>/dev/null)
+  local record_name=$(cat /usr/local/etc/xray/dns/a_record 2>/dev/null)
   if [ -n "$record_name" ]; then
     delete_record "$record_name" "$TYPE_A"
   fi
@@ -455,15 +457,15 @@ create_A_record() {
       "ttl": 0,
       "proxied": false
     }')
-  echo "$NAME_A" > /usr/local/etc/xray/domain
-  echo "$NAME_A" > /usr/local/etc/xray/a_record
+  echo "$NAME_A" > /usr/local/etc/xray/dns/domain
+  echo "$NAME_A" > /usr/local/etc/xray/dns/a_record
   echo "DNS=$NAME_A" > /var/lib/dnsvps.conf
   handle_response "$response" "${YB}Adding A record $GB$NAME_A$NC"
 }
 
 # Function to add CNAME record
 create_CNAME_record() {
-  local record_name=$(cat /usr/local/etc/xray/cname_record 2>/dev/null)
+  local record_name=$(cat /usr/local/etc/xray/dns/cname_record 2>/dev/null)
   if [ -n "$record_name" ]; then
     delete_record "$record_name" "$TYPE_CNAME"
   fi
@@ -480,7 +482,7 @@ create_CNAME_record() {
       "ttl": 0,
       "proxied": false
     }')
-  echo "$NAME_CNAME" > /usr/local/etc/xray/cname_record
+  echo "$NAME_CNAME" > /usr/local/etc/xray/dns/cname_record
   handle_response "$response" "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC"
 }
 
@@ -533,7 +535,7 @@ setup_domain
 
 # Fungsi untuk menginstal acme.sh dan mendapatkan sertifikat
 install_acme_sh() {
-    domain=$(cat /usr/local/etc/xray/domain)
+    domain=$(cat /usr/local/etc/xray/dns/domain)
     curl https://get.acme.sh | sh
     source ~/.bashrc
     ~/.acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
@@ -560,50 +562,9 @@ echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 
 # Konfigurasi Xray-core
 print_msg $YB "Mengonfigurasi Xray-core..."
-cat > /usr/local/etc/xray/config.json << END
+cat > /usr/local/etc/xray/config/04_inbounds.json << END
 {
-  "log": {
-    "access": "/var/log/xray/access.log",
-    "dnsLog": false,
-    "error": "/var/log/xray/error.log",
-    "loglevel": "info"
-  },
-  "api": {
-    "services": [
-      "HandlerService",
-      "LoggerService",
-      "StatsService"
-    ],
-    "tag": "api"
-  },
-  "dns": {
-    "queryStrategy": "UseIP",
-    "servers": [
-      {
-        "address": "localhost",
-        "domains": [
-          "https://1.1.1.1/dns-query"
-        ],
-        "queryStrategy": "UseIP"
-      }
-    ],
-    "tag": "dns_inbounds"
-  },
-  "policy": {
-    "levels": {
-      "0": {
-        "statsUserDownlink": true,
-        "statsUserUplink": true
-      }
-    },
-    "system": {
-      "statsInboundDownlink": true,
-      "statsInboundUplink": true,
-      "statsOutboundDownlink": true,
-      "statsOutboundUplink": true
-    }
-  },
-  "inbounds": [
+    "inbounds": [
     {
       "listen": "127.0.0.1",
       "port": 10000,
@@ -1514,87 +1475,7 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "tag": "in-24"
     }
-  ],
-  "outbounds": [
-    {
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      },
-      "tag": "direct"
-    },
-    {
-      "protocol": "blackhole",
-      "settings": {},
-      "tag": "blocked"
-    },
-    {
-      "protocol": "wireguard",
-      "settings": {
-        "address": [
-          "172.16.0.2/32",
-          "2606:4700::/128"
-        ],
-        "domainStrategy": "ForceIP",
-        "kernelMode": false,
-        "mtu": 1420,
-        "peers": [
-          {
-            "allowedIPs": [
-              "0.0.0.0/0",
-              "::/0"
-            ],
-            "endpoint": "engage.cloudflareclient.com:2408",
-            "keepAlive": 0,
-            "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
-          }
-        ],
-        "secretKey": "MCQZVrCmmKJqhPT0jKF86EM5ar+/muwmCgsK8eVUC0k=",
-        "workers": 0
-      },
-      "tag": "warp"
-    }
-  ],
-  "routing": {
-    "domainStrategy": "AsIs",
-    "rules": [
-      {
-        "inboundTag": [
-          "api"
-        ],
-        "outboundTag": "api",
-        "type": "field"
-      },
-      {
-        "ip": [
-          "geoip:private"
-        ],
-        "outboundTag": "blocked",
-        "type": "field"
-      },
-      {
-        "outboundTag": "blocked",
-        "protocol": [
-          "bittorrent"
-        ],
-        "type": "field"
-      },
-      {
-        "domain": [
-          "geosite:google",
-          "geosite:openai",
-          "geosite:netflix",
-          "geosite:reddit",
-          "geosite:apple",
-          "geosite:spotify",
-          "geosite:meta"
-        ],
-        "outboundTag": "warp",
-        "type": "field"
-      }
-    ]
-  },
-  "stats": {}
+  ]
 }
 END
 sleep 1.5
@@ -1703,7 +1584,7 @@ sudo iptables -A INPUT -p tcp --dport 6881:6889 -j DROP
 sudo iptables -A INPUT -p tcp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 sudo iptables -A INPUT -p udp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 cd /usr/bin
-GITHUB=raw.githubusercontent.com/dugong-lewat/1clickxray/main
+GITHUB=raw.githubusercontent.com/dugong-lewat/1clickxray/main/testing
 echo -e "${GB}[ INFO ]${NC} ${YB}Mengunduh menu utama...${NC}"
 wget -q -O menu "https://${GITHUB}/menu/menu.sh"
 wget -q -O allxray "https://${GITHUB}/menu/allxray.sh"
