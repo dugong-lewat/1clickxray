@@ -29,7 +29,7 @@ echo -e "${GB}[ INFO ]${NC} ${YB}Renew cert done...${NC} "
 sleep 2
 echo -e "${GB}[ INFO ]${NC} ${YB}Starting service $Cek${NC} "
 sleep 2
-echo "$domain" > /usr/local/etc/xray/domain
+echo "$domain" > /usr/local/etc/xray/dns/domain
 systemctl restart $Cek
 systemctl restart nginx
 echo -e "${GB}[ INFO ]${NC} ${YB}All finished...${NC} "
