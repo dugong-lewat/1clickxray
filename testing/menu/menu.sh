@@ -46,7 +46,7 @@ umon=$(echo "${monthly_data[1]}" | awk '{printf "%.2f MiB", $1/1048576}')
 tmon=$(echo "${monthly_data[0]} ${monthly_data[1]}" | awk '{printf "%.2f MiB", ($1 + $2)/1048576}')
 
 # Mengambil informasi konfigurasi dan sistem
-domain=$(cat /usr/local/etc/xray/domain)
+domain=$(cat /usr/local/etc/xray/dns/domain)
 ISP=$(cat /usr/local/etc/xray/org)
 CITY=$(cat /usr/local/etc/xray/city)
 REG=$(cat /usr/local/etc/xray/region)
