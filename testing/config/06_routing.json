@@ -63,6 +63,7 @@
           "in-23",
           "in-24"
         ],
+        "network": "TCP,UDP",
         "outboundTag": "direct",
         "type": "field"
       }
