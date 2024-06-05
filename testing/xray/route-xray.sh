@@ -44,7 +44,7 @@ route_all_traffic() {
 # Fungsi untuk merutekan lalu lintas beberapa situs web via WARP
 route_some_traffic() {
     # Menggunakan 'sed' untuk mengganti 'outboundTag' dari 'direct' menjadi 'warp' untuk domain tertentu
-    sed -i '/"domain": \[.*"geosite:meta"\]/,/"type": "field"/ s/"outboundTag": "direct"/"outboundTag": "warp"/' $CONFIG_FILE
+    sed -i '/"domain": \[/,/"type": "field"/ s/"outboundTag": "direct"/"outboundTag": "warp"/' $CONFIG_FILE
     verification_1st
     systemctl restart xray
 }
@@ -56,16 +56,29 @@ disable_route() {
     systemctl restart xray
 }
 
+function_1st() {
+  disable_route
+  route_all_traffic
+}
+function_2nd() {
+  disable_route
+  route_some_traffic
+}
+function_3rd() {
+  disable_route
+  verification_2nd
+}
+
 # Fungsi untuk menampilkan menu
 show_wg_menu() {
     clear
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "             ${WB}----- [ Xray Route Menu ] -----${NC}            "
+    echo -e "             ${WB}----- [ Route Xray Menu ] -----${NC}            "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
     echo -e " ${MB}[1]${NC} ${YB}Route all traffic via WARP${NC}"
     echo -e " ${MB}[2]${NC} ${YB}Route some website traffic via WARP${NC}"
-    echo -e " ${MB}[3]${NC} ${YB}Disable route via WARP${NC}"
+    echo -e " ${MB}[3]${NC} ${YB}Disable route WARP${NC}"
     echo -e ""
     echo -e " ${MB}[0]${NC} ${YB}Back To Menu${NC}"
     echo -e ""
@@ -78,9 +91,9 @@ handle_wg_menu() {
     read -p " Select menu :  "  opt
     echo -e ""
     case $opt in
-        1) clear ; disable_route ; route_all_traffic ; sleep 2 ;;
-        2) clear ; disable_route ; route_some_traffic ; sleep 2 ;;
-        3) clear ; disable_route ; verification_2nd ; sleep 2 ;;
+        1) function_1st ; sleep 2 ;;
+        2) function_2nd ; sleep 2 ;;
+        3) function_3rd ; sleep 2 ;;
         0) clear ; menu ;;
         *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_wg_menu ;;
     esac
