@@ -28,7 +28,7 @@ function display_menu() {
 
 # Fungsi untuk menampilkan pengguna dan IP yang login
 function display_users() {
-    local config_file="/usr/local/etc/xray/config.json"
+    local config_file="/usr/local/etc/xray/config/00_log.json"
     local log_file="/var/log/xray/access.log"
 
     if [[ ! -f "$config_file" ]]; then

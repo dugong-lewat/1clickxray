@@ -25,7 +25,7 @@ generate_uuid() {
 add_xray_config() {
     local section=$1
     local content=$2
-    sed -i "/#$section\$/a\\#&@ $user $exp\n$content" /usr/local/etc/xray/config.json
+    sed -i "/#$section\$/a\\#&@ $user $exp\n$content" /usr/local/etc/xray/config/04_inbounds.json
 }
 
 # Inisialisasi Variabel
