@@ -1605,6 +1605,7 @@ wget -q -O del-xray "https://${GITHUB}/xray/del-xray.sh"
 wget -q -O extend-xray "https://${GITHUB}/xray/extend-xray.sh"
 wget -q -O create-xray "https://${GITHUB}/xray/create-xray.sh"
 wget -q -O cek-xray "https://${GITHUB}/xray/cek-xray.sh"
+wget -q -O route-xray "https://${GITHUB}/xray/route-xray.sh"
 sleep 0.5
 
 echo -e "${GB}[ INFO ]${NC} ${YB}Mengunduh menu lainnya...${NC}"
@@ -1617,7 +1618,7 @@ wget -q -O log-xray "https://${GITHUB}/other/log-xray.sh"
 wget -q -O update-xray "https://${GITHUB}/other/update-xray.sh"
 
 echo -e "${GB}[ INFO ]${NC} ${YB}Memberikan izin eksekusi pada skrip...${NC}"
-chmod +x del-xray extend-xray create-xray cek-xray log-xray menu allxray xp dns certxray about clear-log update-xray
+chmod +x del-xray extend-xray create-xray cek-xray log-xray menu allxray xp dns certxray about clear-log update-xray route-xray
 echo -e "${GB}[ INFO ]${NC} ${YB}Persiapan Selesai.${NC}"
 sleep 3
 cd
