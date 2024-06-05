@@ -562,6 +562,11 @@ echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 
 # Konfigurasi Xray-core
 print_msg $YB "Mengonfigurasi Xray-core..."
+XRAY_CONFIG=raw.githubusercontent.com/dugong-lewat/1clickxray/main/testing/config
+wget -q -O /usr/local/etc/xray/config/00_log.json "https://${XRAY_CONFIG}/00_log.json"
+wget -q -O /usr/local/etc/xray/config/01_api.json "https://${XRAY_CONFIG}/01_api.json"
+wget -q -O /usr/local/etc/xray/config/02_dns.json "https://${XRAY_CONFIG}/02_dns.json"
+wget -q -O /usr/local/etc/xray/config/03_policy.json "https://${XRAY_CONFIG}/03_policy.json"
 cat > /usr/local/etc/xray/config/04_inbounds.json << END
 {
     "inbounds": [
@@ -1478,6 +1483,9 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
   ]
 }
 END
+wget -q -O /usr/local/etc/xray/config/05_outbonds.json "https://${XRAY_CONFIG}/05_outbonds.json"
+wget -q -O /usr/local/etc/xray/config/06_routing.json "https://${XRAY_CONFIG}/06_routing.json"
+wget -q -O /usr/local/etc/xray/config/07_stats.json "https://${XRAY_CONFIG}/07_stats.json"
 sleep 1.5
 
 # Konfigurasi Nginx
