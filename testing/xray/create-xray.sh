@@ -40,7 +40,20 @@ userpsk=$(openssl rand -base64 32)
 serverpsk=$(cat /usr/local/etc/xray/serverpsk)
 
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-read -p "Active Period / Masa Aktif (days): " masaaktif
+
+valid_input=false
+
+while [ "$valid_input" = false ]; do
+    read -p "Active Period / Masa Aktif (days): " masaaktif
+
+    # Cek apakah input hanya berisi angka
+    if [[ "$masaaktif" =~ ^[0-9]+$ ]]; then
+        valid_input=true
+    else
+        echo "${RB}Input harus berupa angka. Silakan coba lagi.${NC}"
+    fi
+done
+
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 exp=$(date -d "$masaaktif days" +"%Y-%m-%d")
 
