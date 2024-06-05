@@ -53,7 +53,6 @@ route_some_traffic() {
 disable_route() {
     # Menggunakan 'sed' untuk mengganti 'outboundTag' dari 'warp' menjadi 'direct'
     sed -i 's/"outboundTag": "warp"/"outboundTag": "direct"/g' $CONFIG_FILE
-    verification_2nd
     systemctl restart xray
 }
 
@@ -66,7 +65,7 @@ show_wg_menu() {
     echo -e ""
     echo -e " ${MB}[1]${NC} ${YB}Route all traffic via WARP${NC}"
     echo -e " ${MB}[2]${NC} ${YB}Route some website traffic via WARP${NC}"
-    echo -e " ${MB}[3]${NC} ${YB}Disable route WARP${NC}"
+    echo -e " ${MB}[3]${NC} ${YB}Disable route via WARP${NC}"
     echo -e ""
     echo -e " ${MB}[0]${NC} ${YB}Back To Menu${NC}"
     echo -e ""
@@ -81,7 +80,7 @@ handle_wg_menu() {
     case $opt in
         1) clear ; disable_route ; route_all_traffic ; sleep 2 ;;
         2) clear ; disable_route ; route_some_traffic ; sleep 2 ;;
-        3) clear ; disable_route ; sleep 2 ;;
+        3) clear ; disable_route ; verification_2nd ; sleep 2 ;;
         0) clear ; menu ;;
         *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_wg_menu ;;
     esac
