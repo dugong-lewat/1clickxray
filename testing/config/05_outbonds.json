@@ -17,7 +17,7 @@
       "settings": {
         "address": [
           "172.16.0.2",
-          "2606:4700:110:84ca:a69f:6946:419d:9e82"
+          "2606:4700:110:871d:cce8:971c:d742:fd61"
         ],
         "domainStrategy": "ForceIP",
         "kernelMode": false,
@@ -28,12 +28,12 @@
               "0.0.0.0/0",
               "::/0"
             ],
-            "endpoint": "engage.cloudflareclient.com:2408",
+            "endpoint": "162.159.192.102:1843",
             "keepAlive": 0,
             "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
           }
         ],
-        "secretKey": "uLljGOGp0mU18mNQVCS+10cUzO2mX5U/p9BU2t0coG0=",
+        "secretKey": "MOw0T+9oLjA1zJ3jqUOFR+fu1YtcS70IbpertivRw2U=",
         "workers": 0
       },
       "tag": "warp"

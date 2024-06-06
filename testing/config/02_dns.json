@@ -5,20 +5,10 @@
       {
         "address": "localhost",
         "domains": [
-          "https://1.1.1.1/dns-query",
-          "https://dns.google/dns-query"
+          "https://1.1.1.1/dns-query"
         ],
         "queryStrategy": "UseIP",
-        "skipFallback": false
-      },
-      {
-        "address": "localhost",
-        "domains": [
-          "1.1.1.1",
-          "8.8.8.8"
-        ],
-        "queryStrategy": "UseIP",
-        "skipFallback": false
+        "skipFallback": true
       }
     ],
     "tag": "dns_inbound"
