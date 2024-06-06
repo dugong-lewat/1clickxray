@@ -1,6 +1,6 @@
 {
     "routing": {
-    "domainStrategy": "AsIs",
+    "domainStrategy": "IPIfNonMatch",
     "rules": [
       {
         "inboundTag": [
