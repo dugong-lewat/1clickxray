@@ -17,11 +17,11 @@
       "settings": {
         "address": [
           "172.16.0.2",
-          "2606:4700:110:8b11:3447:b482:6337:7d9a"
+          "2606:4700:110:84ca:a69f:6946:419d:9e82"
         ],
         "domainStrategy": "ForceIP",
         "kernelMode": false,
-        "mtu": 1420,
+        "mtu": 1280,
         "peers": [
           {
             "allowedIPs": [
@@ -33,7 +33,7 @@
             "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
           }
         ],
-        "secretKey": "cDdJ0KRWkVW0axW+v1c3+KjY25q3hybuVAEXemyKtno=",
+        "secretKey": "uLljGOGp0mU18mNQVCS+10cUzO2mX5U/p9BU2t0coG0=",
         "workers": 0
       },
       "tag": "warp"
