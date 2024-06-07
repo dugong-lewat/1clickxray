@@ -1552,6 +1552,7 @@ http {
        listen 8443 http2 proxy_protocol;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
+       server_name $domain;
        root /var/www/html;
        index index.html index.htm;
    }
@@ -1561,7 +1562,15 @@ http {
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
        server_name $domain;
-       root /var/www/html;
+
+       #AdGuard Home reverse proxy
+       location / {
+          proxy_pass http://localhost:3000;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+       }
 
        location /vless-grpc {
           grpc_pass grpc://vless_grpc;
