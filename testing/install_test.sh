@@ -560,14 +560,53 @@ echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 
 # Konfigurasi Xray-core
 print_msg $YB "Mengonfigurasi Xray-core..."
-XRAY_CONFIG=raw.githubusercontent.com/dugong-lewat/1clickxray/main/testing/config
-wget -q -O /usr/local/etc/xray/config/00_log.json "https://${XRAY_CONFIG}/00_log.json"
-wget -q -O /usr/local/etc/xray/config/01_api.json "https://${XRAY_CONFIG}/01_api.json"
-wget -q -O /usr/local/etc/xray/config/02_dns.json "https://${XRAY_CONFIG}/02_dns.json"
-wget -q -O /usr/local/etc/xray/config/03_policy.json "https://${XRAY_CONFIG}/03_policy.json"
-cat > /usr/local/etc/xray/config/04_inbounds.json << END
+# XRAY_CONFIG=raw.githubusercontent.com/dugong-lewat/1clickxray/main/testing/config
+# wget -q -O /usr/local/etc/xray/config/00_log.json "https://${XRAY_CONFIG}/00_log.json"
+cat > /usr/local/etc/xray/config.json << END
 {
-    "inbounds": [
+  "log": {
+    "access": "/var/log/xray/access.log",
+    "dnsLog": false,
+    "error": "/var/log/xray/error.log",
+    "loglevel": "info"
+  },
+  "api": {
+    "services": [
+      "HandlerService",
+      "LoggerService",
+      "StatsService"
+    ],
+    "tag": "api"
+  },
+  "dns": {
+    "queryStrategy": "UseIP",
+    "servers": [
+      {
+        "address": "localhost",
+        "domains": [
+          "https://1.1.1.1/dns-query"
+        ],
+        "queryStrategy": "UseIP",
+        "skipFallback": true
+      }
+    ],
+    "tag": "dns_inbound"
+  },
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true
+      }
+    },
+    "system": {
+      "statsInboundDownlink": true,
+      "statsInboundUplink": true,
+      "statsOutboundDownlink": true,
+      "statsOutboundUplink": true
+    }
+  },
+  "inbounds": [
     {
       "listen": "127.0.0.1",
       "port": 10000,
@@ -1478,12 +1517,136 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
       },
       "tag": "in-24"
     }
-  ]
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIP"
+      },
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "blocked"
+    },
+    {
+      "protocol": "wireguard",
+      "settings": {
+        "address": [
+          "172.16.0.2",
+          "2606:4700:110:8588:23e4:ae3a:e5cb:1a4a"
+        ],
+        "domainStrategy": "ForceIP",
+        "kernelMode": false,
+        "mtu": 1280,
+        "peers": [
+          {
+            "allowedIPs": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "endpoint": "engage.cloudflareclient.com:2408",
+            "keepAlive": 0,
+            "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
+          }
+        ],
+        "secretKey": "sCoC/QyP5H4fFBCHeGismIZJHPHlUDWWpVGmNcfGFVQ=",
+        "workers": 2
+      },
+      "tag": "warp-wg"
+    },
+    {
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIPv6v4"
+      },
+      "streamSettings": {
+        "sockopt": {
+          "dialerProxy": "warp-wg",
+          "tcpFastOpen": true,
+          "tcpKeepAliveInterval": 0,
+          "tcpMptcp": false,
+          "tcpNoDelay": true
+        }
+      },
+      "tag": "warp"
+    }
+  ],
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api",
+        "type": "field"
+      },
+      {
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "blocked",
+        "type": "field"
+      },
+      {
+        "outboundTag": "blocked",
+        "protocol": [
+          "bittorrent"
+        ],
+        "type": "field"
+      },
+      {
+        "domain": [
+          "geosite:google",
+          "geosite:openai",
+          "geosite:netflix",
+          "geosite:reddit",
+          "geosite:apple",
+          "geosite:spotify",
+          "geosite:meta"
+        ],
+        "outboundTag": "direct",
+        "type": "field"
+      },
+      {
+        "inboundTag": [
+          "in-01",
+          "in-02",
+          "in-03",
+          "in-04",
+          "in-05",
+          "in-06",
+          "in-07",
+          "in-08",
+          "in-09",
+          "in-10",
+          "in-11",
+          "in-12",
+          "in-13",
+          "in-14",
+          "in-15",
+          "in-16",
+          "in-17",
+          "in-18",
+          "in-19",
+          "in-20",
+          "in-21",
+          "in-22",
+          "in-23",
+          "in-24"
+        ],
+        "outboundTag": "direct",
+        "port": "0-65535",
+        "type": "field"
+      }
+    ]
+  },
+  "stats": {}
 }
 END
-wget -q -O /usr/local/etc/xray/config/05_outbonds.json "https://${XRAY_CONFIG}/05_outbonds.json"
-wget -q -O /usr/local/etc/xray/config/06_routing.json "https://${XRAY_CONFIG}/06_routing.json"
-wget -q -O /usr/local/etc/xray/config/07_stats.json "https://${XRAY_CONFIG}/07_stats.json"
 sleep 1.5
 
 # Membuat file log Xray yang diperlukan
