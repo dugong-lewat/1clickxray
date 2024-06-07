@@ -46,7 +46,7 @@ umon=$(echo "${monthly_data[1]}" | awk '{printf "%.2f MiB", $1/1048576}')
 tmon=$(echo "${monthly_data[0]} ${monthly_data[1]}" | awk '{printf "%.2f MiB", ($1 + $2)/1048576}')
 
 # Mengambil informasi konfigurasi dan sistem
-domain=$(cat /usr/local/etc/xray/domain)
+domain=$(cat /usr/local/etc/xray/dns/domain)
 ISP=$(cat /usr/local/etc/xray/org)
 CITY=$(cat /usr/local/etc/xray/city)
 REG=$(cat /usr/local/etc/xray/region)
@@ -80,13 +80,14 @@ show_menu() {
     echo -e "                   ${WB}----- [ Menu ] -----${NC}               "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e " ${MB}[1]${NC} ${YB}Xray Menu${NC}"
-    echo -e " ${MB}[2]${NC} ${YB}Log Create Account${NC}"
-    echo -e " ${MB}[3]${NC} ${YB}Update Xray-core${NC}"
-    echo -e " ${MB}[4]${NC} ${YB}Speedtest${NC}"
-    echo -e " ${MB}[5]${NC} ${YB}Change Domain${NC}"
-    echo -e " ${MB}[6]${NC} ${YB}Cert Acme.sh${NC}"
-    echo -e " ${MB}[7]${NC} ${YB}About Script${NC}"
-    echo -e " ${MB}[8]${NC} ${YB}Exit${NC}"
+    echo -e " ${MB}[2]${NC} ${YB}Xray Route${NC}"
+    echo -e " ${MB}[3]${NC} ${YB}Log Create Account${NC}"
+    echo -e " ${MB}[4]${NC} ${YB}Update Xray-core${NC}"
+    echo -e " ${MB}[5]${NC} ${YB}Speedtest${NC}"
+    echo -e " ${MB}[6]${NC} ${YB}Change Domain${NC}"
+    echo -e " ${MB}[7]${NC} ${YB}Cert Acme.sh${NC}"
+    echo -e " ${MB}[8]${NC} ${YB}About Script${NC}"
+    echo -e " ${MB}[9]${NC} ${YB}Exit${NC}"
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
     # echo -e "${RB}Jika kalian mengubah domain maka Akun yang yang sudah dibuat akan hilang, Jadi tolong hati-hati.${NC}"
@@ -98,13 +99,14 @@ handle_menu() {
     echo -e ""
     case $opt in
         1) clear ; allxray ;;
-        2) clear ; log-xray ;;
-        3) clear ; update-xray ;;
-        4) clear ; speedtest ; echo " " ; read -n 1 -s -r -p "Press any key to back on menu" ; show_menu ;;
-        5) clear ; dns ;;
-        6) clear ; certxray ;;
-        7) clear ; about ;;
-        8) exit ;;
+        2) clear ; route-xray ;;
+        3) clear ; log-xray ;;
+        4) clear ; update-xray ;;
+        5) clear ; speedtest ; echo " " ; read -n 1 -s -r -p "Press any key to back on menu" ; show_menu ;;
+        6) clear ; dns ;;
+        7) clear ; certxray ;;
+        8) clear ; about ;;
+        9) exit 1 ;;
         *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_menu ;;
     esac
 }
