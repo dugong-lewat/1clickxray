@@ -106,7 +106,7 @@ handle_menu() {
         6) clear ; dns ;;
         7) clear ; certxray ;;
         8) clear ; about ;;
-        9) exit 0 ;;
+        9) exit 1 ;;
         *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_menu ;;
     esac
 }
