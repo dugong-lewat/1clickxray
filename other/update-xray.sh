@@ -96,6 +96,7 @@ print_msg $YB "Versi terbaru Xray-core: $GB$LATEST_VERSION"
 
 # Memasang Xray-core
 install_xray_core
+systemctl restart xray
 
 # Meminta pengguna untuk menekan tombol apa pun sebelum kembali ke menu utama
 read -n 1 -s -r -p "Tekan tombol apa pun untuk kembali ke menu utama..."
