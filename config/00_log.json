@@ -1,0 +1,8 @@
+{
+  "log": {
+    "access": "/var/log/xray/access.log",
+    "dnsLog": false,
+    "error": "/var/log/xray/error.log",
+    "loglevel": "info"
+  }
+}
