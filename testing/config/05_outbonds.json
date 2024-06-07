@@ -17,7 +17,7 @@
       "settings": {
         "address": [
           "172.16.0.2",
-          "2606:4700:110:871d:cce8:971c:d742:fd61"
+          "2606:4700:110:8588:23e4:ae3a:e5cb:1a4a"
         ],
         "domainStrategy": "ForceIP",
         "kernelMode": false,
@@ -28,13 +28,29 @@
               "0.0.0.0/0",
               "::/0"
             ],
-            "endpoint": "162.159.192.102:1843",
+            "endpoint": "engage.cloudflareclient.com:2408",
             "keepAlive": 0,
             "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
           }
         ],
-        "secretKey": "MOw0T+9oLjA1zJ3jqUOFR+fu1YtcS70IbpertivRw2U=",
-        "workers": 0
+        "secretKey": "sCoC/QyP5H4fFBCHeGismIZJHPHlUDWWpVGmNcfGFVQ=",
+        "workers": 2
+      },
+      "tag": "warp-wg"
+    },
+    {
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIPv6v4"
+      },
+      "streamSettings": {
+        "sockopt": {
+          "dialerProxy": "warp-wg",
+          "tcpFastOpen": true,
+          "tcpKeepAliveInterval": 0,
+          "tcpMptcp": false,
+          "tcpNoDelay": true
+        }
       },
       "tag": "warp"
     }
