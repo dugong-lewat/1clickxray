@@ -8,7 +8,7 @@ MB='\e[35;1m'
 CB='\e[35;1m'
 WB='\e[37;1m'
 clear
-NUMBER_OF_CLIENTS=$(grep -c -E "^#&@ " "/usr/local/etc/xray/config.json")
+NUMBER_OF_CLIENTS=$(grep -c -E "^#&@ " "/usr/local/etc/xray/config/04_inbounds.json")
 if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 echo -e "${BB}————————————————————————————————————————————————————${NC}"
 echo -e "               ${WB}Extend All Xray Account${NC}              "
@@ -25,7 +25,7 @@ echo -e "               ${WB}Extend All Xray Account${NC}              "
 echo -e "${BB}————————————————————————————————————————————————————${NC}"
 echo -e " ${YB}User  Expired${NC}  "
 echo -e "${BB}————————————————————————————————————————————————————${NC}"
-grep -E "^#&@ " "/usr/local/etc/xray/config.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
+grep -E "^#&@ " "/usr/local/etc/xray/config/04_inbounds.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
 echo ""
 echo -e "${YB}tap enter to go back${NC}"
 echo -e "${BB}————————————————————————————————————————————————————${NC}"
@@ -34,14 +34,14 @@ if [ -z $user ]; then
 allxray
 else
 read -p "Expired (days): " masaaktif
-exp=$(grep -wE "^#&@ $user" "/usr/local/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+exp=$(grep -wE "^#&@ $user" "/usr/local/etc/xray/config/04_inbounds.json" | cut -d ' ' -f 3 | sort | uniq)
 now=$(date +%Y-%m-%d)
 d1=$(date -d "$exp" +%s)
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 exp3=$(($exp2 + $masaaktif))
 exp4=`date -d "$exp3 days" +"%Y-%m-%d"`
-sed -i "/#&@ $user/c\#&@ $user $exp4" /usr/local/etc/xray/config.json
+sed -i "/#&@ $user/c\#&@ $user $exp4" /usr/local/etc/xray/config/04_inbounds.json
 systemctl restart xray
 clear
 echo -e "${BB}————————————————————————————————————————————————————${NC}"
