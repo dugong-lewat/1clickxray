@@ -11,7 +11,7 @@ MB='\e[35;1m'    # Magenta Bold
 CB='\e[36;1m'    # Cyan Bold
 WB='\e[37;1m'    # White Bold
 
-CONFIG_FILE="/usr/local/etc/xray/config/06_routing.json"
+CONFIG_FILE="/usr/local/etc/xray/config.json"
 
 # Fungsi untuk Verifikasi
 verification_1st() {
@@ -44,8 +44,7 @@ route_all_traffic() {
 # Fungsi untuk merutekan lalu lintas beberapa situs web via WARP
 route_some_traffic() {
     # Menggunakan 'sed' untuk mengganti 'outboundTag' dari 'direct' menjadi 'warp' untuk domain tertentu
-    sed -i '/"port": "0-65535"/!b;n;c\  
-    "outboundTag": "warp",' $CONFIG_FILE
+    sed -i '/"domain": \[/,/"type": "field"/ s/"outboundTag": "direct"/"outboundTag": "warp"/' $CONFIG_FILE
     verification_1st
     systemctl restart xray
 }
