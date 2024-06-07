@@ -37,8 +37,8 @@
         "type": "field"
       },
       {
-        "outboundTag": "direct",
         "port": "0-65535",
+        "outboundTag": "direct",
         "type": "field"
       }
     ]
