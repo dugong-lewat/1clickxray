@@ -36,7 +36,8 @@ verification_2nd() {
 # Fungsi untuk merutekan seluruh lalu lintas via WARP
 route_all_traffic() {
     # Menggunakan 'sed' untuk mengganti 'outboundTag' dari 'direct' menjadi 'warp'
-    sed '/"port": "0-65535",/!b;x;/^x$/!d;x;b;:a;n;/^},$/!ba;x' -e '/"outboundTag": "direct",/!b;n;c\        "outboundTag": "warp",' $CONFIG_FILE
+    sed -i '/"port": "0-65535"/!b;n;c\        "outboundTag": "warp",' $CONFIG_FILE
+
     verification_1st
     systemctl restart xray
 }
@@ -44,7 +45,8 @@ route_all_traffic() {
 # Fungsi untuk merutekan lalu lintas beberapa situs web via WARP
 route_some_traffic() {
     # Menggunakan 'sed' untuk mengganti 'outboundTag' dari 'direct' menjadi 'warp' untuk domain tertentu
-    sed -i '/"domain": \[/,/"type": "field"/ s/"outboundTag": "direct"/"outboundTag": "warp"/' $CONFIG_FILE
+    sed -i '/"port": "0-65535"/!b;n;c\  
+    "outboundTag": "warp",' $CONFIG_FILE
     verification_1st
     systemctl restart xray
 }
