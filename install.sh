@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -rf install.sh
+rm -rf install_test.sh
 clear
 # Warna untuk output (sesuaikan dengan kebutuhan)
 NC='\e[0m'       # No Color (mengatur ulang warna teks ke default)
@@ -71,7 +71,7 @@ sleep 1
 # Install paket keempat
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
 apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd -y
-apt install unzip systemd -y
+apt install unzip -y
 check_success
 sleep 1
 
@@ -92,13 +92,6 @@ check_success "Gagal membuat direktori."
 print_msg $YB "Menghapus file konfigurasi lama..."
 sudo rm -f /usr/local/etc/xray/city /usr/local/etc/xray/org /usr/local/etc/xray/timezone /usr/local/etc/xray/region
 check_success "Gagal menghapus file konfigurasi lama."
-
-# Membuat file log Xray yang diperlukan
-print_msg $YB "Membuat file log Xray yang diperlukan..."
-sudo touch /var/log/xray/access.log /var/log/xray/error.log
-sudo chown nobody:nogroup /var/log/xray/access.log /var/log/xray/error.log
-sudo chmod 644 /var/log/xray/access.log /var/log/xray/error.log
-check_success "Gagal membuat file log Xray yang diperlukan."
 
 # Fungsi untuk mendeteksi OS dan distribusi
 detect_os() {
@@ -161,14 +154,18 @@ After=network.target nss-lookup.target
 
 [Service]
 User=nobody
+Group=nogroup
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
-ExecStart=/usr/local/bin/xray run -config /usr/local/etc/xray/config.json
-Restart=on-failure
-RestartPreventExitStatus=23
-LimitNPROC=10000
-LimitNOFILE=1000000
+ExecStart=/usr/local/bin/xray run -confdir /usr/local/etc/xray/config/
+RestartSec=5
+Restart=always
+StandardOutput=file:/var/log/xray/access.log
+StandardError=file:/var/log/xray/error.log
+SyslogIdentifier=xray
+LimitNOFILE=infinity
+OOMScoreAdjust=100
 
 [Install]
 WantedBy=multi-user.target
@@ -334,7 +331,9 @@ clear
 systemctl restart nginx
 systemctl stop nginx
 systemctl stop xray
-touch /usr/local/etc/xray/domain
+mkdir -p /usr/local/etc/xray/config >> /dev/null 2>&1
+mkdir -p /usr/local/etc/xray/dns >> /dev/null 2>&1
+touch /usr/local/etc/xray/dns/domain
 
 # Set your Cloudflare API credentials and zone ID
 API_EMAIL="1562apricot@awgarstone.com"
@@ -371,7 +370,7 @@ input_domain() {
         elif ! validate_domain "$dns"; then
             echo -e "${RB}Invalid domain format! Please input a valid domain.${NC}"
         else
-            echo "$dns" > /usr/local/etc/xray/domain
+            echo "$dns" > /usr/local/etc/xray/dns/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
             echo -e "Domain ${GB}${dns}${NC} saved successfully"
             break
@@ -438,7 +437,7 @@ delete_record() {
 
 # Function to add A record
 create_A_record() {
-  local record_name=$(cat /usr/local/etc/xray/a_record 2>/dev/null)
+  local record_name=$(cat /usr/local/etc/xray/dns/a_record 2>/dev/null)
   if [ -n "$record_name" ]; then
     delete_record "$record_name" "$TYPE_A"
   fi
@@ -455,15 +454,15 @@ create_A_record() {
       "ttl": 0,
       "proxied": false
     }')
-  echo "$NAME_A" > /usr/local/etc/xray/domain
-  echo "$NAME_A" > /usr/local/etc/xray/a_record
+  echo "$NAME_A" > /usr/local/etc/xray/dns/domain
+  echo "$NAME_A" > /usr/local/etc/xray/dns/a_record
   echo "DNS=$NAME_A" > /var/lib/dnsvps.conf
   handle_response "$response" "${YB}Adding A record $GB$NAME_A$NC"
 }
 
 # Function to add CNAME record
 create_CNAME_record() {
-  local record_name=$(cat /usr/local/etc/xray/cname_record 2>/dev/null)
+  local record_name=$(cat /usr/local/etc/xray/dns/cname_record 2>/dev/null)
   if [ -n "$record_name" ]; then
     delete_record "$record_name" "$TYPE_CNAME"
   fi
@@ -480,7 +479,7 @@ create_CNAME_record() {
       "ttl": 0,
       "proxied": false
     }')
-  echo "$NAME_CNAME" > /usr/local/etc/xray/cname_record
+  echo "$NAME_CNAME" > /usr/local/etc/xray/dns/cname_record
   handle_response "$response" "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC"
 }
 
@@ -533,7 +532,8 @@ setup_domain
 
 # Fungsi untuk menginstal acme.sh dan mendapatkan sertifikat
 install_acme_sh() {
-    domain=$(cat /usr/local/etc/xray/domain)
+    domain=$(cat /usr/local/etc/xray/dns/domain)
+    rm -rf ~/.acme.sh/*_ecc >> /dev/null 2>&1
     curl https://get.acme.sh | sh
     source ~/.bashrc
     ~/.acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
@@ -560,50 +560,14 @@ echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 
 # Konfigurasi Xray-core
 print_msg $YB "Mengonfigurasi Xray-core..."
-cat > /usr/local/etc/xray/config.json << END
+XRAY_CONFIG=raw.githubusercontent.com/dugong-lewat/1clickxray/main/config
+wget -q -O /usr/local/etc/xray/config/00_log.json "https://${XRAY_CONFIG}/00_log.json"
+wget -q -O /usr/local/etc/xray/config/01_api.json "https://${XRAY_CONFIG}/01_api.json"
+wget -q -O /usr/local/etc/xray/config/02_dns.json "https://${XRAY_CONFIG}/02_dns.json"
+wget -q -O /usr/local/etc/xray/config/03_policy.json "https://${XRAY_CONFIG}/03_policy.json"
+cat > /usr/local/etc/xray/config/04_inbounds.json << END
 {
-  "log": {
-    "access": "/var/log/xray/access.log",
-    "dnsLog": false,
-    "error": "/var/log/xray/error.log",
-    "loglevel": "info"
-  },
-  "api": {
-    "services": [
-      "HandlerService",
-      "LoggerService",
-      "StatsService"
-    ],
-    "tag": "api"
-  },
-  "dns": {
-    "queryStrategy": "UseIP",
-    "servers": [
-      {
-        "address": "localhost",
-        "domains": [
-          "https://1.1.1.1/dns-query"
-        ],
-        "queryStrategy": "UseIP"
-      }
-    ],
-    "tag": "dns_inbounds"
-  },
-  "policy": {
-    "levels": {
-      "0": {
-        "statsUserDownlink": true,
-        "statsUserUplink": true
-      }
-    },
-    "system": {
-      "statsInboundDownlink": true,
-      "statsInboundUplink": true,
-      "statsOutboundDownlink": true,
-      "statsOutboundUplink": true
-    }
-  },
-  "inbounds": [
+    "inbounds": [
     {
       "listen": "127.0.0.1",
       "port": 10000,
@@ -1514,89 +1478,20 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "tag": "in-24"
     }
-  ],
-  "outbounds": [
-    {
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      },
-      "tag": "direct"
-    },
-    {
-      "protocol": "blackhole",
-      "settings": {},
-      "tag": "blocked"
-    },
-    {
-      "protocol": "wireguard",
-      "settings": {
-        "address": [
-          "172.16.0.2/32",
-          "2606:4700::/128"
-        ],
-        "domainStrategy": "ForceIP",
-        "kernelMode": false,
-        "mtu": 1420,
-        "peers": [
-          {
-            "allowedIPs": [
-              "0.0.0.0/0",
-              "::/0"
-            ],
-            "endpoint": "engage.cloudflareclient.com:2408",
-            "keepAlive": 0,
-            "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
-          }
-        ],
-        "secretKey": "MCQZVrCmmKJqhPT0jKF86EM5ar+/muwmCgsK8eVUC0k=",
-        "workers": 0
-      },
-      "tag": "warp"
-    }
-  ],
-  "routing": {
-    "domainStrategy": "AsIs",
-    "rules": [
-      {
-        "inboundTag": [
-          "api"
-        ],
-        "outboundTag": "api",
-        "type": "field"
-      },
-      {
-        "ip": [
-          "geoip:private"
-        ],
-        "outboundTag": "blocked",
-        "type": "field"
-      },
-      {
-        "outboundTag": "blocked",
-        "protocol": [
-          "bittorrent"
-        ],
-        "type": "field"
-      },
-      {
-        "domain": [
-          "geosite:google",
-          "geosite:openai",
-          "geosite:netflix",
-          "geosite:reddit",
-          "geosite:apple",
-          "geosite:spotify",
-          "geosite:meta"
-        ],
-        "outboundTag": "warp",
-        "type": "field"
-      }
-    ]
-  },
-  "stats": {}
+  ]
 }
 END
+wget -q -O /usr/local/etc/xray/config/05_outbonds.json "https://${XRAY_CONFIG}/05_outbonds.json"
+wget -q -O /usr/local/etc/xray/config/06_routing.json "https://${XRAY_CONFIG}/06_routing.json"
+wget -q -O /usr/local/etc/xray/config/07_stats.json "https://${XRAY_CONFIG}/07_stats.json"
+sleep 1.5
+
+# Membuat file log Xray yang diperlukan
+print_msg $YB "Membuat file log Xray yang diperlukan..."
+sudo touch /var/log/xray/access.log /var/log/xray/error.log
+sudo chown nobody:nogroup /var/log/xray/access.log /var/log/xray/error.log
+sudo chmod 664 /var/log/xray/access.log /var/log/xray/error.log
+check_success "Gagal membuat file log Xray yang diperlukan."
 sleep 1.5
 
 # Konfigurasi Nginx
@@ -1711,6 +1606,7 @@ wget -q -O del-xray "https://${GITHUB}/xray/del-xray.sh"
 wget -q -O extend-xray "https://${GITHUB}/xray/extend-xray.sh"
 wget -q -O create-xray "https://${GITHUB}/xray/create-xray.sh"
 wget -q -O cek-xray "https://${GITHUB}/xray/cek-xray.sh"
+wget -q -O route-xray "https://${GITHUB}/xray/route-xray.sh"
 sleep 0.5
 
 echo -e "${GB}[ INFO ]${NC} ${YB}Mengunduh menu lainnya...${NC}"
@@ -1723,7 +1619,7 @@ wget -q -O log-xray "https://${GITHUB}/other/log-xray.sh"
 wget -q -O update-xray "https://${GITHUB}/other/update-xray.sh"
 
 echo -e "${GB}[ INFO ]${NC} ${YB}Memberikan izin eksekusi pada skrip...${NC}"
-chmod +x del-xray extend-xray create-xray cek-xray log-xray menu allxray xp dns certxray about clear-log update-xray
+chmod +x del-xray extend-xray create-xray cek-xray log-xray menu allxray xp dns certxray about clear-log update-xray route-xray
 echo -e "${GB}[ INFO ]${NC} ${YB}Persiapan Selesai.${NC}"
 sleep 3
 cd
@@ -1760,7 +1656,7 @@ echo -e "${YB}SS 2022 HTTPupgrade${NC} : ${YB}443 & 80${NC}"
 echo -e "${YB}SS 2022 gRPC${NC}        : ${YB}443${NC}"
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 echo ""
-rm -f install.sh
+rm -f install_test.sh
 secs_to_human "$(($(date +%s) - ${start}))"
 echo -e "${YB}[ WARNING ] reboot now ? (Y/N)${NC} "
 read answer
