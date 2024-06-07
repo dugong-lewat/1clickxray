@@ -645,7 +645,7 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
           },
           {
             "path": "/ss-hup",
-            "dest": "3000",
+            "dest": "3010",
             "xver": 2
           },
           {
@@ -967,7 +967,7 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
 # SS HTTPupgrade
     {
       "listen": "127.0.0.1",
-      "port": "3000",
+      "port": "3010",
       "protocol": "shadowsocks",
       "settings": {
         "clients": [
