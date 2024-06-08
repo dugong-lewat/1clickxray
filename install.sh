@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -rf install_test.sh
+rm -rf install.sh
 clear
 # Warna untuk output (sesuaikan dengan kebutuhan)
 NC='\e[0m'       # No Color (mengatur ulang warna teks ke default)
@@ -1549,7 +1549,8 @@ http {
        server 127.0.0.1:5400;
    }
    server {
-       listen 8443 http2 proxy_protocol;
+       listen 8443 proxy_protocol;
+       http2 on;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
        server_name $domain;
@@ -1558,19 +1559,10 @@ http {
    }
    server {
        listen 8080 proxy_protocol default_server;
-       listen 8443 http2 proxy_protocol default_server;
+       listen 8443 proxy_protocol default_server;
+       http2 on;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
-       server_name $domain;
-
-       #AdGuard Home reverse proxy
-       location / {
-          proxy_pass http://localhost:3000;
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-       }
 
        location /vless-grpc {
           grpc_pass grpc://vless_grpc;
@@ -1665,7 +1657,7 @@ echo -e "${YB}SS 2022 HTTPupgrade${NC} : ${YB}443 & 80${NC}"
 echo -e "${YB}SS 2022 gRPC${NC}        : ${YB}443${NC}"
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 echo ""
-rm -f install_test.sh
+rm -f install.sh
 secs_to_human "$(($(date +%s) - ${start}))"
 echo -e "${YB}[ WARNING ] reboot now ? (Y/N)${NC} "
 read answer
