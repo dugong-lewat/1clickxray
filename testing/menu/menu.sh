@@ -87,7 +87,6 @@ show_menu() {
     echo -e " ${MB}[6]${NC} ${YB}Change Domain${NC}"
     echo -e " ${MB}[7]${NC} ${YB}Cert Acme.sh${NC}"
     echo -e " ${MB}[8]${NC} ${YB}About Script${NC}"
-    echo -e " ${MB}[9]${NC} ${YB}Exit${NC}"
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
     # echo -e "${RB}Jika kalian mengubah domain maka Akun yang yang sudah dibuat akan hilang, Jadi tolong hati-hati.${NC}"
@@ -106,7 +105,6 @@ handle_menu() {
         6) clear ; dns ;;
         7) clear ; certxray ;;
         8) clear ; about ;;
-        9) exit 1 ;;
         *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_menu ;;
     esac
 }
