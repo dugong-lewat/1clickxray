@@ -560,53 +560,14 @@ echo "$serverpsk" > /usr/local/etc/xray/serverpsk
 
 # Konfigurasi Xray-core
 print_msg $YB "Mengonfigurasi Xray-core..."
-# XRAY_CONFIG=raw.githubusercontent.com/dugong-lewat/1clickxray/main/testing/config
-# wget -q -O /usr/local/etc/xray/config/00_log.json "https://${XRAY_CONFIG}/00_log.json"
-cat > /usr/local/etc/xray/config.json << END
+XRAY_CONFIG=raw.githubusercontent.com/dugong-lewat/1clickxray/main/config
+wget -q -O /usr/local/etc/xray/config/00_log.json "https://${XRAY_CONFIG}/00_log.json"
+wget -q -O /usr/local/etc/xray/config/01_api.json "https://${XRAY_CONFIG}/01_api.json"
+wget -q -O /usr/local/etc/xray/config/02_dns.json "https://${XRAY_CONFIG}/02_dns.json"
+wget -q -O /usr/local/etc/xray/config/03_policy.json "https://${XRAY_CONFIG}/03_policy.json"
+cat > /usr/local/etc/xray/config/04_inbounds.json << END
 {
-  "log": {
-    "access": "/var/log/xray/access.log",
-    "dnsLog": false,
-    "error": "/var/log/xray/error.log",
-    "loglevel": "info"
-  },
-  "api": {
-    "services": [
-      "HandlerService",
-      "LoggerService",
-      "StatsService"
-    ],
-    "tag": "api"
-  },
-  "dns": {
-    "queryStrategy": "UseIP",
-    "servers": [
-      {
-        "address": "localhost",
-        "domains": [
-          "https://1.1.1.1/dns-query"
-        ],
-        "queryStrategy": "UseIP",
-        "skipFallback": true
-      }
-    ],
-    "tag": "dns_inbound"
-  },
-  "policy": {
-    "levels": {
-      "0": {
-        "statsUserDownlink": true,
-        "statsUserUplink": true
-      }
-    },
-    "system": {
-      "statsInboundDownlink": true,
-      "statsInboundUplink": true,
-      "statsOutboundDownlink": true,
-      "statsOutboundUplink": true
-    }
-  },
-  "inbounds": [
+    "inbounds": [
     {
       "listen": "127.0.0.1",
       "port": 10000,
@@ -684,7 +645,7 @@ cat > /usr/local/etc/xray/config.json << END
           },
           {
             "path": "/ss-hup",
-            "dest": "3000",
+            "dest": "3010",
             "xver": 2
           },
           {
@@ -1006,7 +967,7 @@ cat > /usr/local/etc/xray/config.json << END
 # SS HTTPupgrade
     {
       "listen": "127.0.0.1",
-      "port": "3000",
+      "port": "3010",
       "protocol": "shadowsocks",
       "settings": {
         "clients": [
@@ -1517,136 +1478,12 @@ cat > /usr/local/etc/xray/config.json << END
       },
       "tag": "in-24"
     }
-  ],
-  "outbounds": [
-    {
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIP"
-      },
-      "tag": "direct"
-    },
-    {
-      "protocol": "blackhole",
-      "settings": {},
-      "tag": "blocked"
-    },
-    {
-      "protocol": "wireguard",
-      "settings": {
-        "address": [
-          "172.16.0.2",
-          "2606:4700:110:8588:23e4:ae3a:e5cb:1a4a"
-        ],
-        "domainStrategy": "ForceIP",
-        "kernelMode": false,
-        "mtu": 1280,
-        "peers": [
-          {
-            "allowedIPs": [
-              "0.0.0.0/0",
-              "::/0"
-            ],
-            "endpoint": "engage.cloudflareclient.com:2408",
-            "keepAlive": 0,
-            "publicKey": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
-          }
-        ],
-        "secretKey": "sCoC/QyP5H4fFBCHeGismIZJHPHlUDWWpVGmNcfGFVQ=",
-        "workers": 2
-      },
-      "tag": "warp-wg"
-    },
-    {
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIPv6v4"
-      },
-      "streamSettings": {
-        "sockopt": {
-          "dialerProxy": "warp-wg",
-          "tcpFastOpen": true,
-          "tcpKeepAliveInterval": 0,
-          "tcpMptcp": false,
-          "tcpNoDelay": true
-        }
-      },
-      "tag": "warp"
-    }
-  ],
-  "routing": {
-    "domainStrategy": "IPIfNonMatch",
-    "rules": [
-      {
-        "inboundTag": [
-          "api"
-        ],
-        "outboundTag": "api",
-        "type": "field"
-      },
-      {
-        "ip": [
-          "geoip:private"
-        ],
-        "outboundTag": "blocked",
-        "type": "field"
-      },
-      {
-        "outboundTag": "blocked",
-        "protocol": [
-          "bittorrent"
-        ],
-        "type": "field"
-      },
-      {
-        "domain": [
-          "geosite:google",
-          "geosite:openai",
-          "geosite:netflix",
-          "geosite:reddit",
-          "geosite:apple",
-          "geosite:spotify",
-          "geosite:meta"
-        ],
-        "outboundTag": "direct",
-        "type": "field"
-      },
-      {
-        "inboundTag": [
-          "in-01",
-          "in-02",
-          "in-03",
-          "in-04",
-          "in-05",
-          "in-06",
-          "in-07",
-          "in-08",
-          "in-09",
-          "in-10",
-          "in-11",
-          "in-12",
-          "in-13",
-          "in-14",
-          "in-15",
-          "in-16",
-          "in-17",
-          "in-18",
-          "in-19",
-          "in-20",
-          "in-21",
-          "in-22",
-          "in-23",
-          "in-24"
-        ],
-        "outboundTag": "direct",
-        "port": "0-65535",
-        "type": "field"
-      }
-    ]
-  },
-  "stats": {}
+  ]
 }
 END
+wget -q -O /usr/local/etc/xray/config/05_outbonds.json "https://${XRAY_CONFIG}/05_outbonds.json"
+wget -q -O /usr/local/etc/xray/config/06_routing.json "https://${XRAY_CONFIG}/06_routing.json"
+wget -q -O /usr/local/etc/xray/config/07_stats.json "https://${XRAY_CONFIG}/07_stats.json"
 sleep 1.5
 
 # Membuat file log Xray yang diperlukan
@@ -1712,19 +1549,20 @@ http {
        server 127.0.0.1:5400;
    }
    server {
-       listen 8443 http2 proxy_protocol;
+       listen 8443 proxy_protocol;
+       http2 on;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
+       server_name $domain;
        root /var/www/html;
        index index.html index.htm;
    }
    server {
        listen 8080 proxy_protocol default_server;
-       listen 8443 http2 proxy_protocol default_server;
+       listen 8443 proxy_protocol default_server;
+       http2 on;
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
-       server_name $domain;
-       root /var/www/html;
 
        location /vless-grpc {
           grpc_pass grpc://vless_grpc;
@@ -1745,6 +1583,7 @@ http {
 }
 END
 wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/index.html
+wget -q -O /etc/nginx/conf.d/adguard.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/adguard.conf
 # Jika sampai di sini tidak ada error, maka konfigurasi berhasil
 print_msg $GB "Konfigurasi Xray-core dan Nginx berhasil."
 sleep 3
@@ -1761,7 +1600,7 @@ sudo iptables -A INPUT -p tcp --dport 6881:6889 -j DROP
 sudo iptables -A INPUT -p tcp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 sudo iptables -A INPUT -p udp --dport 6881:6889 -m string --algo bm --string "BitTorrent" -j DROP
 cd /usr/bin
-GITHUB=raw.githubusercontent.com/dugong-lewat/1clickxray/main/testing
+GITHUB=raw.githubusercontent.com/dugong-lewat/1clickxray/main
 echo -e "${GB}[ INFO ]${NC} ${YB}Mengunduh menu utama...${NC}"
 wget -q -O menu "https://${GITHUB}/menu/menu.sh"
 wget -q -O allxray "https://${GITHUB}/menu/allxray.sh"
