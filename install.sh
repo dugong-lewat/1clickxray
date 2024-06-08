@@ -1556,16 +1556,6 @@ http {
        server_name $domain;
        root /var/www/html;
        index index.html index.htm;
-
-       location /adguard/ {
-          proxy_pass http://localhost:3000/;
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header X-Forwarded-Proto $scheme;
-          proxy_cookie_path / /adguard/;
-          proxy_redirect / /adguard/;
-       }
    }
    server {
        listen 8080 proxy_protocol default_server;
