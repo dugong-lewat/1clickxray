@@ -1532,6 +1532,7 @@ DNS=127.0.0.1
 DNSStubListener=no
 END
 sudo cp /etc/resolv.conf /etc/resolv.conf.backup
+rm /etc/resolv.conf
 sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 sudo systemctl reload-or-restart systemd-resolved
 # Jika sampai di sini tidak ada error, maka konfigurasi berhasil
