@@ -1554,8 +1554,24 @@ http {
        set_real_ip_from 127.0.0.1;
        real_ip_header proxy_protocol;
        server_name $domain;
-       root /var/www/html;
-       index index.html index.htm;
+
+      root /var/www/html;
+      index index.html;
+  
+      location / {
+          try_files $uri $uri/ =404;
+      }
+  
+      location /adguard/ {
+          proxy_pass http://127.0.0.1:3000/;  # Sesuaikan IP dan port AdGuard Home
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          sub_filter 'href="/' 'href="/adguard/';
+          sub_filter 'src="/' 'src="/adguard/';
+          sub_filter_once off;
+      }
    }
    server {
        listen 8080 proxy_protocol default_server;
