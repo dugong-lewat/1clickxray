@@ -137,7 +137,7 @@ delete_record() {
 
 # Function to add A record
 create_A_record() {
-  local record_name=$(cat /usr/local/etc/xray/a_record 2>/dev/null)
+  local record_name=$(cat /usr/local/etc/xray/dns/a_record 2>/dev/null)
   if [ -n "$record_name" ]; then
     delete_record "$record_name" "$TYPE_A"
   fi
@@ -155,14 +155,14 @@ create_A_record() {
       "proxied": false
     }')
   echo "$NAME_A" > /usr/local/etc/xray/dns/domain
-  echo "$NAME_A" > /usr/local/etc/xray/a_record
+  echo "$NAME_A" > /usr/local/etc/xray/dns/a_record
   echo "DNS=$NAME_A" > /var/lib/dnsvps.conf
   handle_response "$response" "${YB}Adding A record $GB$NAME_A$NC"
 }
 
 # Function to add CNAME record
 create_CNAME_record() {
-  local record_name=$(cat /usr/local/etc/xray/cname_record 2>/dev/null)
+  local record_name=$(cat /usr/local/etc/xray/dns/cname_record 2>/dev/null)
   if [ -n "$record_name" ]; then
     delete_record "$record_name" "$TYPE_CNAME"
   fi
@@ -179,7 +179,7 @@ create_CNAME_record() {
       "ttl": 0,
       "proxied": false
     }')
-  echo "$NAME_CNAME" > /usr/local/etc/xray/cname_record
+  echo "$NAME_CNAME" > /usr/local/etc/xray/dns/cname_record
   handle_response "$response" "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC"
 }
 
