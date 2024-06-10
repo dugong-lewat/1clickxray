@@ -11,7 +11,7 @@ MB='\e[35;1m'    # Magenta Bold
 CB='\e[36;1m'    # Cyan Bold
 WB='\e[37;1m'    # White Bold
 
-CONFIG_FILE="/usr/local/etc/xray/config.json"
+CONFIG_FILE="/usr/local/etc/xray/config/06_routing.json"
 
 # Fungsi untuk Verifikasi
 verification_1st() {
