@@ -25,7 +25,7 @@ generate_uuid() {
 add_xray_config() {
     local section=$1
     local content=$2
-    sed -i "/#$section\$/a\\#&@ $user $exp\n$content" /usr/local/etc/xray/config/04_inbounds.json
+    sed -i "/#$section\$/a\\#&@ $user $exp\n$content" /usr/local/etc/xray/config.json
 }
 
 # Inisialisasi Variabel
@@ -50,7 +50,7 @@ while [ "$valid_input" = false ]; do
     if [[ "$masaaktif" =~ ^[0-9]+$ ]]; then
         valid_input=true
     else
-        echo "${RB}Input harus berupa angka. Silakan coba lagi.${NC}"
+        echo -e "${RB}Input harus berupa angka. Silakan coba lagi.${NC}"
     fi
 done
 
