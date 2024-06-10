@@ -116,6 +116,14 @@ def get_system_info():
 
     daily_bandwidth_usage, monthly_bandwidth_usage = get_network_usage()
 
+    disk_usage = psutil.disk_usage('/')
+    total_disk = disk_usage.total / (1024 ** 3)  # Convert to GB
+    used_disk = disk_usage.used / (1024 ** 3)    # Convert to GB
+    free_disk = disk_usage.free / (1024 ** 3)    # Convert to GB
+    disk_percentage = disk_usage.percent
+
+    disk_usage_str = f"{used_disk:.2f} GB / {total_disk:.2f} GB ({disk_percentage}%)"
+
     nginx_status = check_service_status('nginx')
     xray_status = check_service_status('xray')
 
@@ -129,6 +137,7 @@ def get_system_info():
         ("Operating System", os_name),
         ("Kernel Version", kernel_version),
         ("RAM Usage", ram_usage_str),
+        ("Disk Usage", disk_usage_str),
         ("Uptime Server", uptime_str),
         ("Nginx Status", nginx_status),
         ("Xray-core Status", xray_status)
