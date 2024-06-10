@@ -1509,41 +1509,6 @@ echo -e "${GB}[ INFO ]${NC} ${YB}Setup Done${NC}"
 sleep 3
 clear
 
-
-
-# Konfigurasi AdGuard Home
-print_msg $YB "Memasang dan Mengonfigurasi AdGuard Home..."
-sudo systemctl stop AdGuardHome >> /dev/null 2>&1
-sudo systemctl disable AdGuardHome >> /dev/null 2>&1
-sudo rm -rf /opt/AdGuardHome >> /dev/null 2>&1
-sudo rm -rf /etc/AdGuardHome >> /dev/null 2>&1
-sudo rm -rf /var/log/AdGuardHome >> /dev/null 2>&1
-sudo rm -rf /var/lib/AdGuardHome >> /dev/null 2>&1
-sudo rm /etc/systemd/system/AdGuardHome.service >> /dev/null 2>&1
-sudo systemctl daemon-reload
-
-
-curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
-
-sudo mkdir -p /etc/systemd/resolved.conf.d
-cat > /etc/systemd/resolved.conf.d/adguardhome.conf << END
-[Resolve]
-DNS=127.0.0.1
-DNSStubListener=no
-END
-sudo cp /etc/resolv.conf /etc/resolv.conf.backup
-rm /etc/resolv.conf
-sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
-sudo systemctl reload-or-restart systemd-resolved
-# Jika sampai di sini tidak ada error, maka konfigurasi berhasil
-print_msg $GB "Konfigurasi AdGuard Home berhasil."
-sleep 3
-echo -e "${GB}[ INFO ]${NC} ${YB}Setup Done${NC}"
-sleep 3
-clear
-
-
-
 # Blokir lalu lintas torrent (BitTorrent)
 sudo iptables -A INPUT -p udp --dport 6881:6889 -j DROP
 sudo iptables -A INPUT -p tcp --dport 6881:6889 -j DROP
