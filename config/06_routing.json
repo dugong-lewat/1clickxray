@@ -31,7 +31,9 @@
           "geosite:reddit",
           "geosite:apple",
           "geosite:spotify",
-          "geosite:meta"
+          "geosite:meta",
+          "geosite:microsoft",
+          "geosite:zoom"
         ],
         "outboundTag": "direct",
         "type": "field"
