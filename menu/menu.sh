@@ -11,71 +11,12 @@ MB='\e[35;1m'    # Magenta Bold
 CB='\e[36;1m'    # Cyan Bold
 WB='\e[37;1m'    # White Bold
 
-# Fungsi untuk memeriksa status layanan
-check_service_status() {
-    local service=$1
-    local status=$(systemctl is-active "$service")
-    if [[ $status == "active" ]]; then
-        echo -e "${GB}[ ON ]${NC}"
-    else
-        echo -e "${RB}[ OFF ]${NC}"
-    fi
-}
-
-# Memeriksa status layanan Xray dan Nginx
-status_xray=$(check_service_status xray)
-status_nginx=$(check_service_status nginx)
-
-# Mengambil data bandwidth menggunakan vnstat
-get_bandwidth_data() {
-    local period=$1
-    vnstat --json | jq -r ".interfaces[0].traffic.$period[] | .rx, .tx"
-}
-
-# Mendapatkan data bandwidth hari ini
-today_data=($(get_bandwidth_data "day"))
-dtoday=$(echo "${today_data[0]}" | awk '{printf "%.2f MiB", $1/1048576}')
-utoday=$(echo "${today_data[1]}" | awk '{printf "%.2f MiB", $1/1048576}')
-ttoday=$(echo "${today_data[0]} ${today_data[1]}" | awk '{printf "%.2f MiB", ($1 + $2)/1048576}')
-
-# Mendapatkan data bandwidth bulanan
-month=$(date +%Y-%m)
-monthly_data=($(vnstat --json | jq -r ".interfaces[0].traffic.month[] | select(.date.year == $(date +%Y) and .date.month == $(date +%-m)) | .rx, .tx"))
-dmon=$(echo "${monthly_data[0]}" | awk '{printf "%.2f MiB", $1/1048576}')
-umon=$(echo "${monthly_data[1]}" | awk '{printf "%.2f MiB", $1/1048576}')
-tmon=$(echo "${monthly_data[0]} ${monthly_data[1]}" | awk '{printf "%.2f MiB", ($1 + $2)/1048576}')
-
-# Mengambil informasi konfigurasi dan sistem
-domain=$(cat /usr/local/etc/xray/dns/domain)
-ISP=$(cat /usr/local/etc/xray/org)
-CITY=$(cat /usr/local/etc/xray/city)
-REG=$(cat /usr/local/etc/xray/region)
-WKT=$(cat /usr/local/etc/xray/timezone)
-DATE=$(date +"%a, %d %b %Y")
-MYIP=$(curl -sS ipv4.icanhazip.com)
-XRAY_VERSION=$(xray -version | head -n 1 | awk '{print "v"$2}')
-
 # Fungsi untuk menampilkan menu
 show_menu() {
     clear
+    python /usr/bin/system_info.py
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e "               ${WB}----- [ Xray Script ] -----${NC}              "
-    echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e " ${YB}ISP${NC}          ${WB}: $ISP"
-    echo -e " ${YB}Region${NC}       ${WB}: $REG${NC}"
-    echo -e " ${YB}City${NC}         ${WB}: $CITY${NC}"
-    echo -e " ${YB}Date${NC}         ${WB}: $DATE${NC}"
-    echo -e " ${YB}Domain${NC}       ${WB}: $domain${NC}"
-    echo -e " ${YB}Xray Version${NC} ${WB}: $XRAY_VERSION${NC}"
-    echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "     ${WB}NGINX STATUS :${NC} $status_nginx    ${WB}XRAY STATUS :${NC} $status_xray   "
-    echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "          ${WB}----- [ Bandwidth Monitoring ] -----${NC}"
-    echo -e "${BB}————————————————————————————————————————————————————————${NC}"
-    echo -e "  ${GB}Today (${DATE})${NC}      ${GB}Monthly ($(date +%B/%Y))${NC}      "
-    echo -e "  ${GB}↓↓ Down : $dtoday${NC}         ${GB}↓↓ Down : $dmon${NC}   "
-    echo -e "  ${GB}↑↑ Up   : $utoday${NC}         ${GB}↑↑ Up   : $umon${NC}   "
-    echo -e "  ${GB}≈ Total : $ttoday${NC}         ${GB}≈ Total : $tmon${NC}   "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e "                   ${WB}----- [ Menu ] -----${NC}               "
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
