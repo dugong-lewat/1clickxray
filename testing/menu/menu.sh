@@ -22,12 +22,13 @@ show_menu() {
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e " ${MB}[1]${NC} ${YB}Xray Menu${NC}"
     echo -e " ${MB}[2]${NC} ${YB}Xray Route${NC}"
-    echo -e " ${MB}[3]${NC} ${YB}Log Create Account${NC}"
-    echo -e " ${MB}[4]${NC} ${YB}Update Xray-core${NC}"
-    echo -e " ${MB}[5]${NC} ${YB}Speedtest${NC}"
-    echo -e " ${MB}[6]${NC} ${YB}Change Domain${NC}"
-    echo -e " ${MB}[7]${NC} ${YB}Cert Acme.sh${NC}"
-    echo -e " ${MB}[8]${NC} ${YB}About Script${NC}"
+    echo -e " ${MB}[3]${NC} ${YB}Show User Traffic${NC}"
+    echo -e " ${MB}[4]${NC} ${YB}Log Create Account${NC}"
+    echo -e " ${MB}[5]${NC} ${YB}Update Xray-core${NC}"
+    echo -e " ${MB}[6]${NC} ${YB}Speedtest${NC}"
+    echo -e " ${MB}[7]${NC} ${YB}Change Domain${NC}"
+    echo -e " ${MB}[8]${NC} ${YB}Cert Acme.sh${NC}"
+    echo -e " ${MB}[9]${NC} ${YB}About Script${NC}"
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e ""
     # echo -e "${RB}Jika kalian mengubah domain maka Akun yang yang sudah dibuat akan hilang, Jadi tolong hati-hati.${NC}"
@@ -40,12 +41,13 @@ handle_menu() {
     case $opt in
         1) clear ; allxray ;;
         2) clear ; route-xray ;;
-        3) clear ; log-xray ;;
-        4) clear ; update-xray ;;
-        5) clear ; speedtest ; echo " " ; read -n 1 -s -r -p "Press any key to back on menu" ; show_menu ;;
-        6) clear ; dns ;;
-        7) clear ; certxray ;;
-        8) clear ; about ;;
+        3) clear ; python /usr/bin/traffic.py ; echo " " ; read -n 1 -s -r -p "Press any key to back on menu" ; show_menu ;;
+        4) clear ; log-xray ;;
+        5) clear ; update-xray ;;
+        6) clear ; speedtest ; echo " " ; read -n 1 -s -r -p "Press any key to back on menu" ; show_menu ;;
+        7) clear ; dns ;;
+        8) clear ; certxray ;;
+        9) clear ; about ;;
         *) echo -e "${YB}Invalid input${NC}" ; sleep 1 ; show_menu ;;
     esac
 }
