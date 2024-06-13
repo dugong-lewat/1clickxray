@@ -593,9 +593,30 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
         ],
         "decryption": "none",
         "fallbacks": [
+          // TCP + TLS
+          {
+            "alpn": "h2",
+            "dest": 1443,
+            "xver": 2
+          },
+          {
+            "alpn": "h2",
+            "dest": 2443,
+            "xver": 2
+          },
+          {
+            "alpn": "h2",
+            "dest": 3443,
+            "xver": 2
+          },
           {
             "alpn": "h2",
             "dest": 4443,
+            "xver": 2
+          },
+          {
+            "alpn": "h2",
+            "dest": 5443,
             "xver": 2
           },
           {
@@ -684,10 +705,72 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
       },
       "tag": "in-01"
     },
+# VLESS TCP TLS
+    {
+      "listen": "127.0.0.1",
+      "port": 1443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email": "tcp",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tcpSettings": {
+          "acceptProxyProtocol": true
+        },
+        "network": "tcp",
+        "security": "none"
+      }
+    },
+# VMESS TCP TLS
+    {
+      "listen": "127.0.0.1",
+      "port": 1443,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email": "tcp",
+            "id": "$uuid"
+#vmess
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tcpSettings": {
+          "acceptProxyProtocol": true
+        },
+        "network": "tcp",
+        "security": "none"
+      }
+    },
 # TROJAN TCP TLS
     {
       "listen": "127.0.0.1",
-      "port": 4443,
+      "port": 3443,
       "protocol": "trojan",
       "settings": {
         "clients": [
@@ -718,6 +801,67 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
         "security": "none"
       },
       "tag": "in-02"
+    },
+# SS TCP TLS
+    {
+      "listen": "127.0.0.1",
+      "port": 4443,
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tcpSettings": {
+          "acceptProxyProtocol": true
+        },
+        "network": "tcp",
+        "security": "none"
+      }
+    },
+# SS2022 TCP TLS
+    {
+      "listen": "127.0.0.1",
+      "port": 5443,
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tcpSettings": {
+          "acceptProxyProtocol": true
+        },
+        "network": "tcp",
+        "security": "none"
+      }
     },
 # VLESS WS
     {
