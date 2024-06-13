@@ -50,7 +50,7 @@ while [ "$valid_input" = false ]; do
     if [[ "$masaaktif" =~ ^[0-9]+$ ]]; then
         valid_input=true
     else
-        echo "${RB}Input harus berupa angka. Silakan coba lagi.${NC}"
+        echo -e "${RB}Input harus berupa angka. Silakan coba lagi.${NC}"
     fi
 done
 
@@ -101,6 +101,7 @@ vmesslink2="vmess://$(create_vmess_link "vmess-ws-ntls" "80" "ws" "/vmess-ws" "n
 vmesslink3="vmess://$(create_vmess_link "vmess-hup-tls" "443" "httpupgrade" "/vmess-hup" "tls")"
 vmesslink4="vmess://$(create_vmess_link "vmess-hup-ntls" "80" "httpupgrade" "/vmess-hup" "none")"
 vmesslink5="vmess://$(create_vmess_link "vmess-grpc" "443" "grpc" "vmess-grpc" "tls")"
+vmesslink6="vmess://$(create_vmess_link "vmess-tcp-tls" "443" "tcp" "tls")"
 
 # Membuat Tautan Vless
 vlesslink1="vless://$uuid@$domain:443?path=/vless-ws&security=tls&encryption=none&host=$domain&type=ws&sni=$domain#vless-ws-tls"
@@ -109,6 +110,7 @@ vlesslink3="vless://$uuid@$domain:443?path=/vless-hup&security=tls&encryption=no
 vlesslink4="vless://$uuid@$domain:80?path=/vless-hup&security=none&encryption=none&host=$domain&type=httpupgrade#vless-hup-ntls"
 vlesslink5="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=gun&type=grpc&serviceName=vless-grpc&sni=$domain#vless-grpc"
 vlesslink6="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=none&type=tcp&sni=$domain&flow=xtls-rprx-vision#vless-vision"
+vlesslink7="vless://$uuid@$domain:443?security=tls&encryption=none&headerType=none&type=tcp&sni=$domain#vless-tcp-tls"
 
 # Membuat Tautan Trojan
 trojanlink1="trojan://$pwtr@$domain:443?path=/trojan-ws&security=tls&host=$domain&type=ws&sni=$domain#trojan-ws-tls"
@@ -129,6 +131,7 @@ sslink2="ss://${ss_base64}@$domain:80?path=/ss-ws&security=none&host=${domain}&t
 sslink3="ss://${ss_base64}@$domain:443?path=/ss-hup&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#ss-hup-tls"
 sslink4="ss://${ss_base64}@$domain:80?path=/ss-hup&security=none&host=${domain}&type=httpupgrade#ss-hup-ntls"
 sslink5="ss://${ss_base64}@$domain:443?security=tls&encryption=none&type=grpc&serviceName=ss-grpc&sni=$domain#ss-grpc"
+sslink6="ss://${ss_base64}@$domain:443?security=tls&encryption=none&headerType=none&type=tcp&sni=$domain#ss-tcp-tls"
 
 ss2022_base64=$(encode_ss "$cipher2" "$serverpsk:$userpsk")
 ss22link1="ss://${ss2022_base64}@$domain:443?path=/ss22-ws&security=tls&host=${domain}&type=ws&sni=${domain}#ss2022-ws-tls"
@@ -136,6 +139,7 @@ ss22link2="ss://${ss2022_base64}@$domain:80?path=/ss22-ws&security=none&host=${d
 ss22link3="ss://${ss2022_base64}@$domain:443?path=/ss22-hup&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#ss2022-hup-tls"
 ss22link4="ss://${ss2022_base64}@$domain:80?path=/ss22-hup&security=none&host=${domain}&type=httpupgrade#ss2022-hup-ntls"
 ss22link5="ss://${ss2022_base64}@$domain:443?security=tls&encryption=none&type=grpc&serviceName=ss22-grpc&sni=$domain#ss2022-grpc"
+ss22link6="ss://${ss2022_base64}@$domain:443?security=tls&encryption=none&headerType=none&type=tcp&sni=$domain#ss2022-tcp-tls"
 
 # Menulis Log ke File
 cat > /var/www/html/xray/xray-$user.log << END
@@ -166,6 +170,8 @@ Link HUP nTLS    : $vmesslink4
 ========================================
 Link gRPC        : $vmesslink5
 ========================================
+Link TCP TLS     : $vmesslink6
+========================================
 
 
 ========================================
@@ -182,6 +188,8 @@ Link HUP nTLS    : $vlesslink4
 Link gRPC        : $vlesslink5
 ========================================
 Link XTLS-Vision : $vlesslink6
+========================================
+Link TCP TLS     : $vlesslink7
 ========================================
 
 
@@ -215,6 +223,8 @@ Link HUP nTLS    : $sslink4
 ========================================
 Link gRPC        : $sslink5
 ========================================
+Link TCP TLS     : $sslink6
+========================================
 
 
 ========================================
@@ -229,6 +239,8 @@ Link HUP TLS     : $ss22link3
 Link HUP nTLS    : $ss22link4
 ========================================
 Link gRPC        : $ss22link5
+========================================
+Link TCP TLS     : $ss22link6
 ========================================
 END
 
@@ -263,6 +275,8 @@ echo -e "Link HUP nTLS  : $vmesslink4" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link gRPC      : $vmesslink5" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
+echo -e "Link TCP TLS   : $vmesslink6" | tee -a /user/xray-$user.log
+echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
@@ -279,6 +293,8 @@ echo -e "${BB}——————————————————————
 echo -e "Link gRPC        : $vlesslink5" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link XTLS-Vision : $vlesslink6" | tee -a /user/xray-$user.log
+echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
+echo -e "Link TCP TLS     : $vlesslink7" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
@@ -312,6 +328,8 @@ echo -e "Link HUP nTLS    : $sslink4" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link gRPC        : $sslink5" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
+echo -e "Link TCP TLS     : $sslink6" | tee -a /user/xray-$user.log
+echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
@@ -326,6 +344,8 @@ echo -e "${BB}——————————————————————
 echo -e "Link HUP nTLS    : $ss22link4" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e "Link gRPC        : $ss22link5" | tee -a /user/xray-$user.log
+echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
+echo -e "Link TCP TLS     : $ss22link6" | tee -a /user/xray-$user.log
 echo -e "${BB}————————————————————————————————————————————————————${NC}" | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
 echo -e " " | tee -a /user/xray-$user.log
