@@ -1,6 +1,8 @@
 ## 1 Click Xray
 Ubuntu or Debian
 
+Setelah pasang ketik `menu` untuk menampilkan menu
+
 Skrip ini aman untuk di install ulang tanpa harus rebuild VPS
 
 Support VPS IPv6 Only, tetapi !!! saat SETUP DOMAIN wajib pilih no.2 / pilih domain sendiri (tidak mendukung opsi no.1)
