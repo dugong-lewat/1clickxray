@@ -1527,6 +1527,8 @@ wget -q -O create-xray "https://${GITHUB}/xray/create-xray.sh"
 wget -q -O cek-xray "https://${GITHUB}/xray/cek-xray.sh"
 wget -q -O route-xray "https://${GITHUB}/xray/route-xray.sh"
 wget -q -O system_info.py "https://${GITHUB}/system_info.py"
+wget -q -O traffic.py "https://${GITHUB}/traffic.py"
+sleep 0.5
 sleep 0.5
 
 echo -e "${GB}[ INFO ]${NC} ${YB}Mengunduh menu lainnya...${NC}"
