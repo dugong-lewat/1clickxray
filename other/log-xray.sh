@@ -48,7 +48,7 @@ echo -e "                  ${WB}Log All Xray Account${NC}                 "
 echo -e "${BB}————————————————————————————————————————————————————${NC}"
 echo -e " ${YB}User  Expired${NC}  "
 echo -e "${BB}————————————————————————————————————————————————————${NC}"
-grep -E "^#&@ " "/usr/local/etc/xray/config.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
+grep -E "^#&@ " "/usr/local/etc/xray/config/04_inbounds.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
 echo ""
 echo -e "${YB}Tap enter to go back${NC}"
 echo -e "${BB}————————————————————————————————————————————————————${NC}"
