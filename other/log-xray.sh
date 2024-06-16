@@ -37,7 +37,7 @@ no_clients_menu() {
 }
 
 clear
-NUMBER_OF_CLIENTS=$(grep -c -E "^#&@ " "/usr/local/etc/xray/config.json")
+NUMBER_OF_CLIENTS=$(grep -c -E "^#&@ " "/usr/local/etc/xray/config/04_inbounds.json")
 if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
     no_clients_menu
 fi
