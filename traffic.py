@@ -1,16 +1,15 @@
 import subprocess
 import json
 import pandas as pd
-from tabulate import tabulate
+from rich.console import Console
+from rich.table import Table, box
+from rich.align import Align
+from rich.text import Text
 
 APISERVER = "127.0.0.1:10000"
 XRAY = "/usr/local/bin/xray"
 
-# ANSI escape codes
-CYAN = '\033[96m'
-YELLOW = '\033[93m'
-GREEN = '\033[92m'
-RESET = '\033[0m'
+console = Console()
 
 def apidata(reset=False):
     args = ["--server", APISERVER]
@@ -21,7 +20,7 @@ def apidata(reset=False):
     try:
         data = json.loads(result.stdout)
     except json.JSONDecodeError:
-        print("Failed to parse JSON")
+        console.print("Failed to parse JSON", style="bold red")
         return []
 
     parsed_data = []
@@ -56,36 +55,26 @@ def print_sum(data, prefix):
 
     df_sorted['value'] = df_sorted['value'].apply(human_readable_size)
 
-    table_data = []
+    table = Table(box=box.SQUARE, show_header=True, header_style="bold cyan")
+    table.add_column("Pengguna / User", justify="center", style="cyan", no_wrap=True)
+    table.add_column("Traffic", justify="center", style="magenta")
+
     for index, row in df_sorted.iterrows():
         entity = f"{row['direction']}:{row['link']}->{row['type']}"
         value = row['value']
-        table_data.append([f"{YELLOW}{entity}{RESET}", f"{GREEN}{value}{RESET}"])
+        table.add_row(entity, value)
 
-    summary_data = [
-        [f"{YELLOW}SUM->up:{RESET}", f"{GREEN}{human_readable_size(up_sum)}{RESET}"],
-        [f"{YELLOW}SUM->down:{RESET}", f"{GREEN}{human_readable_size(down_sum)}{RESET}"],
-        [f"{YELLOW}SUM->TOTAL:{RESET}", f"{GREEN}{human_readable_size(total_sum)}{RESET}"]
-    ]
+    table.add_row("", "")
+    table.add_row("SUM->up:", human_readable_size(up_sum))
+    table.add_row("SUM->down:", human_readable_size(down_sum))
+    table.add_row("SUM->TOTAL:", human_readable_size(total_sum))
 
-    # Find maximum width for each column
-    max_length_entity = max(len(str(row[0])) for row in table_data + summary_data)
-    max_length_value = max(len(str(row[1])) for row in table_data + summary_data)
+    # Create the title "Xray Stats" in the center with normal and italic text
+    title = Text("Xray Stats", style="bold cyan")
+    title.stylize("italic")
 
-    # Create formatted table with consistent cell sizes
-    formatted_table_data = [
-        [f"{entity:^{max_length_entity}}", f"{value:^{max_length_value}}"] for entity, value in table_data
-    ]
-    formatted_summary_data = [
-        [f"{entity:^{max_length_entity}}", f"{value:^{max_length_value}}"] for entity, value in summary_data
-    ]
-
-    # Combine table data and summary data for final output
-    combined_data = formatted_table_data + [["", ""]] + formatted_summary_data
-
-    # Print formatted table with a uniform grid and centered text
-    table = tabulate(combined_data, headers=[f"{YELLOW}Pengguna / User{RESET}", f"{GREEN}Traffic{RESET}"], tablefmt="grid", colalign=("center", "center"))
-    print(table)
+    console.print(Align.center(title))
+    console.print(table)
 
 if __name__ == "__main__":
     data = apidata(reset=False)
