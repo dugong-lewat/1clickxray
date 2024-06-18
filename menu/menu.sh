@@ -22,7 +22,7 @@ show_menu() {
     echo -e "${BB}————————————————————————————————————————————————————————${NC}"
     echo -e " ${MB}[1]${NC} ${YB}Xray Menu${NC}"
     echo -e " ${MB}[2]${NC} ${YB}Xray Route${NC}"
-    echo -e " ${MB}[3]${NC} ${YB}Show User Traffic${NC}"
+    echo -e " ${MB}[3]${NC} ${YB}Xray Statistics${NC}"
     echo -e " ${MB}[4]${NC} ${YB}Log Create Account${NC}"
     echo -e " ${MB}[5]${NC} ${YB}Update Xray-core${NC}"
     echo -e " ${MB}[6]${NC} ${YB}Speedtest${NC}"
