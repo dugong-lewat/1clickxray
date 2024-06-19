@@ -72,7 +72,7 @@ sleep 1
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
 apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd bind9-host -y
 apt install unzip python-is-python3 python3-pip -y
-pip install psutil tabulate rich py-cpuinfo distro requests
+pip install psutil pandas tabulate rich py-cpuinfo distro requests
 check_success
 sleep 1
 
