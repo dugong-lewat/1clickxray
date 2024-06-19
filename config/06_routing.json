@@ -24,6 +24,12 @@
         "type": "field"
       },
       {
+        "network": "UDP",
+        "outboundTag": "blocked",
+        "port": "443",
+        "type": "field"
+      },
+      {
         "domain": [
           "geosite:google",
           "geosite:openai",
@@ -31,9 +37,7 @@
           "geosite:reddit",
           "geosite:apple",
           "geosite:spotify",
-          "geosite:meta",
-          "geosite:microsoft",
-          "geosite:zoom"
+          "geosite:meta"
         ],
         "outboundTag": "direct",
         "type": "field"

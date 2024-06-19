@@ -36,16 +36,45 @@
         "secretKey": "sCoC/QyP5H4fFBCHeGismIZJHPHlUDWWpVGmNcfGFVQ=",
         "workers": 2
       },
+      "tag": "wireguard"
+    },
+    {
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "127.0.0.1",
+            "port": 40000,
+            "users": []
+          }
+        ]
+      },
+      "tag":"socks"
+    },
+    {
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIPv4v6"
+      },
+      "streamSettings": {
+        "sockopt": {
+          "dialerProxy": "wireguard",
+          "tcpFastOpen": true,
+          "tcpKeepAliveInterval": 0,
+          "tcpMptcp": false,
+          "tcpNoDelay": true
+        }
+      },
       "tag": "warp-wg"
     },
     {
       "protocol": "freedom",
       "settings": {
-        "domainStrategy": "UseIPv6v4"
+        "domainStrategy": "UseIP"
       },
       "streamSettings": {
         "sockopt": {
-          "dialerProxy": "warp-wg",
+          "dialerProxy": "socks",
           "tcpFastOpen": true,
           "tcpKeepAliveInterval": 0,
           "tcpMptcp": false,
