@@ -3,8 +3,6 @@ import json
 import pandas as pd
 from rich.console import Console
 from rich.table import Table, box
-from rich.align import Align
-from rich.text import Text
 
 APISERVER = "127.0.0.1:10000"
 XRAY = "/usr/local/bin/xray"
@@ -55,9 +53,9 @@ def print_sum(data, prefix):
 
     df_sorted['value'] = df_sorted['value'].apply(human_readable_size)
 
-    table = Table(box=box.SQUARE, show_header=True, header_style="bold cyan")
+    table = Table(title="Xray Statistics", box=box.SQUARE, show_header=True, header_style="bold cyan")
     table.add_column("Pengguna / User", justify="center", style="cyan", no_wrap=True)
-    table.add_column("Traffic", justify="center", style="magenta")
+    table.add_column("Data Traffic", justify="center", style="magenta", no_wrap=True)
 
     for index, row in df_sorted.iterrows():
         entity = f"{row['direction']}:{row['link']}->{row['type']}"
@@ -69,11 +67,6 @@ def print_sum(data, prefix):
     table.add_row("SUM->down:", human_readable_size(down_sum))
     table.add_row("SUM->TOTAL:", human_readable_size(total_sum))
 
-    # Create the title "Xray Stats" in the center with normal and italic text
-    title = Text("Xray Stats", style="bold cyan")
-    title.stylize("italic")
-
-    console.print(Align.center(title))
     console.print(table)
 
 if __name__ == "__main__":
