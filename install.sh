@@ -304,9 +304,6 @@ check_success "Gagal menambahkan kunci signing Nginx ke apt."
 rm -rf nginx_signing.*
 check_success "Gagal membersihkan file kunci yang didownload."
 
-curl https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
-
 # Memperbarui daftar paket
 print_msg $YB "Memperbarui daftar paket..."
 apt update
@@ -314,14 +311,8 @@ check_success "Gagal memperbarui daftar paket."
 
 # Menginstal Nginx versi terbaru
 print_msg $YB "Menginstal Nginx versi terbaru..."
-apt install cloudflare-warp -y
 apt install -y nginx
 check_success "Gagal menginstal Nginx."
-
-warp-cli --accept-tos registration new >> /dev/null 2>&1
-warp-cli --accept-tos mode proxy >> /dev/null 2>&1
-warp-cli --accept-tos proxy port 40000 >> /dev/null 2>&1
-warp-cli --accept-tos connect >> /dev/null 2>&1
 
 # Menghapus konfigurasi default Nginx dan konten default web
 print_msg $YB "Menghapus konfigurasi default Nginx dan konten default web..."
