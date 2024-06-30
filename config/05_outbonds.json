@@ -36,22 +36,6 @@
         "secretKey": "sCoC/QyP5H4fFBCHeGismIZJHPHlUDWWpVGmNcfGFVQ=",
         "workers": 2
       },
-      "tag": "wireguard"
-    },
-    {
-      "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIPv4v6"
-      },
-      "streamSettings": {
-        "sockopt": {
-          "dialerProxy": "wireguard",
-          "tcpFastOpen": true,
-          "tcpKeepAliveInterval": 0,
-          "tcpMptcp": false,
-          "tcpNoDelay": true
-        }
-      },
       "tag": "warp"
     }
   ]
