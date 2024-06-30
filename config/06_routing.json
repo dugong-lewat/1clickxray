@@ -24,12 +24,6 @@
         "type": "field"
       },
       {
-        "network": "UDP",
-        "outboundTag": "blocked",
-        "port": "443",
-        "type": "field"
-      },
-      {
         "domain": [
           "geosite:google",
           "geosite:openai",
@@ -72,7 +66,7 @@
           "in-24"
         ],
         "outboundTag": "direct",
-        "port": "0-65535",
+        # "port": "0-65535",
         "type": "field"
       }
     ]
