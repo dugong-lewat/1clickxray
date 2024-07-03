@@ -2,14 +2,7 @@
   "dns": {
     "queryStrategy": "UseIP",
     "servers": [
-      {
-        "address": "localhost",
-        "domains": [
-          "https://1.1.1.1/dns-query"
-        ],
-        "queryStrategy": "UseIP",
-        "skipFallback": true
-      }
+      "https://1.1.1.1/dns-query"
     ],
     "tag": "dns_inbound"
   }
