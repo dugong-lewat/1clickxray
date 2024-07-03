@@ -72,7 +72,7 @@ sleep 1
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
 apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd bind9-host -y
 apt install unzip python-is-python3 python3-pip -y
-pip install psutil pandas tabulate rich py-cpuinfo distro requests
+pip install psutil pandas tabulate rich py-cpuinfo distro requests pycountry geoip2
 check_success
 sleep 1
 
@@ -239,6 +239,50 @@ sudo timedatectl set-timezone Asia/Jakarta &>/dev/null
 print_msg $YB "Zona waktu berhasil diatur."
 
 # Memberikan pesan penyelesaian
+print_msg $YB "Instalasi selesai."
+sleep 3
+clear
+
+# Selamat datang
+print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi WireProxy untuk WARP pada sistem Anda."
+
+print_msg $YB "Instalasi WireProxy"
+wget -q -O /usr/local/bin/wireproxy https://github.com/dugong-lewat/1clickxray/raw/main/wireproxy
+print_msg $YB "Mengkonfigurasi WireProxy"
+cat > nano /etc/wireproxy.conf << END
+[Interface]
+PrivateKey = 4Osd07VYMrPGDtrJfRaRZ+ynuscBVi4PjzOZmLUJDlE=
+Address = 172.16.0.2/32, 2606:4700:110:8fdc:f256:b15d:9e5c:5d1/128
+DNS = 1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001
+MTU = 1280
+
+[Peer]
+PublicKey = bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=
+AllowedIPs = 0.0.0.0/0
+AllowedIPs = ::/0
+Endpoint = engage.cloudflareclient.com:2408
+
+[Socks5]
+BindAddress = 127.0.0.1:40000
+END
+
+print_msg $YB "Membuat service untuk WireProxy"
+cat > /etc/systemd/system/wireproxy.service << END
+[Unit]
+Description=WireProxy for WARP
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/wireproxy -c /etc/wireproxy.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+END
+sudo systemctl enable wireproxy
+sudo systemctl start wireproxy
+sudo systemctl daemon-reload
+sudo systemctl restart wireproxy
 print_msg $YB "Instalasi selesai."
 sleep 3
 clear
