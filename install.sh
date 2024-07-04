@@ -249,6 +249,7 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi WireP
 print_msg $YB "Instalasi WireProxy"
 wget -q -O /usr/local/bin/wireproxy https://github.com/dugong-lewat/1clickxray/raw/main/wireproxy
 chmod +x /usr/local/bin/wireproxy
+check_success "Gagal instalasi WireProxy."
 print_msg $YB "Mengkonfigurasi WireProxy"
 cat > /etc/wireproxy.conf << END
 [Interface]
@@ -266,6 +267,7 @@ Endpoint = engage.cloudflareclient.com:2408
 [Socks5]
 BindAddress = 127.0.0.1:40000
 END
+check_success "Gagal mengkonfigurasi WireProxy."
 
 print_msg $YB "Membuat service untuk WireProxy"
 cat > /etc/systemd/system/wireproxy.service << END
@@ -275,11 +277,13 @@ After=network.target
 
 [Service]
 ExecStart=/usr/local/bin/wireproxy -c /etc/wireproxy.conf
-Restart=on-failure
+RestartSec=5
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
 END
+check_success "Gagal membuat service untuk WireProxy."
 sudo systemctl enable wireproxy
 sudo systemctl start wireproxy
 sudo systemctl daemon-reload
