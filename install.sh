@@ -248,6 +248,7 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi WireP
 
 print_msg $YB "Instalasi WireProxy"
 wget -q -O /usr/local/bin/wireproxy https://github.com/dugong-lewat/1clickxray/raw/main/wireproxy
+chmod +x /usr/local/bin/wireproxy
 print_msg $YB "Mengkonfigurasi WireProxy"
 cat > /etc/wireproxy.conf << END
 [Interface]
