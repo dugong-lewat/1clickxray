@@ -101,7 +101,7 @@ vmesslink2="vmess://$(create_vmess_link "vmess-ws-ntls" "80" "ws" "/vmess-ws" "n
 vmesslink3="vmess://$(create_vmess_link "vmess-hup-tls" "443" "httpupgrade" "/vmess-hup" "tls")"
 vmesslink4="vmess://$(create_vmess_link "vmess-hup-ntls" "80" "httpupgrade" "/vmess-hup" "none")"
 vmesslink5="vmess://$(create_vmess_link "vmess-grpc" "443" "grpc" "vmess-grpc" "tls")"
-vmesslink6="vmess://$(create_vmess_link "vmess-splithttp-tls" "443" "ws" "/vmess-split" "tls")"
+vmesslink6="vmess://$(create_vmess_link "vmess-splithttp-tls" "443" "splithttp" "/vmess-split" "tls")"
 
 # Membuat Tautan Vless
 vlesslink1="vless://$uuid@$domain:443?path=/vless-ws&security=tls&encryption=none&host=$domain&type=ws&sni=$domain#vless-ws-tls"
