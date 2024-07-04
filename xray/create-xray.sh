@@ -50,7 +50,7 @@ while [ "$valid_input" = false ]; do
     if [[ "$masaaktif" =~ ^[0-9]+$ ]]; then
         valid_input=true
     else
-        echo "${RB}Input harus berupa angka. Silakan coba lagi.${NC}"
+        echo -e "${RB}Input harus berupa angka. Silakan coba lagi.${NC}"
     fi
 done
 
