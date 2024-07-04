@@ -1263,6 +1263,159 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
       },
       "tag": "in-17"
     },
+# VLESS Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1010,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-split",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/vless-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+# VMESS Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1020,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email": "split",
+            "id": "$uuid"
+#vmess
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/vmess-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+# TROJAN Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1030,
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "email": "split",
+            "password": "$pwtr"
+#trojan
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/trojan-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+# SS Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1040,
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/ss-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+# SS2022 Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1050,
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/ss22-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
     {
       "port": 80,
       "protocol": "vless",
