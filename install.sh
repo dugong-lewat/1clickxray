@@ -249,7 +249,7 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi WireP
 print_msg $YB "Instalasi WireProxy"
 wget -q -O /usr/local/bin/wireproxy https://github.com/dugong-lewat/1clickxray/raw/main/wireproxy
 print_msg $YB "Mengkonfigurasi WireProxy"
-cat > nano /etc/wireproxy.conf << END
+cat > /etc/wireproxy.conf << END
 [Interface]
 PrivateKey = 4Osd07VYMrPGDtrJfRaRZ+ynuscBVi4PjzOZmLUJDlE=
 Address = 172.16.0.2/32, 2606:4700:110:8fdc:f256:b15d:9e5c:5d1/128
