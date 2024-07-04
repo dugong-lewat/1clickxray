@@ -1,0 +1,1067 @@
+{
+    "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 10000,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      },
+      "tag": "api"
+    },
+# XTLS
+    {
+      "listen": "::",
+      "port": 443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "flow": "xtls-rprx-vision",
+            "id": "$uuid"
+#xtls
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": [
+          {
+            "alpn": "h2",
+            "dest": 4443,
+            "xver": 2
+          },
+          {
+            "dest": 8080,
+            "xver": 2
+          },
+          // Websocket
+          {
+            "path": "/vless-ws",
+            "dest": "@vless-ws",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-ws",
+            "dest": "@vmess-ws",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-ws",
+            "dest": "@trojan-ws",
+            "xver": 2
+          },
+          {
+            "path": "/ss-ws",
+            "dest": 1000,
+            "xver": 2
+          },
+          {
+            "path": "/ss22-ws",
+            "dest": 1100,
+            "xver": 2
+          },
+          // HTTPupgrade
+          {
+            "path": "/vless-hup",
+            "dest": "@vl-hup",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-hup",
+            "dest": "@vm-hup",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-hup",
+            "dest": "@tr-hup",
+            "xver": 2
+          },
+          {
+            "path": "/ss-hup",
+            "dest": "3010",
+            "xver": 2
+          },
+          {
+            "path": "/ss22-hup",
+            "dest": "3100",
+            "xver": 2
+          }
+        ]
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tlsSettings": {
+          "certificates": [
+            {
+              "ocspStapling": 3600,
+              "certificateFile": "/usr/local/etc/xray/fullchain.cer",
+              "keyFile": "/usr/local/etc/xray/private.key"
+            }
+          ],
+          "minVersion": "1.2",
+          "cipherSuites": "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
+        },
+        "network": "tcp",
+        "security": "tls"
+      },
+      "tag": "in-01"
+    },
+# TROJAN TCP TLS
+    {
+      "listen": "127.0.0.1",
+      "port": 4443,
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ],
+        "fallbacks": [
+          {
+            "dest": "8443",
+            "xver": 2
+          }
+        ]
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "tcpSettings": {
+          "acceptProxyProtocol": true
+        },
+        "network": "tcp",
+        "security": "none"
+      },
+      "tag": "in-02"
+    },
+# VLESS WS
+    {
+      "listen": "@vless-ws",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-ws",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vless-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      },
+      "tag": "in-03"
+    },
+# VMESS WS
+    {
+      "listen": "@vmess-ws",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email": "general@vmess-ws", 
+            "id": "$uuid"
+#vmess
+          }
+        ]
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vmess-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      },
+      "tag": "in-04"
+    },
+# TROJAN WS
+    {
+      "listen": "@trojan-ws",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ]
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      },
+      "tag": "in-05"
+    },
+# SS WS
+    {
+      "listen": "127.0.0.1",
+      "port": 1000,
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      },
+      "tag": "in-06"
+    },
+# SS2022 WS
+    {
+      "listen": "127.0.0.1",
+      "port": 1100,
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      },
+      "tag": "in-07"
+    },
+# VLESS HTTPupgrade
+    {
+      "listen": "@vl-hup",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-ws",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vless-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-08"
+    },
+# VMESS HTTPupgrade
+    {
+      "listen": "@vm-hup",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-ws",
+            "id": "$uuid"
+#vmess
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/vmess-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-09"
+    },
+# TROJAN HTTPupgrade
+    {
+      "listen": "@tr-hup",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ]
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-10"
+    },
+# SS HTTPupgrade
+    {
+      "listen": "127.0.0.1",
+      "port": "3010",
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-11"
+    },
+# SS2022 HTTPupgrade
+    {
+      "listen": "127.0.0.1",
+      "port": "3100",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-12"
+    },
+# VLESS gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": 5000,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email": "grpc",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "multiMode": true,
+          "serviceName": "vless-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
+        },
+        "network": "grpc",
+        "security": "none"
+      },
+      "tag": "in-13"
+    },
+# VMESS gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": 5100,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email": "grpc",
+            "id": "$uuid"
+#vmess
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "multiMode": true,
+          "serviceName": "vmess-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
+        },
+        "network": "grpc",
+        "security": "none"
+      },
+      "tag": "in-14"
+    },
+# TROJAN gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": 5200,
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "email": "grpc",
+            "password": "$pwtr"
+#trojan
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "multiMode": true,
+          "serviceName": "trojan-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
+        },
+        "network": "grpc",
+        "security": "none"
+      },
+      "tag": "in-15"
+    },
+# SS gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": 5300,
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "multiMode": true,
+          "serviceName": "ss-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
+        },
+        "network": "grpc",
+        "security": "none"
+      },
+      "tag": "in-16"
+    },
+# SS2022 gRPC
+    {
+      "listen": "127.0.0.1",
+      "port": 5400,
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "multiMode": true,
+          "serviceName": "ss22-grpc",
+          "alpn": [
+            "h2",
+            "http/1.1"
+          ]
+        },
+        "network": "grpc",
+        "security": "none"
+      },
+      "tag": "in-17"
+    },
+# VLESS Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1010,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "email":"general@vless-split",
+            "id": "$uuid"
+#vless
+          }
+        ],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/vless-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+# VMESS Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1020,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "email": "split",
+            "id": "$uuid"
+#vmess
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/vmess-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+# TROJAN Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1030,
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "email": "split",
+            "password": "$pwtr"
+#trojan
+          }
+        ],
+        "decryption": "none",
+        "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/trojan-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+# SS Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1040,
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/ss-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+# SS2022 Split
+    {
+      "listen": "127.0.0.1",
+      "port": 1050,
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "splithttpSettings": {
+          "path": "/ss22-split"
+        },
+        "network": "splithttp",
+        "security": "none"
+      }
+    },
+    {
+      "port": 80,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "$uuid"
+#universal
+          }
+        ],
+        "fallbacks": [
+          {
+            "dest": 8080,
+            "xver": 2
+          },
+          // Websocket
+          {
+            "path": "/vless-ws",
+            "dest": "@vless-ws",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-ws",
+            "dest": "@vmess-ws",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-ws",
+            "dest": "@trojan",
+            "xver": 2
+          },
+          {
+            "dest": 2000,
+            "xver": 2
+          },
+          {
+            "dest": 2100,
+            "xver": 2
+          },
+          // HTTPupgrade
+          {
+            "path": "/vless-hup",
+            "dest": "@vl-hup",
+            "xver": 2
+          },
+          {
+            "path": "/vmess-hup",
+            "dest": "@vm-hup",
+            "xver": 2
+          },
+          {
+            "path": "/trojan-hup",
+            "dest": "@trojan-hup",
+            "xver": 2
+          },
+          {
+            "path": "/ss-hup",
+            "dest": "4000",
+            "xver": 2
+          },
+          {
+            "path": "/ss22-hup",
+            "dest": "4100",
+            "xver": 2
+          }
+        ],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-18"
+    },
+# TROJAN WS
+    {
+      "listen": "@trojan",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ]
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      },
+      "tag": "in-19"
+    },
+# SS WS
+    {
+      "listen": "127.0.0.1",
+      "port": 2000,
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      },
+      "tag": "in-20"
+    },
+# SS2022 WS
+    {
+      "listen": "127.0.0.1",
+      "port": 2100,
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "wsSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-ws"
+        },
+        "network": "ws",
+        "security": "none"
+      },
+      "tag": "in-21"
+    },
+# TROJAN HTTPupgrade
+    {
+      "listen": "@trojan-hup",
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password": "$pwtr"
+#trojan
+          }
+        ]
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/trojan-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-22"
+    },
+# SS HTTPupgrade
+    {
+      "listen": "127.0.0.1",
+      "port": 4000,
+      "protocol": "shadowsocks",
+      "settings": {
+        "clients": [
+            {
+              "method": "aes-256-gcm",
+              "password": "$pwss"
+#ss
+            }
+          ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-23"
+    },
+# SS2022 HTTPupgrade
+    {
+      "listen": "127.0.0.1",
+      "port": "4100",
+      "protocol": "shadowsocks",
+      "settings": {
+        "method": "2022-blake3-aes-256-gcm",
+        "password": "$(cat /usr/local/etc/xray/serverpsk)",
+        "clients": [
+          {
+            "password": "$userpsk"
+#ss22
+          }
+        ],
+        "network": "tcp,udp"
+      },
+      "streamSettings": {
+        "httpupgradeSettings": {
+          "acceptProxyProtocol": true,
+          "path": "/ss22-hup"
+        },
+        "network": "httpupgrade",
+        "security": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls"
+        ],
+        "enabled": true
+      },
+      "tag": "in-24"
+    }
+  ]
+}
