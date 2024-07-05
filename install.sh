@@ -70,7 +70,7 @@ sleep 1
 
 # Install paket keempat
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
-apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd bind9-host -y
+apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd bind9-host gnupg2 ca-certificates lsb-release ubuntu-keyring debian-archive-keyring -y
 apt install unzip python-is-python3 python3-pip -y
 pip install psutil pandas tabulate rich py-cpuinfo distro requests pycountry geoip2
 check_success
@@ -385,18 +385,14 @@ mkdir -p /usr/local/etc/xray/config >> /dev/null 2>&1
 mkdir -p /usr/local/etc/xray/dns >> /dev/null 2>&1
 touch /usr/local/etc/xray/dns/domain
 
-# Set your Cloudflare API credentials and zone ID
+# Set your Cloudflare API credentials
 API_EMAIL="1562apricot@awgarstone.com"
 API_KEY="e9c80c4d538c819701ea0129a2fd75ea599ba"
 
 # Set the DNS record details
-DOMAIN="vless.sbs"
 TYPE_A="A"
 TYPE_CNAME="CNAME"
-NAME_A="$(openssl rand -hex 2).$DOMAIN"
 IP_ADDRESS=$(curl -sS ipv4.icanhazip.com)
-NAME_CNAME="*.$NAME_A"
-TARGET_CNAME="$NAME_A"
 
 # Fungsi untuk memvalidasi domain
 validate_domain() {
@@ -447,6 +443,48 @@ get_zone_id() {
   echo -e "${YB}Zone ID: $ZONE_ID_SENSORED${NC}"
 }
 
+# Function to get Previous Zone ID and delete existing DNS records
+get_previous_zone_id() {
+  echo -e "${YB}Getting Previous Zone ID and Deleting Existing Records...${NC}"
+
+  # Read previous A record and CNAME record
+  PREVIOUS_A_RECORD=$(cat /usr/local/etc/xray/dns/a_record 2>/dev/null)
+  PREVIOUS_CNAME_RECORD=$(cat /usr/local/etc/xray/dns/cname_record 2>/dev/null)
+
+  if [ -n "$PREVIOUS_A_RECORD" ]; then
+    PREVIOUS_DOMAIN="${PREVIOUS_A_RECORD#*.}"
+  elif [ -n "$PREVIOUS_CNAME_RECORD" ]; then
+    PREVIOUS_DOMAIN="${PREVIOUS_CNAME_RECORD#*.}"
+  else
+    echo -e "${GB}No previous records found.${NC}"
+    return
+  fi
+
+  # Get Zone ID for the previous domain
+  PREVIOUS_ZONE_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$PREVIOUS_DOMAIN" \
+    -H "X-Auth-Email: $API_EMAIL" \
+    -H "X-Auth-Key: $API_KEY" \
+    -H "Content-Type: application/json" | jq -r '.result[0].id')
+
+  if [ "$PREVIOUS_ZONE_ID" == "null" ]; then
+    echo -e "${RB}Failed to get Zone ID for previous domain${NC}"
+    return
+  fi
+
+  PREVIOUS_ZONE_ID_SENSORED="${GB}${PREVIOUS_ZONE_ID:0:3}*****${PREVIOUS_ZONE_ID: -3}"
+  echo -e "${YB}Previous Zone ID: $PREVIOUS_ZONE_ID_SENSORED${NC}"
+
+  # Delete previous A record
+  if [ -n "$PREVIOUS_A_RECORD" ]; then
+    delete_record "$PREVIOUS_A_RECORD" "$TYPE_A" "$PREVIOUS_ZONE_ID"
+  fi
+
+  # Delete previous CNAME record
+  if [ -n "$PREVIOUS_CNAME_RECORD" ]; then
+    delete_record "$PREVIOUS_CNAME_RECORD" "$TYPE_CNAME" "$PREVIOUS_ZONE_ID"
+  fi
+}
+
 # Function to handle API response
 handle_response() {
   local response=$1
@@ -466,22 +504,20 @@ handle_response() {
 delete_record() {
   local record_name=$1
   local record_type=$2
+  local zone_id=${3:-$ZONE_ID}
 
-  echo -e "${YB}Checking for existing $record_type record: ${CB}$record_name${NC} ${YB}.....${NC}"
-  RECORD_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records?type=$record_type&name=$record_name" \
+  RECORD_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?type=$record_type&name=$record_name" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
     -H "Content-Type: application/json" | jq -r '.result[0].id')
 
   if [ "$RECORD_ID" != "null" ]; then
     echo -e "${YB}Deleting existing $record_type record: ${CB}$record_name${NC} ${YB}.....${NC}"
-    response=$(curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$RECORD_ID" \
+    response=$(curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records/$RECORD_ID" \
       -H "X-Auth-Email: $API_EMAIL" \
       -H "X-Auth-Key: $API_KEY" \
       -H "Content-Type: application/json")
     handle_response "$response" "${YB}Deleting $record_type record:${NC} ${CB}$record_name${NC}"
-  else
-    echo -e "${GB}No existing $record_type record found for $record_name.${NC}"
   fi
 }
 
@@ -545,7 +581,7 @@ setup_domain() {
 
         # Menampilkan pilihan untuk menggunakan domain acak atau domain sendiri
         print_msg $YB "Pilih Opsi:"
-        print_msg $YB "1. Gunakan domain acak"
+        print_msg $YB "1. Gunakan domain yang tersedia"
         print_msg $YB "2. Gunakan domain sendiri"
 
         # Meminta input dari pengguna untuk memilih opsi
@@ -554,7 +590,36 @@ setup_domain() {
         # Memproses pilihan pengguna
         case $choice in
             1)
-                # Menggunakan domain acak
+                while true; do
+                    # clear
+                    print_msg $YB "Pilih Domain anda:"
+                    print_msg $YB "1. vless.sbs"
+                    print_msg $YB "2. airi.buzz"
+                    print_msg $YB "3. drm.icu"
+                    read -rp "Masukkan pilihan Anda: " domain_choice
+                    case $domain_choice in
+                        1)
+                            DOMAIN="vless.sbs"
+                            break
+                            ;;
+                        2)
+                            DOMAIN="airi.buzz"
+                            break
+                            ;;
+                        3)
+                            DOMAIN="drm.icu"
+                            break
+                            ;;
+                        *)
+                            print_error "Pilihan tidak valid!"
+                            sleep 2
+                            ;;
+                    esac
+                done
+                NAME_A="$(openssl rand -hex 2).$DOMAIN"
+                NAME_CNAME="*.$NAME_A"
+                TARGET_CNAME="$NAME_A"
+                get_previous_zone_id
                 get_zone_id
                 create_A_record
                 create_CNAME_record
@@ -747,6 +812,7 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
         ],
         "fallbacks": [
           {
+            "alpn": "h2",
             "dest": "8443",
             "xver": 2
           }
