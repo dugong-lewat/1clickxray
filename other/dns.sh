@@ -194,6 +194,24 @@ create_CNAME_record() {
   handle_response "$response" "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC"
 }
 
+# Update Nginx configuration
+update_nginx_config() {
+    # Get new domain from file
+    NEW_DOMAIN=$(cat /usr/local/etc/xray/dns/domain)
+    # Update server_name in Nginx configuration
+    sed -i "s/server_name .*;/server_name $NEW_DOMAIN;/g" /etc/nginx/nginx.conf
+
+    # Check if Nginx configuration is valid after changes
+    if nginx -t &> /dev/null; then
+        # Reload Nginx configuration if valid
+        systemctl reload nginx
+        print_msg $GB "Nginx configuration reloaded successfully."
+    else
+        # If Nginx configuration is not valid, display error message
+        print_msg $RB "Nginx configuration test failed. Please check your configuration."
+    fi
+}
+
 # Fungsi untuk menampilkan menu utama
 setup_domain() {
     while true; do
@@ -248,11 +266,13 @@ setup_domain() {
                 get_zone_id
                 create_A_record
                 create_CNAME_record
+                update_nginx_config
                 break
                 ;;
             2)
                 # Menggunakan domain sendiri
                 input_domain
+                update_nginx_config
                 break
                 ;;
             *)
