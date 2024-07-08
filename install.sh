@@ -533,8 +533,7 @@ create_CNAME_record() {
       "name": "'$NAME_CNAME'",
       "content": "'$TARGET_CNAME'",
       "ttl": 0,
-      "proxied": false
-    }')
+      "proxied": false}')
   handle_response "$response" "${YB}Menambah CNAME record untuk wildcard $GB$NAME_CNAME$NC"
 }
 
@@ -555,125 +554,129 @@ check_dns_record() {
   fi
 }
 
+# Fungsi untuk menampilkan menu DNS
+setup_dns_menu() {
+  while true; do
+    echo -e "${YB}Pilih opsi untuk nama DNS:"
+    echo -e "${WB}1. Buat nama DNS secara acak"
+    echo -e "${WB}2. Buat nama DNS sendiri${NC}"
+    echo -e " "
+    echo -e "${GB}3. Kembali${NC}"
+    read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' dns_name_choice
+    case $dns_name_choice in
+      1)
+        NAME_A="$(openssl rand -hex 2).$DOMAIN"
+        NAME_CNAME="*.$NAME_A"
+        TARGET_CNAME="$NAME_A"
+        get_zone_id
+        delete_records_based_on_ip
+        create_A_record
+        create_CNAME_record
+        return
+        ;;
+      2)
+        while true; do
+          read -rp $'\e[33;1mMasukkan nama DNS Anda (hanya huruf kecil dan angka, tanpa spasi): \e[0m' custom_dns_name
+          if [[ ! "$custom_dns_name" =~ ^[a-z0-9-]+$ ]]; then
+            echo -e "${RB}Nama DNS hanya boleh mengandung huruf kecil dan angka, tanpa spasi!${NC}"
+            sleep 2
+            continue
+          fi
+          if [ -z "$custom_dns_name" ]; then
+            echo -e "${RB}Nama DNS tidak boleh kosong!${NC}"
+            sleep 2
+            continue
+          fi
+          NAME_A="$custom_dns_name.$DOMAIN"
+          NAME_CNAME="*.$NAME_A"
+          TARGET_CNAME="$NAME_A"
+
+          get_zone_id
+          if check_dns_record "$NAME_A" "$ZONE_ID"; then
+            echo -e "${RB}Nama DNS sudah ada! Silakan coba lagi.${NC}"
+            sleep 2
+          else
+            delete_records_based_on_ip
+            create_A_record
+            create_CNAME_record
+            return
+          fi
+        done
+        ;;
+      3)
+        return
+        ;;
+      *)
+        echo -e "${RB}Pilihan tidak valid!${NC}"
+        sleep 2
+        ;;
+    esac
+  done
+}
+
 # Fungsi untuk menampilkan menu utama
 setup_domain() {
-    while true; do
-        clear
+  while true; do
+    clear
 
-        # Menampilkan judul
-        echo -e "${BB}————————————————————————————————————————————————————————"
-        echo -e "${YB}                      SETUP DOMAIN"
-        echo -e "${BB}————————————————————————————————————————————————————————"
+    # Menampilkan judul
+    echo -e "${BB}————————————————————————————————————————————————————————"
+    echo -e "${YB}                      SETUP DOMAIN"
+    echo -e "${BB}————————————————————————————————————————————————————————"
 
-        # Menampilkan pilihan untuk menggunakan domain acak atau domain sendiri
-        echo -e "${YB}Pilih Opsi:"
-        echo -e "${WB}1. Gunakan domain yang tersedia"
-        echo -e "${WB}2. Gunakan domain sendiri"
+    # Menampilkan pilihan untuk menggunakan domain acak atau domain sendiri
+    echo -e "${YB}Pilih Opsi:"
+    echo -e "${WB}1. Gunakan domain yang tersedia"
+    echo -e "${WB}2. Gunakan domain sendiri"
 
-        # Meminta input dari pengguna untuk memilih opsi
-        read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' choice
+    # Meminta input dari pengguna untuk memilih opsi
+    read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' choice
 
-        # Memproses pilihan pengguna
-        case $choice in
+    # Memproses pilihan pengguna
+    case $choice in
+      1)
+        while true; do
+          echo -e "${YB}Pilih Domain anda:"
+          echo -e "${WB}1. vless.sbs"
+          echo -e "${WB}2. airi.buzz"
+          echo -e "${WB}3. drm.icu${NC}"
+          echo -e " "
+          echo -e "${GB}4. kembali${NC}"
+          read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' domain_choice
+          case $domain_choice in
             1)
-                while true; do
-                    echo -e "${YB}Pilih Domain anda:"
-                    echo -e "${WB}1. vless.sbs"
-                    echo -e "${WB}2. airi.buzz"
-                    echo -e "${WB}3. drm.icu${NC}"
-                    echo -e " "
-                    echo -e "${GB}4. kembali${NC}"
-                    read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' domain_choice
-                    case $domain_choice in
-                        1)
-                            DOMAIN="vless.sbs"
-                            ;;
-                        2)
-                            DOMAIN="airi.buzz"
-                            ;;
-                        3)
-                            DOMAIN="drm.icu"
-                            ;;
-                        4)
-                            break
-                            ;;
-                        *)
-                            echo -e "${RB}Pilihan tidak valid!${NC}"
-                            sleep 2
-                            continue
-                            ;;
-                    esac
-
-                    while true; do
-                        echo -e "${YB}Pilih opsi untuk nama DNS:"
-                        echo -e "${WB}1. Buat nama DNS secara acak"
-                        echo -e "${WB}2. Buat nama DNS sendiri${NC}"
-                        echo -e " "
-                        echo -e "${GB}3. Kembali${NC}"
-                        read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' dns_name_choice
-                        case $dns_name_choice in
-                            1)
-                                NAME_A="$(openssl rand -hex 2).$DOMAIN"
-                                NAME_CNAME="*.$NAME_A"
-                                TARGET_CNAME="$NAME_A"
-                                get_zone_id
-                                delete_records_based_on_ip
-                                create_A_record
-                                create_CNAME_record
-                                break
-                                ;;
-                            2)
-                                while true; do
-                                    read -rp $'\e[33;1mMasukkan nama DNS Anda (hanya huruf kecil dan angka, tanpa spasi): \e[0m' custom_dns_name
-                                    if [[ ! "$custom_dns_name" =~ ^[a-z0-9-]+$ ]]; then
-                                        echo -e "${RB}Nama DNS hanya boleh mengandung huruf kecil dan angka, tanpa spasi!${NC}"
-                                        sleep 2
-                                        continue
-                                    fi
-                                    if [ -z "$custom_dns_name" ]; then
-                                        echo -e "${RB}Nama DNS tidak boleh kosong!${NC}"
-                                        sleep 2
-                                        continue
-                                    fi
-                                    NAME_A="$custom_dns_name.$DOMAIN"
-                                    NAME_CNAME="*.$NAME_A"
-                                    TARGET_CNAME="$NAME_A"
-
-                                    get_zone_id
-                                    if check_dns_record "$NAME_A" "$ZONE_ID"; then
-                                        echo -e "${RB}Nama DNS sudah ada! Silakan coba lagi.${NC}"
-                                        sleep 2
-                                    else
-                                        # get_zone_id
-                                        delete_records_based_on_ip
-                                        create_A_record
-                                        create_CNAME_record
-                                    fi
-                                done
-                                break
-                                ;;
-                            3)
-                                break
-                                ;;
-                            *)
-                                echo -e "${RB}Pilihan tidak valid!${NC}"
-                                sleep 2
-                                ;;
-                        esac
-                    done
-                done
-                ;;
+              DOMAIN="vless.sbs"
+              ;;
             2)
-                input_domain
-                ;;
+              DOMAIN="airi.buzz"
+              ;;
+            3)
+              DOMAIN="drm.icu"
+              ;;
+            4)
+              break
+              ;;
             *)
-                echo -e "${RB}Pilihan tidak valid!${NC}"
-                sleep 2
-                ;;
-        esac
-    done
+              echo -e "${RB}Pilihan tidak valid!${NC}"
+              sleep 2
+              continue
+              ;;
+          esac
+          setup_dns_menu
+          break
+        done
+        ;;
+      2)
+        input_domain
+        ;;
+      *)
+        echo -e "${RB}Pilihan tidak valid!${NC}"
+        sleep 2
+        ;;
+    esac
+  done
 
-    sleep 2
+  sleep 2
 }
 
 # Menjalankan menu utama
