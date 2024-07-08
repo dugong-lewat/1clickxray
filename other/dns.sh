@@ -34,22 +34,22 @@ input_domain() {
     while true; do
         echo -e "${YB}Input Domain${NC}"
         echo " "
-        read -rp "Input domain kamu: " -e dns
+        read -rp $'\e[33;1mInput domain kamu: \e[0m' -e dns
 
         if [ -z "$dns" ]; then
-            echo -e "${RB}Nothing input for domain!${NC}"
+            echo -e "${RB}Tidak ada input untuk domain!${NC}"
         elif ! validate_domain "$dns"; then
-            echo -e "${RB}Invalid domain format! Please input a valid domain.${NC}"
+            echo -e "${RB}Format domain tidak valid! Silakan input domain yang valid.${NC}"
         else
             echo "$dns" > /usr/local/etc/xray/dns/domain
             echo "DNS=$dns" > /var/lib/dnsvps.conf
-            echo -e "Domain ${GB}${dns}${NC} saved successfully"
+            echo -e "Domain ${GB}${dns}${NC} berhasil disimpan"
             break
         fi
     done
 }
 
-# Function to get Zone ID
+# Fungsi untuk mendapatkan Zone ID
 get_zone_id() {
   echo -e "${YB}Getting Zone ID...${NC}"
   ZONE_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$DOMAIN" \
@@ -58,74 +58,32 @@ get_zone_id() {
     -H "Content-Type: application/json" | jq -r '.result[0].id')
 
   if [ "$ZONE_ID" == "null" ]; then
-    echo -e "${RB}Failed to get Zone ID${NC}"
+    echo -e "${RB}Gagal mendapatkan Zone ID${NC}"
     exit 1
   fi
 
-  # Sensoing Zone ID (Only showing first and last 3 characters)
+  # Menyensor Zone ID (hanya menampilkan 3 karakter pertama dan terakhir)
   ZONE_ID_SENSORED="${GB}${ZONE_ID:0:3}*****${ZONE_ID: -3}"
 
   echo -e "${YB}Zone ID: $ZONE_ID_SENSORED${NC}"
 }
 
-# Function to get Previous Zone ID and delete existing DNS records
-get_previous_zone_id() {
-  echo -e "${YB}Getting Previous Zone ID and Deleting Existing Records...${NC}"
-
-  # Read previous A record and CNAME record
-  PREVIOUS_A_RECORD=$(cat /usr/local/etc/xray/dns/a_record 2>/dev/null)
-  PREVIOUS_CNAME_RECORD=$(cat /usr/local/etc/xray/dns/cname_record 2>/dev/null)
-
-  if [ -n "$PREVIOUS_A_RECORD" ]; then
-    PREVIOUS_DOMAIN="${PREVIOUS_A_RECORD#*.}"
-  elif [ -n "$PREVIOUS_CNAME_RECORD" ]; then
-    PREVIOUS_DOMAIN="${PREVIOUS_CNAME_RECORD#*.}"
-  else
-    echo -e "${GB}No previous records found.${NC}"
-    return
-  fi
-
-  # Get Zone ID for the previous domain
-  PREVIOUS_ZONE_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$PREVIOUS_DOMAIN" \
-    -H "X-Auth-Email: $API_EMAIL" \
-    -H "X-Auth-Key: $API_KEY" \
-    -H "Content-Type: application/json" | jq -r '.result[0].id')
-
-  if [ "$PREVIOUS_ZONE_ID" == "null" ]; then
-    echo -e "${RB}Failed to get Zone ID for previous domain${NC}"
-    return
-  fi
-
-  PREVIOUS_ZONE_ID_SENSORED="${GB}${PREVIOUS_ZONE_ID:0:3}*****${PREVIOUS_ZONE_ID: -3}"
-  echo -e "${YB}Previous Zone ID: $PREVIOUS_ZONE_ID_SENSORED${NC}"
-
-  # Delete previous A record
-  if [ -n "$PREVIOUS_A_RECORD" ]; then
-    delete_record "$PREVIOUS_A_RECORD" "$TYPE_A" "$PREVIOUS_ZONE_ID"
-  fi
-
-  # Delete previous CNAME record
-  if [ -n "$PREVIOUS_CNAME_RECORD" ]; then
-    delete_record "$PREVIOUS_CNAME_RECORD" "$TYPE_CNAME" "$PREVIOUS_ZONE_ID"
-  fi
-}
-
-# Function to handle API response
+# Fungsi untuk menangani respon API
 handle_response() {
   local response=$1
   local action=$2
 
   success=$(echo $response | jq -r '.success')
   if [ "$success" == "true" ]; then
-    echo -e "$action ${YB}was successful.${NC}"
+    echo -e "$action ${YB}berhasil.${NC}"
   else
-    echo -e "$action ${RB}failed.${NC}"
+    echo -e "$action ${RB}gagal.${NC}"
     errors=$(echo $response | jq -r '.errors[] | .message')
-    echo -e "${RB}Errors: $errors${NC}"
+    echo -e "${RB}Kesalahan: $errors${NC}"
   fi
 }
 
-# Function to delete existing DNS record
+# Fungsi untuk menghapus DNS record yang ada
 delete_record() {
   local record_name=$1
   local record_type=$2
@@ -137,23 +95,41 @@ delete_record() {
     -H "Content-Type: application/json" | jq -r '.result[0].id')
 
   if [ "$RECORD_ID" != "null" ]; then
-    echo -e "${YB}Deleting existing $record_type record: ${CB}$record_name${NC} ${YB}.....${NC}"
+    echo -e "${YB}Menghapus record $record_type yang ada: ${CB}$record_name${NC} ${YB}.....${NC}"
     response=$(curl -s -X DELETE "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records/$RECORD_ID" \
       -H "X-Auth-Email: $API_EMAIL" \
       -H "X-Auth-Key: $API_KEY" \
       -H "Content-Type: application/json")
-    handle_response "$response" "${YB}Deleting $record_type record:${NC} ${CB}$record_name${NC}"
+    handle_response "$response" "${YB}Menghapus record $record_type:${NC} ${CB}$record_name${NC}"
   fi
 }
 
-# Function to add A record
-create_A_record() {
-  local record_name=$(cat /usr/local/etc/xray/dns/a_record 2>/dev/null)
-  if [ -n "$record_name" ]; then
-    delete_record "$record_name" "$TYPE_A"
-  fi
+# Fungsi untuk menghapus DNS record berdasarkan alamat IP
+delete_records_based_on_ip() {
+  echo -e "${YB}Menghapus DNS records berdasarkan alamat IP: ${CB}$IP_ADDRESS${NC} ${YB}.....${NC}"
 
-  echo -e "${YB}Adding A record $GB$NAME_A$NC $YB.....${NC}"
+  # Mendapatkan semua DNS record untuk zona tersebut
+  dns_records=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+    -H "X-Auth-Email: $API_EMAIL" \
+    -H "X-Auth-Key: $API_KEY" \
+    -H "Content-Type: application/json")
+
+  # Mengurai dan menghapus A record yang cocok dan CNAME record yang terkait
+  echo "$dns_records" | jq -c '.result[] | select(.type == "A" and .content == "'"$IP_ADDRESS"'")' | while read -r record; do
+    record_name=$(echo "$record" | jq -r '.name')
+    delete_record "$record_name" "A"
+    # Menghapus CNAME record yang terkait
+    cname_record=$(echo "$dns_records" | jq -c '.result[] | select(.type == "CNAME" and .content == "'"$record_name"'")')
+    if [ -n "$cname_record" ]; then
+      cname_record_name=$(echo "$cname_record" | jq -r '.name')
+      delete_record "$cname_record_name" "CNAME"
+    fi
+  done
+}
+
+# Fungsi untuk menambah A record
+create_A_record() {
+  echo -e "${YB}Menambah A record $GB$NAME_A$NC $YB.....${NC}"
   response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
@@ -166,19 +142,13 @@ create_A_record() {
       "proxied": false
     }')
   echo "$NAME_A" > /usr/local/etc/xray/dns/domain
-  echo "$NAME_A" > /usr/local/etc/xray/dns/a_record
   echo "DNS=$NAME_A" > /var/lib/dnsvps.conf
-  handle_response "$response" "${YB}Adding A record $GB$NAME_A$NC"
+  handle_response "$response" "${YB}Menambah A record $GB$NAME_A$NC"
 }
 
-# Function to add CNAME record
+# Fungsi untuk menambah CNAME record
 create_CNAME_record() {
-  local record_name=$(cat /usr/local/etc/xray/dns/cname_record 2>/dev/null)
-  if [ -n "$record_name" ]; then
-    delete_record "$record_name" "$TYPE_CNAME"
-  fi
-
-  echo -e "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC $YB.....${NC}"
+  echo -e "${YB}Menambah CNAME record untuk wildcard $GB$NAME_CNAME$NC $YB.....${NC}"
   response=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
     -H "X-Auth-Email: $API_EMAIL" \
     -H "X-Auth-Key: $API_KEY" \
@@ -190,8 +160,24 @@ create_CNAME_record() {
       "ttl": 0,
       "proxied": false
     }')
-  echo "$NAME_CNAME" > /usr/local/etc/xray/dns/cname_record
-  handle_response "$response" "${YB}Adding CNAME record for wildcard $GB$NAME_CNAME$NC"
+  handle_response "$response" "${YB}Menambah CNAME record untuk wildcard $GB$NAME_CNAME$NC"
+}
+
+# Fungsi untuk memeriksa apakah DNS record sudah ada
+check_dns_record() {
+  local record_name=$1
+  local zone_id=$2
+
+  RECORD_EXISTS=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?name=$record_name" \
+    -H "X-Auth-Email: $API_EMAIL" \
+    -H "X-Auth-Key: $API_KEY" \
+    -H "Content-Type: application/json" | jq -r '.result | length')
+
+  if [ "$RECORD_EXISTS" -gt 0 ]; then
+    return 0  # Record exists
+  else
+    return 1  # Record does not exist
+  fi
 }
 
 # Update Nginx configuration
@@ -218,72 +204,127 @@ setup_domain() {
         clear
 
         # Menampilkan judul
-        print_msg $BB "————————————————————————————————————————————————————————"
-        print_msg $YB "                      SETUP DOMAIN"
-        print_msg $BB "————————————————————————————————————————————————————————"
+        echo -e "${BB}————————————————————————————————————————————————————————"
+        echo -e "${YB}                      SETUP DOMAIN"
+        echo -e "${BB}————————————————————————————————————————————————————————"
 
         # Menampilkan pilihan untuk menggunakan domain acak atau domain sendiri
-        print_msg $YB "Pilih Opsi:"
-        print_msg $YB "1. Gunakan domain yang tersedia"
-        print_msg $YB "2. Gunakan domain sendiri"
+        echo -e "${YB}Pilih Opsi:"
+        echo -e "${WB}1. Gunakan domain yang tersedia"
+        echo -e "${WB}2. Gunakan domain sendiri${NC}"
+        echo -e " "
+        echo -e "${GB}3. Kembali${NC}"
 
         # Meminta input dari pengguna untuk memilih opsi
-        read -rp "Masukkan pilihan Anda: " choice
+        read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' choice
 
         # Memproses pilihan pengguna
         case $choice in
             1)
                 while true; do
-                    # clear
-                    print_msg $YB "Pilih Domain anda:"
-                    print_msg $YB "1. vless.sbs"
-                    print_msg $YB "2. airi.buzz"
-                    print_msg $YB "3. drm.icu"
-                    read -rp "Masukkan pilihan Anda: " domain_choice
+                    echo -e "${YB}Pilih Domain anda:"
+                    echo -e "${WB}1. vless.sbs"
+                    echo -e "${WB}2. airi.buzz"
+                    echo -e "${WB}3. drm.icu${NC}"
+                    echo -e " "
+                    echo -e "${GB}4. kembali${NC}"
+                    read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' domain_choice
                     case $domain_choice in
                         1)
                             DOMAIN="vless.sbs"
-                            break
                             ;;
                         2)
                             DOMAIN="airi.buzz"
-                            break
                             ;;
                         3)
                             DOMAIN="drm.icu"
+                            ;;
+                        4)
                             break
                             ;;
                         *)
-                            print_error "Pilihan tidak valid!"
+                            echo -e "${RB}Pilihan tidak valid!${NC}"
                             sleep 2
+                            continue
                             ;;
                     esac
+
+                    while true; do
+                        echo -e "${YB}Pilih opsi untuk nama DNS:"
+                        echo -e "${WB}1. Buat nama DNS secara acak"
+                        echo -e "${WB}2. Buat nama DNS sendiri${NC}"
+                        echo -e " "
+                        echo -e "${GB}3. Kembali${NC}"
+                        read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' dns_name_choice
+                        case $dns_name_choice in
+                            1)
+                                NAME_A="$(openssl rand -hex 2).$DOMAIN"
+                                NAME_CNAME="*.$NAME_A"
+                                TARGET_CNAME="$NAME_A"
+                                get_zone_id
+                                delete_records_based_on_ip
+                                create_A_record
+                                create_CNAME_record
+                                update_nginx_config
+                                exit 0  # Keluar dari script setelah pembuatan DNS selesai
+                                ;;
+                            2)
+                                while true; do
+                                    read -rp $'\e[33;1mMasukkan nama DNS Anda (hanya huruf kecil dan angka, tanpa spasi): \e[0m' custom_dns_name
+                                    if [[ ! "$custom_dns_name" =~ ^[a-z0-9-]+$ ]]; then
+                                        echo -e "${RB}Nama DNS hanya boleh mengandung huruf kecil dan angka, tanpa spasi!${NC}"
+                                        sleep 2
+                                        continue
+                                    fi
+                                    if [ -z "$custom_dns_name" ]; then
+                                        echo -e "${RB}Nama DNS tidak boleh kosong!${NC}"
+                                        sleep 2
+                                        continue
+                                    fi
+                                    NAME_A="$custom_dns_name.$DOMAIN"
+                                    NAME_CNAME="*.$NAME_A"
+                                    TARGET_CNAME="$NAME_A"
+
+                                    get_zone_id
+                                    if check_dns_record "$NAME_A" "$ZONE_ID"; then
+                                        echo -e "${RB}Nama DNS sudah ada! Silakan coba lagi.${NC}"
+                                        sleep 2
+                                    else
+                                        # get_zone_id
+                                        delete_records_based_on_ip
+                                        create_A_record
+                                        create_CNAME_record
+                                        update_nginx_config
+                                        exit 0  # Keluar dari script setelah pembuatan DNS selesai
+                                    fi
+                                done
+                                ;;
+                            3)
+                                break
+                                ;;
+                            *)
+                                echo -e "${RB}Pilihan tidak valid!${NC}"
+                                sleep 2
+                                ;;
+                        esac
+                    done
                 done
-                NAME_A="$(openssl rand -hex 2).$DOMAIN"
-                NAME_CNAME="*.$NAME_A"
-                TARGET_CNAME="$NAME_A"
-                get_previous_zone_id
-                get_zone_id
-                create_A_record
-                create_CNAME_record
-                update_nginx_config
-                break
                 ;;
             2)
-                # Menggunakan domain sendiri
                 input_domain
                 update_nginx_config
+                ;;
+            3)
+                menu
                 break
                 ;;
             *)
-                # Opsi yang tidak valid
-                print_error "Pilihan tidak valid!"
+                echo -e "${RB}Pilihan tidak valid!${NC}"
                 sleep 2
                 ;;
         esac
     done
 
-    # Memberi waktu singkat sebelum membersihkan layar
     sleep 2
 }
 
