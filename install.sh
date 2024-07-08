@@ -851,7 +851,6 @@ cat > /usr/local/etc/xray/config/04_inbounds.json << END
         ],
         "fallbacks": [
           {
-            "alpn": "h2",
             "dest": "8443",
             "xver": 2
           }
