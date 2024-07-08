@@ -266,7 +266,6 @@ setup_domain() {
                                 create_A_record
                                 create_CNAME_record
                                 update_nginx_config
-                                exit 0  # Keluar dari script setelah pembuatan DNS selesai
                                 ;;
                             2)
                                 while true; do
@@ -295,7 +294,6 @@ setup_domain() {
                                         create_A_record
                                         create_CNAME_record
                                         update_nginx_config
-                                        exit 0  # Keluar dari script setelah pembuatan DNS selesai
                                     fi
                                 done
                                 ;;
