@@ -211,9 +211,7 @@ setup_domain() {
         # Menampilkan pilihan untuk menggunakan domain acak atau domain sendiri
         echo -e "${YB}Pilih Opsi:"
         echo -e "${WB}1. Gunakan domain yang tersedia"
-        echo -e "${WB}2. Gunakan domain sendiri${NC}"
-        echo -e " "
-        echo -e "${GB}3. Kembali${NC}"
+        echo -e "${WB}2. Gunakan domain sendiri"
 
         # Meminta input dari pengguna untuk memilih opsi
         read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' choice
@@ -232,12 +230,15 @@ setup_domain() {
                     case $domain_choice in
                         1)
                             DOMAIN="vless.sbs"
+                            
                             ;;
                         2)
                             DOMAIN="airi.buzz"
+                            
                             ;;
                         3)
                             DOMAIN="drm.icu"
+                            
                             ;;
                         4)
                             break
@@ -266,6 +267,7 @@ setup_domain() {
                                 create_A_record
                                 create_CNAME_record
                                 update_nginx_config
+                                return
                                 ;;
                             2)
                                 while true; do
@@ -294,6 +296,7 @@ setup_domain() {
                                         create_A_record
                                         create_CNAME_record
                                         update_nginx_config
+                                        return
                                     fi
                                 done
                                 ;;
@@ -311,9 +314,6 @@ setup_domain() {
             2)
                 input_domain
                 update_nginx_config
-                ;;
-            3)
-                menu
                 break
                 ;;
             *)
