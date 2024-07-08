@@ -620,6 +620,7 @@ setup_domain() {
                                 delete_records_based_on_ip
                                 create_A_record
                                 create_CNAME_record
+                                break
                                 ;;
                             2)
                                 while true; do
@@ -649,6 +650,7 @@ setup_domain() {
                                         create_CNAME_record
                                     fi
                                 done
+                                break
                                 ;;
                             3)
                                 break
