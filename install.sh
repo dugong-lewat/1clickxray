@@ -247,6 +247,7 @@ clear
 print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi WireProxy untuk WARP pada sistem Anda."
 
 print_msg $YB "Instalasi WireProxy"
+rm -rf /usr/local/bin/wireproxy >> /dev/null 2>&1
 wget -q -O /usr/local/bin/wireproxy https://github.com/dugong-lewat/1clickxray/raw/main/wireproxy
 chmod +x /usr/local/bin/wireproxy
 check_success "Gagal instalasi WireProxy."
