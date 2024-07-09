@@ -18,6 +18,12 @@ echo -e "${WB}Installation time : $(( ${1} / 3600 )) hours $(( (${1} / 60) % 60 
 }
 start=$(date +%s)
 
+# Memastikan pengguna adalah root
+if [ "$EUID" -ne 0 ]; then
+  print_error "Harap jalankan skrip ini sebagai root."
+  exit 1
+fi
+
 # Fungsi untuk mencetak pesan dengan warna
 print_msg() {
     COLOR=$1
@@ -298,75 +304,58 @@ print_msg $YB "Selamat datang! Skrip ini akan memasang dan mengkonfigurasi Nginx
 
 # Mendapatkan informasi distribusi dan codename
 print_msg $YB "Mendeteksi distribusi dan codename Linux..."
-if [ -f /etc/lsb-release ]; then
-    . /etc/lsb-release
-    os=$DISTRIB_ID
-    codename=$DISTRIB_CODENAME
-elif [ -f /etc/os-release ]; then
+
+# Fungsi untuk mendeteksi OS
+detect_os() {
+  if [ -f /etc/os-release ]; then
     . /etc/os-release
-    os=$ID
-    codename=$VERSION_CODENAME
-else
-    print_msg $RB "Gagal mendeteksi distribusi Linux."
+    OS=$ID
+    VERSION=$VERSION_ID
+  else
+    print_error "OS tidak didukung. Hanya mendukung Ubuntu dan Debian."
     exit 1
-fi
-check_success "Gagal mendeteksi distribusi Linux."
+  fi
+}
 
-# Menentukan URL repository berdasarkan distribusi dan codename
-case "$os" in
-    ubuntu)
-        repo_url="http://nginx.org/packages/ubuntu/"
-        ;;
-    debian)
-        repo_url="http://nginx.org/packages/debian/"
-        ;;
-    Ubuntu)
-        repo_url="http://nginx.org/packages/ubuntu/"
-        ;;
-    Debian)
-        repo_url="http://nginx.org/packages/debian/"
-        ;;
-    *)
-        print_msg $RB "Distribusi Linux tidak didukung."
-        exit 1
-        ;;
-esac
+# Fungsi untuk menambahkan repositori Nginx
+add_nginx_repo() {
+  if [ "$OS" == "ubuntu" ]; then
+    sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring -y
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/ubuntu `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
+    curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+  elif [ "$OS" == "debian" ]; then
+    sudo apt install curl gnupg2 ca-certificates lsb-release debian-archive-keyring -y
+    echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/mainline/debian `lsb_release -cs` nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
+    curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+  else
+    print_error "OS tidak didukung. Hanya mendukung Ubuntu dan Debian."
+    exit 1
+  fi
+}
 
-# Menambahkan repository Nginx
-print_msg $YB "Menambahkan repository Nginx ke sources.list.d..."
-cat > /etc/apt/sources.list.d/nginx.list << END
-deb $repo_url $codename nginx
-deb-src $repo_url $codename nginx
-END
-check_success "Gagal menambahkan repository Nginx."
+# Fungsi untuk menginstal Nginx
+install_nginx() {
+  sudo apt update
+  sudo apt install nginx -y
+  sudo systemctl start nginx
+  sudo systemctl enable nginx
+}
 
-# Mendownload kunci signing Nginx
-print_msg $YB "Mendownload kunci signing Nginx..."
-wget -q http://nginx.org/keys/nginx_signing.key
-check_success "Gagal mendownload kunci signing Nginx."
+# Fungsi utama
+main_nginx() {
+  detect_os
+  add_nginx_repo
+  install_nginx
+}
 
-# Menambahkan kunci signing Nginx ke apt
-print_msg $YB "Menambahkan kunci signing Nginx ke apt..."
-apt-key add nginx_signing.key
-check_success "Gagal menambahkan kunci signing Nginx ke apt."
-
-# Membersihkan file kunci yang didownload
-rm -rf nginx_signing.*
-check_success "Gagal membersihkan file kunci yang didownload."
-
-# Memperbarui daftar paket
-print_msg $YB "Memperbarui daftar paket..."
-apt update
-check_success "Gagal memperbarui daftar paket."
-
-# Menginstal Nginx versi terbaru
-print_msg $YB "Menginstal Nginx versi terbaru..."
-apt install -y nginx
-check_success "Gagal menginstal Nginx."
+# Menjalankan fungsi utama
+main_nginx
 
 # Menghapus konfigurasi default Nginx dan konten default web
 print_msg $YB "Menghapus konfigurasi default Nginx dan konten default web..."
 rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
+rm -rf /etc/nginx/sites-enabled/default >> /dev/null 2>&1
+rm -rf /etc/nginx/sites-available/default >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
 check_success "Gagal menghapus konfigurasi default Nginx dan konten default web."
 
