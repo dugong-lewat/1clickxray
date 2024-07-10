@@ -357,6 +357,7 @@ rm -rf /etc/nginx/conf.d/default.conf >> /dev/null 2>&1
 rm -rf /etc/nginx/sites-enabled/default >> /dev/null 2>&1
 rm -rf /etc/nginx/sites-available/default >> /dev/null 2>&1
 rm -rf /var/www/html/* >> /dev/null 2>&1
+sudo systemctl restart nginx
 check_success "Gagal menghapus konfigurasi default Nginx dan konten default web."
 
 # Membuat direktori untuk Xray
