@@ -1642,7 +1642,8 @@ print_msg $YB "Mengonfigurasi Nginx..."
 wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/index.html
 wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
 domain=$(cat /usr/local/etc/xray/dns/domain)
-sed -i "s/server_name .*;/server_name $domain;/g" /etc/nginx/nginx.conf
+sed -i "s/server_name web.com;/server_name $domain;/g" /etc/nginx/nginx.conf
+sed -i "s/server_name *.web.com;/server_name *.$domain;/g" /etc/nginx/nginx.conf
 # Jika sampai di sini tidak ada error, maka konfigurasi berhasil
 print_msg $GB "Konfigurasi Xray-core dan Nginx berhasil."
 sleep 3
