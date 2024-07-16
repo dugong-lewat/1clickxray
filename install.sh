@@ -18,12 +18,6 @@ echo -e "${WB}Installation time : $(( ${1} / 3600 )) hours $(( (${1} / 60) % 60 
 }
 start=$(date +%s)
 
-# Memastikan pengguna adalah root
-if [ "$EUID" -ne 0 ]; then
-  print_error "Harap jalankan skrip ini sebagai root."
-  exit 1
-fi
-
 # Fungsi untuk mencetak pesan dengan warna
 print_msg() {
     COLOR=$1
@@ -46,6 +40,12 @@ print_error() {
     MSG=$1
     print_msg $RB "Error: ${MSG}"
 }
+
+# Memastikan pengguna adalah root
+if [ "$EUID" -ne 0 ]; then
+  print_error "Harap jalankan skrip ini sebagai root."
+  exit 1
+fi
 
 # Selamat datang
 print_msg $YB "Selamat datang! Skrip ini akan memasang beberapa paket penting pada sistem Anda."
