@@ -675,12 +675,12 @@ setup_domain
 install_acme_sh() {
     domain=$(cat /usr/local/etc/xray/dns/domain)
     rm -rf ~/.acme.sh/*_ecc >> /dev/null 2>&1
+    export CF_Email="1562apricot@awgarstone.com"
+    export CF_Key="e9c80c4d538c819701ea0129a2fd75ea599ba"
     curl https://get.acme.sh | sh
     source ~/.bashrc
-    export CF_Key="e9c80c4d538c819701ea0129a2fd75ea599ba"
-    export CF_Email="1562apricot@awgarstone.com"
     ~/.acme.sh/acme.sh --register-account -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
-    ~/.acme.sh/acme.sh --issue --dns dns_cf -d $domain -d *.$domain --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --reloadcmd "systemctl reload nginx" --force reload nginx
+    ~/.acme.sh/acme.sh --issue --dns dns_cf -d $domain -d *.$domain --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --reloadcmd "systemctl reload nginx" --force
     chmod 745 /usr/local/etc/xray/private.key
     echo -e "${YB}Sertifikat SSL berhasil dipasang!${NC}"
 }
