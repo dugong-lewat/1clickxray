@@ -680,7 +680,7 @@ install_acme_sh() {
     curl https://get.acme.sh | sh
     source ~/.bashrc
     ~/.acme.sh/acme.sh --register-account -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
-    ~/.acme.sh/acme.sh --issue --dns dns_cf -d $domain -d *.$domain --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --reloadcmd "systemctl reload nginx" --force
+    ~/.acme.sh/acme.sh --issue --dns dns_cf -d $domain -d *.$domain --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --reloadcmd "systemctl restart nginx" --force
     chmod 745 /usr/local/etc/xray/private.key
     echo -e "${YB}Sertifikat SSL berhasil dipasang!${NC}"
 }
@@ -1643,7 +1643,7 @@ wget -q -O /var/www/html/index.html https://raw.githubusercontent.com/dugong-lew
 wget -q -O /etc/nginx/nginx.conf https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/nginx.conf
 domain=$(cat /usr/local/etc/xray/dns/domain)
 sed -i "s/server_name web.com;/server_name $domain;/g" /etc/nginx/nginx.conf
-sed -i "s/server_name *.web.com;/server_name *.$domain;/g" /etc/nginx/nginx.conf
+sed -i "s/server_name \*.web.com;/server_name \*.$domain;/" /etc/nginx/nginx.conf
 # Jika sampai di sini tidak ada error, maka konfigurasi berhasil
 print_msg $GB "Konfigurasi Xray-core dan Nginx berhasil."
 sleep 3
