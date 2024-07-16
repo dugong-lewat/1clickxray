@@ -578,15 +578,12 @@ setup_domain() {
                     case $domain_choice in
                         1)
                             DOMAIN="vless.sbs"
-                            
                             ;;
                         2)
                             DOMAIN="airi.buzz"
-                            
                             ;;
                         3)
                             DOMAIN="drm.icu"
-                            
                             ;;
                         4)
                             break
@@ -680,8 +677,10 @@ install_acme_sh() {
     rm -rf ~/.acme.sh/*_ecc >> /dev/null 2>&1
     curl https://get.acme.sh | sh
     source ~/.bashrc
-    ~/.acme.sh/acme.sh  --register-account  -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
-    ~/.acme.sh/acme.sh --issue -d "$domain" --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --standalone --reloadcmd "systemctl reload nginx"
+    export CF_Key="e9c80c4d538c819701ea0129a2fd75ea599ba"
+    export CF_Email="1562apricot@awgarstone.com"
+    ~/.acme.sh/acme.sh --register-account -m $(echo $RANDOM | md5sum | head -c 6; echo;)@gmail.com --server letsencrypt
+    ~/.acme.sh/acme.sh --issue --dns dns_cf -d $domain -d *.$domain --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --reloadcmd "systemctl reload nginx" --force reload nginx"
     chmod 745 /usr/local/etc/xray/private.key
     echo -e "${YB}Sertifikat SSL berhasil dipasang!${NC}"
 }
