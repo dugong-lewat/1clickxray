@@ -10,6 +10,29 @@ MB='\e[35;1m'      # Magenta Bold
 CB='\e[36;1m'      # Cyan Bold
 WB='\e[37;1m'      # White Bold
 
+# Fungsi untuk mencetak pesan dengan warna
+print_msg() {
+    COLOR=$1
+    MSG=$2
+    echo -e "${COLOR}${MSG}${NC}"
+}
+
+# Fungsi untuk memeriksa keberhasilan perintah
+check_success() {
+    if [ $? -eq 0 ]; then
+        print_msg $GB "Berhasil"
+    else
+        print_msg $RB "Gagal: $1"
+        exit 1
+    fi
+}
+
+# Fungsi untuk menampilkan pesan kesalahan
+print_error() {
+    MSG=$1
+    print_msg $RB "Error: ${MSG}"
+}
+
 # Set your Cloudflare API credentials
 API_EMAIL="1562apricot@awgarstone.com"
 API_KEY="e9c80c4d538c819701ea0129a2fd75ea599ba"
