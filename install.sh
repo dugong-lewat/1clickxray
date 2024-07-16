@@ -687,7 +687,7 @@ install_acme_sh() {
 
 # Panggil fungsi install_acme_sh untuk menginstal acme.sh dan mendapatkan sertifikat
 install_acme_sh
-clear
+
 echo -e "${GB}[ INFO ]${NC} ${YB}Setup Nginx & Xray Config${NC}"
 # Menghasilkan UUID
 uuid=$(cat /proc/sys/kernel/random/uuid)
