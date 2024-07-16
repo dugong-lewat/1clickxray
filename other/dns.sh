@@ -186,6 +186,7 @@ update_nginx_config() {
     NEW_DOMAIN=$(cat /usr/local/etc/xray/dns/domain)
     # Update server_name in Nginx configuration
     sed -i "s/server_name .*;/server_name $NEW_DOMAIN;/g" /etc/nginx/nginx.conf
+    sed -i "s/server_name \*.*;/server_name \*.$NEW_DOMAIN;/" /etc/nginx/nginx.conf
 
     # Check if Nginx configuration is valid after changes
     if nginx -t &> /dev/null; then
