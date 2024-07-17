@@ -25,7 +25,7 @@ echo -e "${GB}[ INFO ]${NC} ${YB}Starting renew cert...${NC} "
 sleep 2
 export CF_Email="1562apricot@awgarstone.com"
 export CF_Key="e9c80c4d538c819701ea0129a2fd75ea599ba"
-bash .acme.sh/acme.sh --issue --dns dns_cf -d $domain -d *.$domain --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --reloadcmd "systemctl reload nginx" --force reload nginx
+bash .acme.sh/acme.sh --issue --dns dns_cf -d $domain -d *.$domain --listen-v6 --server letsencrypt --keylength ec-256 --fullchain-file /usr/local/etc/xray/fullchain.cer --key-file /usr/local/etc/xray/private.key --reloadcmd "systemctl restart nginx" --force
 chmod 745 /usr/local/etc/xray/private.key
 echo -e "${GB}[ INFO ]${NC} ${YB}Renew cert done...${NC} "
 sleep 2
