@@ -583,7 +583,7 @@ setup_domain() {
                             DOMAIN="airi.buzz"
                             ;;
                         3)
-                            DOMAIN="drm.icu"
+                            DOMAIN="balrog.cfd"
                             ;;
                         4)
                             break
