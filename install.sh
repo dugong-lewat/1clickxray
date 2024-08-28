@@ -571,7 +571,7 @@ setup_domain() {
                     echo -e "${YB}Pilih Domain anda:"
                     echo -e "${WB}1. vless.sbs"
                     echo -e "${WB}2. airi.buzz"
-                    echo -e "${WB}3. drm.icu${NC}"
+                    echo -e "${WB}3. balrog.cfd${NC}"
                     echo -e " "
                     echo -e "${GB}4. kembali${NC}"
                     read -rp $'\e[33;1mMasukkan pilihan Anda: \e[0m' domain_choice
