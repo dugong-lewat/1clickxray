@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -rf install.sh
+rm -rf install2.sh
 clear
 # Warna untuk output (sesuaikan dengan kebutuhan)
 NC='\e[0m'       # No Color (mengatur ulang warna teks ke default)
@@ -78,7 +78,7 @@ sleep 1
 print_msg $YB "Memasang build-essential dan dependensi lainnya..."
 apt install build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev gcc clang llvm g++ valgrind make cmake debian-keyring debian-archive-keyring apt-transport-https systemd bind9-host gnupg2 ca-certificates lsb-release ubuntu-keyring debian-archive-keyring -y
 apt install unzip python-is-python3 python3-pip -y
-pip install psutil pandas tabulate rich py-cpuinfo distro requests pycountry geoip2 --break-system-packages
+pip install psutil pandas tabulate rich py-cpuinfo distro requests pycountry geoip2 #--break-system-packages
 check_success
 sleep 1
 
@@ -1736,7 +1736,7 @@ echo -e "${YB}SS 2022 HTTPupgrade${NC} : ${YB}443 & 80${NC}"
 echo -e "${YB}SS 2022 gRPC${NC}        : ${YB}443${NC}"
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 echo ""
-rm -f install.sh
+rm -f install2.sh
 secs_to_human "$(($(date +%s) - ${start}))"
 echo -e "${YB}[ WARNING ] reboot now ? (Y/N)${NC} "
 read answer
