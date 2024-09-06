@@ -30,10 +30,19 @@ Saweria: https://saweria.co/dugonglewat
 | Shadowsocks gRPC | 443 |
 | Shadowsocks 2022 gRPC | 443 |
 
-**Link Instalasi**
+**Link Instalasi Opsi 1**
 ```
 bash -c "$(wget -qO- https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install.sh)"
 ```
 ```
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install.sh)"
+```
+
+
+**Link Instalasi Opsi 2**
+```
+bash -c "$(wget -qO- https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install2.sh)"
+```
+```
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/dugong-lewat/1clickxray/main/install2.sh)"
 ```
