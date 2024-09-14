@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -rf install2.sh
+rm -rf install.sh
 clear
 # Warna untuk output (sesuaikan dengan kebutuhan)
 NC='\e[0m'       # No Color (mengatur ulang warna teks ke default)
@@ -219,10 +219,10 @@ print_msg $GB "Pemasangan Xray-core versi $LATEST_VERSION selesai."
 
 # Mengumpulkan informasi dari ipinfo.io
 print_msg $YB "Mengumpulkan informasi lokasi dari ipinfo.io..."
-curl -s ipinfo.io/city | sudo tee /usr/local/etc/xray/city
-curl -s ipinfo.io/org | cut -d " " -f 2-10 | sudo tee /usr/local/etc/xray/org
-curl -s ipinfo.io/timezone | sudo tee /usr/local/etc/xray/timezone
-curl -s ipinfo.io/region | sudo tee /usr/local/etc/xray/region
+curl -s ipinfo.io/city?token=f209571547ff6b | sudo tee /usr/local/etc/xray/city
+curl -s ipinfo.io/org?token=f209571547ff6b | cut -d " " -f 2-10 | sudo tee /usr/local/etc/xray/org
+curl -s ipinfo.io/timezone?token=f209571547ff6b | sudo tee /usr/local/etc/xray/timezone
+curl -s ipinfo.io/region?token=f209571547ff6b | sudo tee /usr/local/etc/xray/region
 check_success "Gagal mengumpulkan informasi lokasi."
 
 print_msg $GB "Semua tugas selesai. Xray-core telah dipasang dan dikonfigurasi dengan informasi lokasi."
@@ -1736,7 +1736,7 @@ echo -e "${YB}SS 2022 HTTPupgrade${NC} : ${YB}443 & 80${NC}"
 echo -e "${YB}SS 2022 gRPC${NC}        : ${YB}443${NC}"
 echo -e "${BB}————————————————————————————————————————————————————————${NC}"
 echo ""
-rm -f install2.sh
+rm -f install.sh
 secs_to_human "$(($(date +%s) - ${start}))"
 echo -e "${YB}[ WARNING ] reboot now ? (Y/N)${NC} "
 read answer
